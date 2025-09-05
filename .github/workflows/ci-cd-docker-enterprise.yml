@@ -9,19 +9,7 @@ on:
   # Push to master → Development deployment
   # Push to main → Production deployment
   push:
-          - name: "🔍 Debug Image Reference"
-        run: |
-          echo "=== Security Scan Debug ==="
-          echo "Image to scan: ${{ needs.docker-build.outputs.commit-tag }}"
-          echo "Docker build job result: ${{ needs.docker-build.result }}"
-          echo ""
-          if [ -z "${{ needs.docker-build.outputs.commit-tag }}" ]; then
-            echo "❌ ERROR: commit-tag output is empty!"
-            echo "This indicates the docker-build job failed to set outputs properly."
-            exit 1
-          else
-            echo "✅ Image reference is valid, proceeding with scan..."
-          fis: [master, main]
+    branches: [master, main]
 
   # Manual trigger for emergency deployments
   workflow_dispatch:
