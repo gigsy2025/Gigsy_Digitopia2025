@@ -9,7 +9,19 @@ on:
   # Push to master → Development deployment
   # Push to main → Production deployment
   push:
-    branches: [master, main]
+          - name: "🔍 Debug Image Reference"
+        run: |
+          echo "=== Security Scan Debug ==="
+          echo "Image to scan: ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "Docker build job result: ${{ needs.docker-build.result }}"
+          echo ""
+          if [ -z "${{ needs.docker-build.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag output is empty!"
+            echo "This indicates the docker-build job failed to set outputs properly."
+            exit 1
+          else
+            echo "✅ Image reference is valid, proceeding with scan..."
+          fis: [master, main]
 
   # Manual trigger for emergency deployments
   workflow_dispatch:
@@ -208,8 +220,10 @@ jobs:
         id: tags
         run: |
           # 📌 Immutable commit-based tag (always created)
-          COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)"
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:${COMMIT_SHA_SHORT}"
           echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
+          echo "📦 Immutable tag: ${COMMIT_TAG}"
 
           # 🎯 Environment-specific mutable tags
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
@@ -226,7 +240,12 @@ jobs:
             echo "🧪 PR build: ${PR_TAG}"
           fi
 
-          echo "📦 Immutable tag: ${COMMIT_TAG}"
+          # Debug output
+          echo "Debug output:"
+          echo "- COMMIT_SHA_SHORT: ${COMMIT_SHA_SHORT}"
+          echo "- COMMIT_TAG: ${COMMIT_TAG}"
+          echo "- ENV_TAG: ${ENV_TAG:-not_set}"
+          echo "- PR_TAG: ${PR_TAG:-not_set}"
 
       - name: "🔨 Build and Push Docker Image"
         id: build
@@ -235,10 +254,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ steps.tags.outputs.commit-tag }}
-            ${{ steps.tags.outputs.environment-tag }}
-            ${{ steps.tags.outputs.pr-tag }}
+          tags: ${{ steps.tags.outputs.commit-tag }}${{ steps.tags.outputs.environment-tag && format(',{0}', steps.tags.outputs.environment-tag) || '' }}${{ steps.tags.outputs.pr-tag && format(',{0}', steps.tags.outputs.pr-tag) || '' }}
           labels: |
             org.opencontainers.image.title=Gigsy
             org.opencontainers.image.description=Enterprise Next.js Application for Gigsy Platform
@@ -277,9 +293,23 @@ jobs:
 
       - name: "🔍 Debug Image Tags"
         run: |
-          echo "Debug: Commit tag = ${{ steps.tags.outputs.commit-tag }}"
-          echo "Debug: Environment tag = ${{ steps.tags.outputs.environment-tag }}"
-          echo "Debug: PR tag = ${{ steps.tags.outputs.pr-tag }}"
+          echo "=== Debug Information ==="
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Short SHA: $(echo ${{ github.sha }} | cut -c1-7)"
+          echo "Repository: ${{ env.IMAGE_REPOSITORY }}"
+          echo ""
+          echo "=== Generated Tags ==="
+          echo "Commit tag: ${{ steps.tags.outputs.commit-tag }}"
+          echo "Environment tag: ${{ steps.tags.outputs.environment-tag }}"
+          echo "PR tag: ${{ steps.tags.outputs.pr-tag }}"
+          echo ""
+          echo "=== Validation ==="
+          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag is empty!"
+            exit 1
+          else
+            echo "✅ commit-tag is valid: ${{ steps.tags.outputs.commit-tag }}"
+          fi
 
       - name: "📊 Image Build Summary"
         run: |
