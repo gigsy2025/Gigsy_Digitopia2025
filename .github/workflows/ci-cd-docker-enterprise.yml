@@ -5,29 +5,26 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
-  
+
   # Push to master → Development deployment
+  # Push to main → Production deployment
   push:
-    branches: [master]
-  
-  # Push to main → Production deployment  
-  push:
-    branches: [main]
-  
+    branches: [master, main]
+
   # Manual trigger for emergency deployments
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'dev'
+        default: "dev"
         type: choice
         options:
-        - dev
-        - staging
-        - prod
+          - dev
+          - staging
+          - prod
       deploy_commit:
-        description: 'Specific commit SHA to deploy (optional)'
+        description: "Specific commit SHA to deploy (optional)"
         required: false
         type: string
 
@@ -49,23 +46,23 @@ env:
   # 🏢 Enterprise Docker Registry Configuration
   REGISTRY: docker.io
   IMAGE_REPOSITORY: mostafayaser/gigsy_digitopia2025
-  
+
   # 📊 Build metadata
   COMMIT_SHA_SHORT: ${{ github.sha }}
   BUILD_DATE: ${{ github.run_number }}
-  
+
   # 🔧 Build configuration
   NODE_VERSION: "18"
   PNPM_VERSION: "9.12.1"
-  
+
   # 🔍 Testing configuration
   JEST_TIMEOUT: "30000"
   TEST_COVERAGE_THRESHOLD: "80"
-  
+
   # 🐳 Docker build configuration
   DOCKER_BUILDKIT: "1"
   BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
-  
+
   # 🚀 Deployment configuration
   DEV_ENVIRONMENT_URL: "https://dev-gigsy.digitopia.com"
   PROD_ENVIRONMENT_URL: "https://gigsy.digitopia.com"
@@ -213,7 +210,7 @@ jobs:
           # 📌 Immutable commit-based tag (always created)
           COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)"
           echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
-          
+
           # 🎯 Environment-specific mutable tags
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
             ENV_TAG="${{ env.IMAGE_REPOSITORY }}:dev"
@@ -228,7 +225,7 @@ jobs:
             echo "pr-tag=${PR_TAG}" >> $GITHUB_OUTPUT
             echo "🧪 PR build: ${PR_TAG}"
           fi
-          
+
           echo "📦 Immutable tag: ${COMMIT_TAG}"
 
       - name: "🔨 Build and Push Docker Image"
@@ -276,7 +273,7 @@ jobs:
         with:
           name: sbom-${{ github.sha }}
           path: gigsy-sbom-${{ github.sha }}.spdx.json
-          retention-days: 90  # Extended retention for compliance
+          retention-days: 90 # Extended retention for compliance
 
       - name: "📊 Image Build Summary"
         run: |
@@ -305,22 +302,22 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.docker-build.outputs.commit-tag }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: "📤 Upload Trivy Results to GitHub Security"
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: "⚠️ Critical Vulnerability Check"
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.docker-build.outputs.commit-tag }}
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'  # Fail on critical vulnerabilities
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1" # Fail on critical vulnerabilities
           ignore-unfixed: true
 
       - name: "📊 Security Scan Summary"
@@ -351,7 +348,7 @@ jobs:
           echo "📦 Image: ${{ needs.docker-build.outputs.commit-tag }}"
           echo "🎯 Environment: development"
           echo "🌐 URL: https://dev-gigsy.digitopia.com"
-          
+
           # TODO: Add actual deployment commands here
           # Example: kubectl set image deployment/gigsy-app gigsy=${{ needs.docker-build.outputs.commit-tag }}
           # Example: helm upgrade gigsy ./helm-chart --set image.tag=$(echo ${{ github.sha }} | cut -c1-7)
@@ -381,7 +378,7 @@ jobs:
           echo "🎯 Environment: production"
           echo "🌐 URL: https://gigsy.digitopia.com"
           echo "⚠️  Production deployment requires manual approval"
-          
+
           # TODO: Add actual production deployment commands here
           # Example: kubectl set image deployment/gigsy-app gigsy=${{ needs.docker-build.outputs.commit-tag }}
           # Example: helm upgrade gigsy ./helm-chart --set image.tag=$(echo ${{ github.sha }} | cut -c1-7)
@@ -422,7 +419,7 @@ jobs:
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
           # ${{ env.PIPELINE_EMOJI }} Gigsy CI/CD Pipeline Report
-          
+
           ## 📋 Pipeline Overview
           | Stage | Status | Duration |
           |-------|--------|----------|
@@ -430,7 +427,7 @@ jobs:
           | 🔒 **Security Audit** | ${{ needs.security-audit.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
           | 🐳 **Docker Build** | ${{ needs.docker-build.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
           | 🔍 **Image Security** | ${{ needs.security-scan-image.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
-          
+
           ## 🐳 Docker Image Details
           | Attribute | Value |
           |-----------|-------|
@@ -441,33 +438,33 @@ jobs:
           | **Build Number** | `${{ github.run_number }}` |
           | **Event** | `${{ github.event_name }}` |
           | **Platforms** | `linux/amd64, linux/arm64` |
-          
+
           ## 🔧 Usage Commands
-          
+
           ### Pull Image (Immutable)
           ```bash
           docker pull ${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
           ```
-          
+
           ### Run Container
           ```bash
           docker run -p 3000:3000 ${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
           ```
-          
+
           ### Kubernetes Deployment
           ```bash
           kubectl set image deployment/gigsy-app gigsy=${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
           ```
-          
+
           ## 📈 Pipeline Metrics
           - **Jest Tests**: ${{ needs.validate.result == 'success' && 'All tests passed ✅' || 'Tests failed ❌' }}
           - **TypeScript**: ${{ needs.validate.result == 'success' && 'No type errors ✅' || 'Type errors found ❌' }}
           - **ESLint**: ${{ needs.validate.result == 'success' && 'No linting issues ✅' || 'Linting issues found ❌' }}
           - **Security**: ${{ needs.security-scan-image.result == 'success' && 'No critical vulnerabilities ✅' || 'Vulnerabilities found ❌' }}
           - **Build**: ${{ needs.docker-build.result == 'success' && 'Multi-arch build successful ✅' || 'Build failed ❌' }}
-          
+
           ---
-          
+
           **🏷️ Tagging Strategy**: All deployments use immutable `commit-sha` tags for traceability.  
           **📊 SBOM**: Software Bill of Materials generated and stored in artifacts.  
           **🔒 Security**: Images scanned with Trivy for vulnerabilities.
