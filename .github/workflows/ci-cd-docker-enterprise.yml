@@ -9,35 +9,7 @@ types: [opened, synchronize, reopened, ready_for_review]
 # Push to master → Development deployment
 # Push to main → Production deployment
 push:
-    branches: [master, main]
-            security-scan-image:
-    name: "🔍 Image Security Scan"
-    runs-on: ubuntu-latest
-    needs: docker-build
-    if: needs.docker-build.result == 'success'
-    timeout-minutes: 15
-    permissions:
-      security-events: write
-    steps:
-      - name: "🔍 Debug Job Dependencies"
-        run: |
-          echo "=== Job Dependencies Debug ==="
-          echo "docker-build job result: ${{ needs.docker-build.result }}"
-          echo "docker-build outputs available:"
-          echo "- image-digest: ${{ needs.docker-build.outputs.image-digest }}"
-          echo "- commit-tag: ${{ needs.docker-build.outputs.commit-tag }}"
-          echo "- environment-tag: ${{ needs.docker-build.outputs.environment-tag }}"
-          echo "- pr-tag: ${{ needs.docker-build.outputs.pr-tag }}"
-          echo "- image-size: ${{ needs.docker-build.outputs.image-size }}"
-          echo ""
-          echo "=== Context Information ==="
-          echo "Event name: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "SHA: ${{ github.sha }}"
-          echo "Short SHA: $(echo ${{ github.sha }} | cut -c1-7)"
-          echo "Repository: ${{ env.IMAGE_REPOSITORY }}"
-
-      - name: "🔍 Debug Image Reference"🔍 Debug Image Reference"
+          - name: "🔍 Debug Image Reference"
         run: |
           echo "=== Security Scan Debug ==="
           echo "Image to scan: ${{ needs.docker-build.outputs.commit-tag }}"
@@ -49,9 +21,8 @@ push:
             exit 1
           else
             echo "✅ Image reference is valid, proceeding with scan..."
-          fi
-
-      - name: "🛡️ Run Trivy Vulnerability Scanner (SARIF)" [master, main]
+          fis: [master, main]
+    branches: [master, main]
 
 # Manual trigger for emergency deployments
 workflow_dispatch:
@@ -145,27 +116,10 @@ run: |
 run: pnpm install --frozen-lockfile
 
 - name: "🔧 TypeScript Type Checking"
-        run: pnpm run typecheck
-        run: |
-          echo "Running TypeScript type checking..."
-          if pnpm run typecheck; then
-            echo "✅ Type checking passed"
-          else
-            echo "❌ Type checking failed - continuing anyway"
-          fi
-        continue-on-error: true
+run: pnpm run typecheck
 
 - name: "🧪 Run Unit Tests (Jest)"
-        run: pnpm run test:ci
-        run: |
-          echo "Running Jest tests..."
-          if pnpm run test:ci; then
-            echo "✅ Tests passed successfully"
-          else
-            echo "❌ Tests failed - continuing with limited test coverage"
-            echo "test_status=failed" >> $GITHUB_ENV
-          fi
-        continue-on-error: true
+run: pnpm run test:ci
 
 - name: "📊 Upload Test Coverage"
 uses: actions/upload-artifact@v4
@@ -175,26 +129,10 @@ path: coverage/
 retention-days: 7
 
 - name: "🎯 ESLint Code Quality"
-        run: pnpm run lint
-        run: |
-          echo "Running ESLint..."
-          if pnpm run lint; then
-            echo "✅ Linting passed"
-          else
-            echo "❌ Linting failed - continuing anyway"
-          fi
-        continue-on-error: true
+run: pnpm run lint
 
 - name: "💅 Prettier Format Check"
-        run: pnpm run format:check
-        run: |
-          echo "Running Prettier format check..."
-          if pnpm run format:check; then
-            echo "✅ Format check passed"
-          else
-            echo "❌ Format check failed - continuing anyway"
-          fi
-        continue-on-error: true
+run: pnpm run format:check
 
 - name: "🏗️ Next.js Build Verification"
 run: pnpm run build
