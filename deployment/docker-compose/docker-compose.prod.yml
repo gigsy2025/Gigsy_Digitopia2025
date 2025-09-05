@@ -1,0 +1,375 @@
+# 🐳 Gigsy Production Environment
+# Docker Compose configuration for production deployment
+
+version: '3.8'
+
+services:
+  # Gigsy Application - Primary Instance
+  gigsy-app:
+    image: mostafayaser/gigsy_digitopia2025:${GIGSY_IMAGE_TAG}
+    container_name: gigsy-prod
+    restart: unless-stopped
+    
+    ports:
+      - "3000:3000"
+    
+    environment:
+      # Application Configuration
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database Configuration
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-20}
+      
+      # Authentication Configuration
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      
+      # Security Configuration
+      SESSION_SECRET: ${SESSION_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      
+      # External Services
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      
+      # Monitoring & Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      
+      # Performance Configuration
+      MAX_MEMORY: ${MAX_MEMORY:-512m}
+      NODE_OPTIONS: "--max-old-space-size=512"
+      
+      # Feature Flags
+      ENABLE_DEBUG: ${ENABLE_DEBUG:-false}
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
+    
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    networks:
+      - gigsy-prod-network
+      - monitoring-network
+    
+    volumes:
+      - gigsy-uploads:/app/uploads:rw
+      - gigsy-logs:/app/logs:rw
+      - /etc/localtime:/etc/localtime:ro
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=app"
+      - "com.gigsy.version=${GIGSY_IMAGE_TAG}"
+      - "traefik.enable=true"
+      - "traefik.http.routers.gigsy.rule=Host(`gigsy.com`)"
+      - "traefik.http.services.gigsy.loadbalancer.server.port=3000"
+
+  # PostgreSQL Database - Production
+  postgres:
+    image: postgres:15-alpine
+    container_name: gigsy-postgres-prod
+    restart: unless-stopped
+    
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gigsy_prod}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      
+      # Performance Tuning
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
+      POSTGRES_EFFECTIVE_CACHE_SIZE: "1GB"
+      POSTGRES_SHARED_BUFFERS: "256MB"
+      POSTGRES_WORK_MEM: "4MB"
+    
+    ports:
+      - "127.0.0.1:5432:5432"  # Only bind to localhost for security
+    
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-backups:/backups
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+      -c log_statement=all
+      -c log_min_duration_statement=1000
+      -c log_connections=on
+      -c log_disconnections=on
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-gigsy_prod}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.5'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    
+    networks:
+      - gigsy-prod-network
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=database"
+
+  # Redis Cache - Production
+  redis:
+    image: redis:7-alpine
+    container_name: gigsy-redis-prod
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+    
+    ports:
+      - "127.0.0.1:6379:6379"  # Only bind to localhost for security
+    
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    
+    networks:
+      - gigsy-prod-network
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=cache"
+
+  # Nginx Reverse Proxy - Production
+  nginx:
+    image: nginx:alpine
+    container_name: gigsy-nginx-prod
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - gigsy-logs:/var/log/nginx
+      - /etc/localtime:/etc/localtime:ro
+    
+    depends_on:
+      - gigsy-app
+    
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    
+    networks:
+      - gigsy-prod-network
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=proxy"
+
+  # Log Aggregator (Optional)
+  fluentd:
+    image: fluent/fluentd:v1.16-debian-1
+    container_name: gigsy-fluentd-prod
+    restart: unless-stopped
+    
+    volumes:
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - gigsy-logs:/var/log/gigsy:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    
+    ports:
+      - "127.0.0.1:24224:24224"
+    
+    environment:
+      FLUENTD_CONF: fluent.conf
+    
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    
+    networks:
+      - gigsy-prod-network
+      - monitoring-network
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=logging"
+
+  # Monitoring Agent (Optional)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: gigsy-node-exporter-prod
+    restart: unless-stopped
+    
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    
+    ports:
+      - "127.0.0.1:9100:9100"
+    
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    
+    networks:
+      - monitoring-network
+    
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=monitoring"
+
+# Networks
+networks:
+  gigsy-prod-network:
+    driver: bridge
+    name: gigsy-prod-network
+    driver_opts:
+      com.docker.network.bridge.name: gigsy-prod-br
+    labels:
+      - "com.gigsy.environment=production"
+  
+  monitoring-network:
+    driver: bridge
+    name: gigsy-monitoring-network
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=monitoring"
+
+# Volumes
+volumes:
+  postgres-data:
+    name: gigsy-postgres-prod-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/gigsy/postgres
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=database"
+  
+  postgres-backups:
+    name: gigsy-postgres-backups
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/backups/gigsy/postgres
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=database"
+  
+  redis-data:
+    name: gigsy-redis-prod-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/gigsy/redis
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=cache"
+  
+  gigsy-uploads:
+    name: gigsy-uploads-prod
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/gigsy/uploads
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=app"
+  
+  gigsy-logs:
+    name: gigsy-logs-prod
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/log/gigsy
+    labels:
+      - "com.gigsy.environment=production"
+      - "com.gigsy.service=logs"

@@ -1,0 +1,277 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+  checks: write
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: gigsy
+
+jobs:
+  test-and-lint:
+    name: Unit Tests & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type checking
+        run: pnpm run typecheck
+
+      - name: Run unit tests with Jest
+        run: pnpm run test:ci
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/
+          retention-days: 7
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Check code formatting
+        run: pnpm run format:check
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) || (github.event_name == 'pull_request' && (github.base_ref == 'main' || github.base_ref == 'master'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            public
+          retention-days: 1
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: test-and-lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Dependency Review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run audit check
+        run: pnpm audit --audit-level moderate
+
+  docker-build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, security-scan]
+    if: (github.event_name == 'push' || github.event_name == 'pull_request') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.base_ref == 'main' || github.base_ref == 'master')
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+      is-main-push: ${{ steps.check-event.outputs.is-main-push }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Check event type
+        id: check-event
+        run: |
+          echo "is-main-push=true" >> $GITHUB_OUTPUT
+          echo "🚀 Full pipeline - will build, scan, and publish to DockerHub"
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr,prefix=pr-
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.description=Gigsy - A Next.js application
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.vendor=Gigsy Team
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ github.sha }}
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 30
+
+  security-scan-image:
+    name: Scan Docker Image
+    runs-on: ubuntu-latest
+    needs: docker-build-and-push
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.docker-build-and-push.outputs.image-tag }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: Run Trivy vulnerability scanner (Table format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.docker-build-and-push.outputs.image-tag }}
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+  deploy-notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [docker-build-and-push, security-scan-image]
+    if: always()
+    steps:
+      - name: Check deployment status
+        run: |
+          if [ "${{ needs.docker-build-and-push.result }}" == "success" ] && [ "${{ needs.security-scan-image.result }}" == "success" ]; then
+            echo "✅ Docker image successfully built, scanned, and published"
+            echo "📦 Image: ${{ needs.docker-build-and-push.outputs.image-tag }}"
+            echo "🔒 Security scan passed"
+            if [ "${{ github.event_name }}" == "pull_request" ]; then
+              echo "� PR Docker image published for testing"
+            else
+              echo "🚀 Production-ready deployment"
+            fi
+          else
+            echo "❌ Pipeline failed"
+            echo "📦 Build status: ${{ needs.docker-build-and-push.result }}"
+            echo "🔒 Security scan status: ${{ needs.security-scan-image.result }}"
+            exit 1
+          fi
+
+      - name: Create deployment summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          # 🚀 Full Pipeline Summary
+
+          ## Docker Image Details
+          - **Repository**: `${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}`
+          - **Tag**: `${{ github.ref_name }}-${{ github.sha }}`
+          - **Digest**: `${{ needs.docker-build-and-push.outputs.image-digest }}`
+          - **Platforms**: `linux/amd64`, `linux/arm64`
+          - **Event**: `${{ github.event_name }}`
+
+          ## Pipeline Status
+          - ✅ **Unit Tests (Jest)**: Passed
+          - ✅ **TypeScript Check**: Passed
+          - ✅ **Linting & Formatting**: Passed
+          - ✅ **Security Scan**: Passed  
+          - ✅ **Docker Build & Push**: Passed
+          - ✅ **Image Security Scan**: Passed
+          - ✅ **SBOM Generated**: Available in artifacts
+
+          ## Quick Start
+          ```bash
+          # Pull and run the latest image
+          docker pull ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          docker run -p 3000:3000 ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          ```
+
+          ## Deployment Commands
+          ```bash
+          # For production deployment
+          docker pull ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}
+
+          # For Docker Compose
+          # Update your docker-compose.yml:
+          # image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }}
+          ```
+          EOF

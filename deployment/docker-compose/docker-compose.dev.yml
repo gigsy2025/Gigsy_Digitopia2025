@@ -1,0 +1,174 @@
+# 🐳 Gigsy Development Environment
+# Docker Compose configuration for development deployment
+
+version: '3.8'
+
+services:
+  # Gigsy Application
+  gigsy-app:
+    image: mostafayaser/gigsy_digitopia2025:${GIGSY_IMAGE_TAG:-dev}
+    container_name: gigsy-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Application Configuration
+      NODE_ENV: development
+      PORT: 3000
+      
+      # Database Configuration (if needed)
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/gigsy_dev}
+      
+      # Authentication Configuration
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-secret-key-change-in-production}
+      
+      # Logging Configuration
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      
+      # Feature Flags
+      ENABLE_DEBUG: ${ENABLE_DEBUG:-true}
+      
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    networks:
+      - gigsy-dev-network
+    
+    volumes:
+      # Development-specific volumes for hot reloading (if needed)
+      - gigsy-uploads:/app/uploads
+      - gigsy-logs:/app/logs
+    
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=app"
+      - "com.gigsy.version=${GIGSY_IMAGE_TAG:-dev}"
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: gigsy-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gigsy_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    
+    ports:
+      - "5432:5432"
+    
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gigsy_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - gigsy-dev-network
+    
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=database"
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gigsy-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-devpassword}
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - redis-data:/data
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - gigsy-dev-network
+    
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=cache"
+
+  # Nginx Reverse Proxy (optional for development)
+  nginx:
+    image: nginx:alpine
+    container_name: gigsy-nginx-dev
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - gigsy-logs:/var/log/nginx
+    
+    depends_on:
+      - gigsy-app
+    
+    networks:
+      - gigsy-dev-network
+    
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=proxy"
+
+# Networks
+networks:
+  gigsy-dev-network:
+    driver: bridge
+    name: gigsy-dev-network
+    labels:
+      - "com.gigsy.environment=development"
+
+# Volumes
+volumes:
+  postgres-data:
+    name: gigsy-postgres-dev-data
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=database"
+  
+  redis-data:
+    name: gigsy-redis-dev-data
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=cache"
+  
+  gigsy-uploads:
+    name: gigsy-uploads-dev
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=app"
+  
+  gigsy-logs:
+    name: gigsy-logs-dev
+    labels:
+      - "com.gigsy.environment=development"
+      - "com.gigsy.service=logs"

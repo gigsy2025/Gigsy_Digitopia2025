@@ -1,0 +1,54 @@
+# Version control
+.git*
+.gitignore
+
+# Dependencies (will be installed in container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+.next
+out
+dist
+build
+
+# Development files
+.env*.local
+.env.development
+*.log
+coverage
+.nyc_output
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Test files
+__tests__/
+*.test.*
+*.spec.*
+jest.config.*
+cypress/
+
+# Config files (keep essential ones)
+.eslintrc.*
+.prettierrc.*
+
+
+# Docker files (avoid recursive copying)
+Dockerfile*
+docker-compose*
+.dockerignore
