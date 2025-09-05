@@ -275,6 +275,12 @@ jobs:
           path: gigsy-sbom-${{ github.sha }}.spdx.json
           retention-days: 90 # Extended retention for compliance
 
+      - name: "🔍 Debug Image Tags"
+        run: |
+          echo "Debug: Commit tag = ${{ steps.tags.outputs.commit-tag }}"
+          echo "Debug: Environment tag = ${{ steps.tags.outputs.environment-tag }}"
+          echo "Debug: PR tag = ${{ steps.tags.outputs.pr-tag }}"
+
       - name: "📊 Image Build Summary"
         run: |
           echo "### 🐳 Docker Image Built Successfully" >> $GITHUB_STEP_SUMMARY
@@ -298,7 +304,15 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - name: "🛡️ Run Trivy Vulnerability Scanner (SARIF)"
+      - name: "� Debug Image Reference"
+        run: |
+          echo "Debug: Image to scan = ${{ needs.docker-build.outputs.commit-tag }}"
+          if [ -z "${{ needs.docker-build.outputs.commit-tag }}" ]; then
+            echo "ERROR: commit-tag output is empty!"
+            exit 1
+          fi
+
+      - name: "�🛡️ Run Trivy Vulnerability Scanner (SARIF)"
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.docker-build.outputs.commit-tag }}
