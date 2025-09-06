@@ -16,6 +16,10 @@
         "shadcn@latest",
         "mcp"
       ]
+    },
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/goalrise/gigsy_digitopia2025",
+      "type": "http"
     }
   }
 }
