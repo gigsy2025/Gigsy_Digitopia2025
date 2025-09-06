@@ -180,7 +180,7 @@ jobs:
     needs: [validate, security-audit]
     timeout-minutes: 30
     outputs:
-      # 🏷️ Image tags for downstream jobs
+      # 🏷️ Fixed job-level outputs - must reference step outputs correctly
       image-digest: ${{ steps.build.outputs.digest }}
       commit-tag: ${{ steps.tags.outputs.commit-tag }}
       environment-tag: ${{ steps.tags.outputs.environment-tag }}
@@ -222,23 +222,36 @@ jobs:
           COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:${COMMIT_SHA_SHORT}"
           
-          # ✅ Robust output setting with verification
+          # ✅ Set output using the correct modern syntax
           echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
           echo "📦 Immutable tag: ${COMMIT_TAG}"
           
-          # 🔍 Verify the output was written correctly
+          # 🔍 Debug: Verify GITHUB_OUTPUT file
+          echo "=== DEBUG: GITHUB_OUTPUT Verification ==="
+          echo "GITHUB_OUTPUT file: $GITHUB_OUTPUT"
+          echo "GITHUB_OUTPUT exists: $(test -f "$GITHUB_OUTPUT" && echo 'YES' || echo 'NO')"
+          
+          if [ -f "$GITHUB_OUTPUT" ]; then
+            echo "GITHUB_OUTPUT contents:"
+            cat "$GITHUB_OUTPUT"
+            echo "--- End of GITHUB_OUTPUT ---"
+          fi
+          
+          # Verify the commit-tag was written
           if grep -q "commit-tag=${COMMIT_TAG}" "$GITHUB_OUTPUT" 2>/dev/null; then
             echo "✅ commit-tag successfully written to GITHUB_OUTPUT"
           else
             echo "❌ FAILED to write commit-tag to GITHUB_OUTPUT"
-            echo "GITHUB_OUTPUT location: $GITHUB_OUTPUT"
-            echo "Current working directory: $(pwd)"
-            echo "GITHUB_OUTPUT file exists: $(test -f "$GITHUB_OUTPUT" && echo 'YES' || echo 'NO')"
-            if [ -f "$GITHUB_OUTPUT" ]; then
-              echo "GITHUB_OUTPUT contents:"
-              cat "$GITHUB_OUTPUT"
+            echo "Attempting manual write..."
+            echo "commit-tag=${COMMIT_TAG}" >> "$GITHUB_OUTPUT"
+            
+            # Verify again
+            if grep -q "commit-tag=${COMMIT_TAG}" "$GITHUB_OUTPUT" 2>/dev/null; then
+              echo "✅ Manual write successful"
+            else
+              echo "❌ Manual write also failed"
+              exit 1
             fi
-            exit 1
           fi
 
           # 🎯 Environment-specific mutable tags
@@ -256,30 +269,49 @@ jobs:
             echo "🧪 PR build: ${PR_TAG}"
           fi
 
-          # Debug output
-          echo "Debug output:"
-          echo "- COMMIT_SHA_SHORT: ${COMMIT_SHA_SHORT}"
-          echo "- COMMIT_TAG: ${COMMIT_TAG}"
-          echo "- ENV_TAG: ${ENV_TAG:-not_set}"
-          echo "- PR_TAG: ${PR_TAG:-not_set}"
+          # Final debug output
+          echo "=== Final Debug Output ==="
+          echo "COMMIT_SHA_SHORT: ${COMMIT_SHA_SHORT}"
+          echo "COMMIT_TAG: ${COMMIT_TAG}"
+          echo "ENV_TAG: ${ENV_TAG:-not_set}"
+          echo "PR_TAG: ${PR_TAG:-not_set}"
 
-      - name: "� Verify Step Outputs"
+      - name: "🔍 Verify Step Outputs"
         run: |
           echo "=== Step Output Verification ==="
-          echo "commit-tag from step: ${{ steps.tags.outputs.commit-tag }}"
-          echo "environment-tag from step: ${{ steps.tags.outputs.environment-tag }}"
-          echo "pr-tag from step: ${{ steps.tags.outputs.pr-tag }}"
-          echo "================================"
+          echo "commit-tag from step: '${{ steps.tags.outputs.commit-tag }}'"
+          echo "environment-tag from step: '${{ steps.tags.outputs.environment-tag }}'"
+          echo "pr-tag from step: '${{ steps.tags.outputs.pr-tag }}'"
           
+          # Additional debugging
+          echo "=== Environment Variables ==="
+          echo "GITHUB_OUTPUT: $GITHUB_OUTPUT"
+          echo "Current working directory: $(pwd)"
+          
+          if [ -f "$GITHUB_OUTPUT" ]; then
+            echo "=== Current GITHUB_OUTPUT Contents ==="
+            cat "$GITHUB_OUTPUT"
+            echo "=== End GITHUB_OUTPUT ==="
+          fi
+          
+          # Critical check
           if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
             echo "❌ ERROR: commit-tag step output is empty!"
-            echo "This indicates the tags step failed to set outputs"
+            echo "This indicates the tags step failed to set outputs properly"
+            
+            # Emergency fallback
+            echo "🚨 EMERGENCY FALLBACK: Setting commit-tag directly"
+            FALLBACK_TAG="${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)"
+            echo "commit-tag=${FALLBACK_TAG}" >> $GITHUB_OUTPUT
+            echo "fallback-commit-tag=${FALLBACK_TAG}" >> $GITHUB_OUTPUT
+            
+            echo "Fallback tag set to: ${FALLBACK_TAG}"
             exit 1
           else
             echo "✅ Step outputs are working correctly"
           fi
 
-      - name: "�🔨 Build and Push Docker Image"
+      - name: "🔨 Build and Push Docker Image"
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -308,6 +340,25 @@ jobs:
             VERSION=${{ github.ref_name }}
             REVISION=${{ github.sha }}
             BUILD_NUMBER=${{ github.run_number }}
+
+      # Add this step to verify outputs one more time before job ends
+      - name: "🏁 Final Output Verification"
+        run: |
+          echo "=== FINAL VERIFICATION ==="
+          echo "Job will output these values:"
+          echo "commit-tag: '${{ steps.tags.outputs.commit-tag }}'"
+          echo "environment-tag: '${{ steps.tags.outputs.environment-tag }}'"
+          echo "pr-tag: '${{ steps.tags.outputs.pr-tag }}'"
+          echo "build-digest: '${{ steps.build.outputs.digest }}'"
+          
+          # Verify commit-tag is not empty
+          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
+            echo "❌ CRITICAL: commit-tag is still empty at job end!"
+            echo "This job will fail downstream jobs"
+            exit 1
+          else
+            echo "✅ commit-tag verified: ${{ steps.tags.outputs.commit-tag }}"
+          fi
 
       - name: "📋 Generate SBOM (Software Bill of Materials)"
         uses: anchore/sbom-action@v0
