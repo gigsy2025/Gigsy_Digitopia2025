@@ -1,6 +1,6 @@
 ##### DEPENDENCIES
 
-FROM --platform=linux/amd64 node:18-alpine AS deps
+FROM --platform=linux/amd64 node:20-slim AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
