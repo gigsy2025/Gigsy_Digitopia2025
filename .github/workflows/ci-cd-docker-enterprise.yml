@@ -322,15 +322,21 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - name: "� Debug Image Reference"
+      - name: "🔍 Debug Image Reference"
         run: |
-          echo "Debug: Image to scan = ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "=== Security Scan Debug ==="
+          echo "Image to scan: ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "Docker build job result: ${{ needs.docker-build.result }}"
+          echo ""
           if [ -z "${{ needs.docker-build.outputs.commit-tag }}" ]; then
-            echo "ERROR: commit-tag output is empty!"
+            echo "❌ ERROR: commit-tag output is empty!"
+            echo "This indicates the docker-build job failed to set outputs properly."
             exit 1
+          else
+            echo "✅ Image reference is valid, proceeding with scan..."
           fi
 
-      - name: "�🛡️ Run Trivy Vulnerability Scanner (SARIF)"
+      - name: "🛡️ Run Trivy Vulnerability Scanner (SARIF)"
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.docker-build.outputs.commit-tag }}
