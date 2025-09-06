@@ -19,7 +19,7 @@ RUN \
 
 ##### BUILDER
 
-FROM --platform=linux/amd64 node:18-alpine AS builder
+FROM --platform=linux/amd64 node:20-slim AS builder
 ARG DATABASE_URL
 ARG NEXT_PUBLIC_CLIENTVAR
 
@@ -43,7 +43,7 @@ RUN \
 
 ##### RUNNER
 
-FROM --platform=linux/amd64 node:18-alpine AS runner
+FROM --platform=linux/amd64 node:20-slim AS runner
 WORKDIR /app
 
 # Set production environment
