@@ -8,15 +8,15 @@
  * @since 2025-09-05
  */
 
-import http from "http";
-import { hostname } from "os";
+const http = require("http");
+const { hostname } = require("os");
 
 const options = {
-  host: hostname(),
+  host: "localhost", // Use localhost instead of hostname() for container health checks
   port: process.env.PORT || 3000,
   timeout: 2000,
   method: "GET",
-  path: "/api/health", // Health endpoint to be created in your Next.js app
+  path: "/", // Check root path instead of /api/health which might not exist yet
 };
 
 const healthCheck = () => {

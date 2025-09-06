@@ -1,7 +1,10 @@
 ##### DEPENDENCIES
 
-FROM --platform=linux/amd64 node:20-slim AS deps
-RUN apk add --no-cache libc6-compat openssl
+FROM node:20-slim AS deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libc6-dev \
+  openssl \
+  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy dependency files for better layer caching
@@ -19,7 +22,7 @@ RUN \
 
 ##### BUILDER
 
-FROM --platform=linux/amd64 node:20-slim AS builder
+FROM node:20-slim AS builder
 ARG DATABASE_URL
 ARG NEXT_PUBLIC_CLIENTVAR
 
@@ -43,7 +46,7 @@ RUN \
 
 ##### RUNNER
 
-FROM --platform=linux/amd64 node:20-slim AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 # Set production environment
