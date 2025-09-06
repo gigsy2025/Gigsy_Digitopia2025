@@ -6,8 +6,21 @@ on:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
 
-  # Push to master → Development deployment
-  # Push to main → Production deployment
+  # Push to master → Development       - name: "🔍 Verify Step Outputs"
+        run: |
+          echo "=== Step Output Verification ==="
+          echo "commit-tag from step: ${{ steps.tags.outputs.commit-tag }}"
+          echo "environment-tag from step: ${{ steps.tags.outputs.environment-tag }}"
+          echo "pr-tag from step: ${{ steps.tags.outputs.pr-tag }}"
+          echo "================================"
+          
+          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag step output is empty!"
+            echo "This indicates the tags step failed to set outputs"
+            exit 1
+          else
+            echo "✅ Step outputs are working correctly"
+          fi # Push to main → Production deployment
   push:
     branches: [master, main]
 
@@ -222,16 +235,24 @@ jobs:
           COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:${COMMIT_SHA_SHORT}"
           
-          # ✅ Set the output and verify it's set
+          # ✅ Robust output setting with verification
           echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
           echo "📦 Immutable tag: ${COMMIT_TAG}"
           
-          # 🔍 Debug: Verify output was written
-          echo "=== Output Verification ==="
-          echo "GITHUB_OUTPUT file contents:"
-          cat $GITHUB_OUTPUT || echo "❌ GITHUB_OUTPUT file not readable"
-          echo "commit-tag value: ${COMMIT_TAG}"
-          echo "=========================="
+          # 🔍 Verify the output was written correctly
+          if grep -q "commit-tag=${COMMIT_TAG}" "$GITHUB_OUTPUT" 2>/dev/null; then
+            echo "✅ commit-tag successfully written to GITHUB_OUTPUT"
+          else
+            echo "❌ FAILED to write commit-tag to GITHUB_OUTPUT"
+            echo "GITHUB_OUTPUT location: $GITHUB_OUTPUT"
+            echo "Current working directory: $(pwd)"
+            echo "GITHUB_OUTPUT file exists: $(test -f "$GITHUB_OUTPUT" && echo 'YES' || echo 'NO')"
+            if [ -f "$GITHUB_OUTPUT" ]; then
+              echo "GITHUB_OUTPUT contents:"
+              cat "$GITHUB_OUTPUT"
+            fi
+            exit 1
+          fi
 
           # 🎯 Environment-specific mutable tags
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
