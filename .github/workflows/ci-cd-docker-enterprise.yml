@@ -6,21 +6,8 @@ on:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
 
-  # Push to master → Development       - name: "🔍 Verify Step Outputs"
-        run: |
-          echo "=== Step Output Verification ==="
-          echo "commit-tag from step: ${{ steps.tags.outputs.commit-tag }}"
-          echo "environment-tag from step: ${{ steps.tags.outputs.environment-tag }}"
-          echo "pr-tag from step: ${{ steps.tags.outputs.pr-tag }}"
-          echo "================================"
-          
-          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
-            echo "❌ ERROR: commit-tag step output is empty!"
-            echo "This indicates the tags step failed to set outputs"
-            exit 1
-          else
-            echo "✅ Step outputs are working correctly"
-          fi # Push to main → Production deployment
+  # Push to master → Development deployment
+  # Push to main → Production deployment
   push:
     branches: [master, main]
 
