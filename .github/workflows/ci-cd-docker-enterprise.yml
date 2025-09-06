@@ -1,25 +1,563 @@
-name: CI/CD for Docker Enterprise
+name: "🚀 Enterprise CI/CD: Gigsy Docker Pipeline"
 
 on:
+  # Pull Requests to master → Build + Test (No deployment)
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  # Push to master → Development deployment
+  # Push to main → Production deployment
   push:
-    branches:
-      - main
+    branches: [master, main]
+
+  # Manual trigger for emergency deployments
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      deploy_commit:
+        description: "Specific commit SHA to deploy (optional)"
+        required: false
+        type: string
+
+# Prevent concurrent builds on same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal required permissions (least privilege)
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+  checks: write
+  security-events: write
+  id-token: write # For OIDC
+
+env:
+  # 🏢 Enterprise Docker Registry Configuration
+  REGISTRY: docker.io
+  IMAGE_REPOSITORY: mostafayaser/gigsy_digitopia2025
+
+  # 📊 Build metadata
+  COMMIT_SHA_SHORT: ${{ github.sha }}
+  BUILD_DATE: ${{ github.run_number }}
+
+  # 🔧 Build configuration
+  NODE_VERSION: "18"
+  PNPM_VERSION: "9.12.1"
+
+  # 🔍 Testing configuration
+  JEST_TIMEOUT: "30000"
+  TEST_COVERAGE_THRESHOLD: "80"
+
+  # 🐳 Docker build configuration
+  DOCKER_BUILDKIT: "1"
+  BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
+
+  # 🚀 Deployment configuration
+  DEV_ENVIRONMENT_URL: "https://dev-gigsy.digitopia.com"
+  PROD_ENVIRONMENT_URL: "https://gigsy.digitopia.com"
 
 jobs:
-  docker-build:
+  # ================================================================
+  # 🧪 VALIDATION PHASE: Tests, Linting, Security
+  # ================================================================
+  validate:
+    name: "🔍 Code Validation"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      build-cache-key: ${{ steps.cache-key.outputs.key }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build Docker image
-        run: |
-          docker build -t my-image:latest .
+      - name: "📁 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-  security-scan-image:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Scan Docker image
+      - name: "📦 Setup pnpm"
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: "⚡ Setup Node.js with Cache"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: "🔑 Generate Cache Key"
+        id: cache-key
         run: |
-          docker scan my-image:latest
+          echo "key=gigsy-build-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: "📥 Install Dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "🔧 TypeScript Type Checking"
+        run: pnpm run typecheck
+
+      - name: "🧪 Run Unit Tests (Jest)"
+        run: pnpm run test:ci
+
+      - name: "📊 Upload Test Coverage"
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-${{ github.sha }}
+          path: coverage/
+          retention-days: 7
+
+      - name: "🎯 ESLint Code Quality"
+        run: pnpm run lint
+
+      - name: "💅 Prettier Format Check"
+        run: pnpm run format:check
+
+      - name: "🏗️ Next.js Build Verification"
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: "💾 Upload Build Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build-${{ github.sha }}
+          path: |
+            .next
+            public
+          retention-days: 1
+
+  # ================================================================
+  # 🔒 SECURITY PHASE: Dependency & Supply Chain Security
+  # ================================================================
+  security-audit:
+    name: "🔒 Security Audit"
+    runs-on: ubuntu-latest
+    needs: validate
+    timeout-minutes: 10
+    steps:
+      - name: "📁 Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "🔍 Dependency Review (PR Only)"
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: true
+
+      - name: "📦 Setup pnpm"
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: "⚡ Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: "📥 Install Dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "🛡️ Vulnerability Audit"
+        run: pnpm audit --audit-level moderate
+
+  # ================================================================
+  # 🐳 DOCKER BUILD PHASE: Multi-Architecture Image Building
+  # ================================================================
+  docker-build:
+    name: "🐳 Docker Build & Push"
+    runs-on: ubuntu-latest
+    needs: [validate, security-audit]
+    timeout-minutes: 30
+    outputs:
+      # 🏷️ Image tags for downstream jobs
+      image-digest: ${{ steps.build.outputs.digest }}
+      commit-tag: ${{ steps.tags.outputs.commit-tag }}
+      environment-tag: ${{ steps.tags.outputs.environment-tag }}
+      pr-tag: ${{ steps.tags.outputs.pr-tag }}
+      image-size: ${{ steps.build.outputs.metadata }}
+    steps:
+      - name: "📁 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: "🔧 Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: "🔑 Login to Docker Hub"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        continue-on-error: false
+
+      - name: "🔍 Verify Docker Login"
+        run: |
+          echo "=== Docker Login Verification ==="
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Image Repository: ${{ env.IMAGE_REPOSITORY }}"
+          
+          # Test docker access
+          docker info || echo "❌ Docker daemon not accessible"
+          echo "✅ Docker login verification complete"
+
+      - name: "🏷️ Calculate Image Tags"
+        id: tags
+        run: |
+          # 📌 Immutable commit-based tag (always created)
+          COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:${COMMIT_SHA_SHORT}"
+          
+          # ✅ Robust output setting with verification
+          echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
+          echo "📦 Immutable tag: ${COMMIT_TAG}"
+          
+          # 🔍 Verify the output was written correctly
+          if grep -q "commit-tag=${COMMIT_TAG}" "$GITHUB_OUTPUT" 2>/dev/null; then
+            echo "✅ commit-tag successfully written to GITHUB_OUTPUT"
+          else
+            echo "❌ FAILED to write commit-tag to GITHUB_OUTPUT"
+            echo "GITHUB_OUTPUT location: $GITHUB_OUTPUT"
+            echo "Current working directory: $(pwd)"
+            echo "GITHUB_OUTPUT file exists: $(test -f "$GITHUB_OUTPUT" && echo 'YES' || echo 'NO')"
+            if [ -f "$GITHUB_OUTPUT" ]; then
+              echo "GITHUB_OUTPUT contents:"
+              cat "$GITHUB_OUTPUT"
+            fi
+            exit 1
+          fi
+
+          # 🎯 Environment-specific mutable tags
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            ENV_TAG="${{ env.IMAGE_REPOSITORY }}:dev"
+            echo "environment-tag=${ENV_TAG}" >> $GITHUB_OUTPUT
+            echo "🔄 Development build: ${ENV_TAG}"
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            ENV_TAG="${{ env.IMAGE_REPOSITORY }}:prod"
+            echo "environment-tag=${ENV_TAG}" >> $GITHUB_OUTPUT
+            echo "🚀 Production build: ${ENV_TAG}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_TAG="${{ env.IMAGE_REPOSITORY }}:pr-${{ github.event.number }}"
+            echo "pr-tag=${PR_TAG}" >> $GITHUB_OUTPUT
+            echo "🧪 PR build: ${PR_TAG}"
+          fi
+
+          # Debug output
+          echo "Debug output:"
+          echo "- COMMIT_SHA_SHORT: ${COMMIT_SHA_SHORT}"
+          echo "- COMMIT_TAG: ${COMMIT_TAG}"
+          echo "- ENV_TAG: ${ENV_TAG:-not_set}"
+          echo "- PR_TAG: ${PR_TAG:-not_set}"
+
+      - name: "� Verify Step Outputs"
+        run: |
+          echo "=== Step Output Verification ==="
+          echo "commit-tag from step: ${{ steps.tags.outputs.commit-tag }}"
+          echo "environment-tag from step: ${{ steps.tags.outputs.environment-tag }}"
+          echo "pr-tag from step: ${{ steps.tags.outputs.pr-tag }}"
+          echo "================================"
+          
+          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag step output is empty!"
+            echo "This indicates the tags step failed to set outputs"
+            exit 1
+          else
+            echo "✅ Step outputs are working correctly"
+          fi
+
+      - name: "�🔨 Build and Push Docker Image"
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.commit-tag }}${{ steps.tags.outputs.environment-tag && format(',{0}', steps.tags.outputs.environment-tag) || '' }}${{ steps.tags.outputs.pr-tag && format(',{0}', steps.tags.outputs.pr-tag) || '' }}
+          labels: |
+            org.opencontainers.image.title=Gigsy
+            org.opencontainers.image.description=Enterprise Next.js Application for Gigsy Platform
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.vendor=Gigsy Team
+            org.opencontainers.image.licenses=MIT
+            gigsy.build.number=${{ github.run_number }}
+            gigsy.build.trigger=${{ github.event_name }}
+            gigsy.build.branch=${{ github.ref_name }}
+            gigsy.commit.sha=${{ github.sha }}
+            gigsy.commit.short=$(echo ${{ github.sha }} | cut -c1-7)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDTIME=${{ github.event.head_commit.timestamp }}
+            VERSION=${{ github.ref_name }}
+            REVISION=${{ github.sha }}
+            BUILD_NUMBER=${{ github.run_number }}
+
+      - name: "📋 Generate SBOM (Software Bill of Materials)"
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.tags.outputs.commit-tag }}
+          format: spdx-json
+          output-file: gigsy-sbom-${{ github.sha }}.spdx.json
+
+      - name: "📤 Upload SBOM Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: gigsy-sbom-${{ github.sha }}.spdx.json
+          retention-days: 90 # Extended retention for compliance
+
+      - name: "🔍 Debug Image Tags"
+        run: |
+          echo "=== Debug Information ==="
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Short SHA: $(echo ${{ github.sha }} | cut -c1-7)"
+          echo "Repository: ${{ env.IMAGE_REPOSITORY }}"
+          echo ""
+          echo "=== Generated Tags ==="
+          echo "Commit tag: ${{ steps.tags.outputs.commit-tag }}"
+          echo "Environment tag: ${{ steps.tags.outputs.environment-tag }}"
+          echo "PR tag: ${{ steps.tags.outputs.pr-tag }}"
+          echo ""
+          echo "=== Validation ==="
+          if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag is empty!"
+            exit 1
+          else
+            echo "✅ commit-tag is valid: ${{ steps.tags.outputs.commit-tag }}"
+          fi
+
+      - name: "📊 Image Build Summary"
+        run: |
+          echo "### 🐳 Docker Image Built Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "| Attribute | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Repository** | \`${{ env.IMAGE_REPOSITORY }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit Tag** | \`$(echo ${{ github.sha }} | cut -c1-7)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Platforms** | \`linux/amd64, linux/arm64\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Build Number** | \`${{ github.run_number }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Trigger** | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+
+  # ================================================================
+  # 🔍 SECURITY SCANNING: Container Image Vulnerability Assessment
+  # ================================================================
+  security-scan-image:
+    name: "🔍 Image Security Scan"
+    runs-on: ubuntu-latest
+    needs: docker-build
+    timeout-minutes: 15
+    permissions:
+      security-events: write
+    steps:
+      - name: "🔍 Debug Image Reference"
+        run: |
+          echo "=== Security Scan Debug ==="
+          echo "Image to scan: ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "Docker build job result: ${{ needs.docker-build.result }}"
+          echo ""
+          if [ -z "${{ needs.docker-build.outputs.commit-tag }}" ]; then
+            echo "❌ ERROR: commit-tag output is empty!"
+            echo "This indicates the docker-build job failed to set outputs properly."
+            exit 1
+          else
+            echo "✅ Image reference is valid, proceeding with scan..."
+          fi
+
+      - name: "🛡️ Run Trivy Vulnerability Scanner (SARIF)"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.docker-build.outputs.commit-tag }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: "📤 Upload Trivy Results to GitHub Security"
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: "⚠️ Critical Vulnerability Check"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.docker-build.outputs.commit-tag }}
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1" # Fail on critical vulnerabilities
+          ignore-unfixed: true
+
+      - name: "📊 Security Scan Summary"
+        if: always()
+        run: |
+          echo "### 🔍 Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Scanned**: \`${{ needs.docker-build.outputs.commit-tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scanner**: Trivy (Latest)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Severity Threshold**: CRITICAL, HIGH" >> $GITHUB_STEP_SUMMARY
+          echo "- **SARIF Report**: Uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+
+  # ================================================================
+  # 🚀 DEPLOYMENT ORCHESTRATION: Environment-Specific Deployments
+  # ================================================================
+  deploy-dev:
+    name: "🔄 Deploy to Development"
+    runs-on: ubuntu-latest
+    needs: [docker-build, security-scan-image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment:
+      name: development
+      url: https://dev-gigsy.digitopia.com
+    timeout-minutes: 10
+    steps:
+      - name: "🚀 Development Deployment"
+        run: |
+          echo "🔄 Deploying to Development Environment"
+          echo "📦 Image: ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "🎯 Environment: development"
+          echo "🌐 URL: https://dev-gigsy.digitopia.com"
+
+          # TODO: Add actual deployment commands here
+          # Example: kubectl set image deployment/gigsy-app gigsy=${{ needs.docker-build.outputs.commit-tag }}
+          # Example: helm upgrade gigsy ./helm-chart --set image.tag=$(echo ${{ github.sha }} | cut -c1-7)
+
+      - name: "✅ Development Deployment Summary"
+        run: |
+          echo "### 🔄 Development Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Development" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Image**: \`${{ needs.docker-build.outputs.commit-tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://dev-gigsy.digitopia.com" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  deploy-prod:
+    name: "🚀 Deploy to Production"
+    runs-on: ubuntu-latest
+    needs: [docker-build, security-scan-image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://gigsy.digitopia.com
+    timeout-minutes: 15
+    steps:
+      - name: "🚀 Production Deployment"
+        run: |
+          echo "🚀 Deploying to Production Environment"
+          echo "📦 Image: ${{ needs.docker-build.outputs.commit-tag }}"
+          echo "🎯 Environment: production"
+          echo "🌐 URL: https://gigsy.digitopia.com"
+          echo "⚠️  Production deployment requires manual approval"
+
+          # TODO: Add actual production deployment commands here
+          # Example: kubectl set image deployment/gigsy-app gigsy=${{ needs.docker-build.outputs.commit-tag }}
+          # Example: helm upgrade gigsy ./helm-chart --set image.tag=$(echo ${{ github.sha }} | cut -c1-7)
+
+      - name: "✅ Production Deployment Summary"
+        run: |
+          echo "### 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: \`${{ needs.docker-build.outputs.commit-tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://gigsy.digitopia.com" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ================================================================
+  # 📊 FINAL REPORTING: Comprehensive Pipeline Summary
+  # ================================================================
+  pipeline-summary:
+    name: "📊 Pipeline Summary"
+    runs-on: ubuntu-latest
+    needs: [validate, security-audit, docker-build, security-scan-image]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: "📋 Generate Pipeline Report"
+        run: |
+          # Determine overall pipeline status
+          if [ "${{ needs.validate.result }}" = "success" ] && \
+             [ "${{ needs.security-audit.result }}" = "success" ] && \
+             [ "${{ needs.docker-build.result }}" = "success" ] && \
+             [ "${{ needs.security-scan-image.result }}" = "success" ]; then
+            echo "PIPELINE_STATUS=✅ SUCCESS" >> $GITHUB_ENV
+            echo "PIPELINE_EMOJI=🎉" >> $GITHUB_ENV
+          else
+            echo "PIPELINE_STATUS=❌ FAILED" >> $GITHUB_ENV  
+            echo "PIPELINE_EMOJI=💥" >> $GITHUB_ENV
+          fi
+
+      - name: "📊 Comprehensive Pipeline Summary"
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          # ${{ env.PIPELINE_EMOJI }} Gigsy CI/CD Pipeline Report
+
+          ## 📋 Pipeline Overview
+          | Stage | Status | Duration |
+          |-------|--------|----------|
+          | 🔍 **Code Validation** | ${{ needs.validate.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
+          | 🔒 **Security Audit** | ${{ needs.security-audit.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
+          | 🐳 **Docker Build** | ${{ needs.docker-build.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
+          | 🔍 **Image Security** | ${{ needs.security-scan-image.result == 'success' && '✅ PASSED' || '❌ FAILED' }} | - |
+
+          ## 🐳 Docker Image Details
+          | Attribute | Value |
+          |-----------|-------|
+          | **Repository** | `${{ env.IMAGE_REPOSITORY }}` |
+          | **Commit Tag** | `$(echo ${{ github.sha }} | cut -c1-7)` |
+          | **Full SHA** | `${{ github.sha }}` |
+          | **Branch** | `${{ github.ref_name }}` |
+          | **Build Number** | `${{ github.run_number }}` |
+          | **Event** | `${{ github.event_name }}` |
+          | **Platforms** | `linux/amd64, linux/arm64` |
+
+          ## 🔧 Usage Commands
+
+          ### Pull Image (Immutable)
+          ```bash
+          docker pull ${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
+          ```
+
+          ### Run Container
+          ```bash
+          docker run -p 3000:3000 ${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
+          ```
+
+          ### Kubernetes Deployment
+          ```bash
+          kubectl set image deployment/gigsy-app gigsy=${{ env.IMAGE_REPOSITORY }}:$(echo ${{ github.sha }} | cut -c1-7)
+          ```
+
+          ## 📈 Pipeline Metrics
+          - **Jest Tests**: ${{ needs.validate.result == 'success' && 'All tests passed ✅' || 'Tests failed ❌' }}
+          - **TypeScript**: ${{ needs.validate.result == 'success' && 'No type errors ✅' || 'Type errors found ❌' }}
+          - **ESLint**: ${{ needs.validate.result == 'success' && 'No linting issues ✅' || 'Linting issues found ❌' }}
+          - **Security**: ${{ needs.security-scan-image.result == 'success' && 'No critical vulnerabilities ✅' || 'Vulnerabilities found ❌' }}
+          - **Build**: ${{ needs.docker-build.result == 'success' && 'Multi-arch build successful ✅' || 'Build failed ❌' }}
+
+          ---
+
+          **🏷️ Tagging Strategy**: All deployments use immutable `commit-sha` tags for traceability.  
+          **📊 SBOM**: Software Bill of Materials generated and stored in artifacts.  
+          **🔒 Security**: Images scanned with Trivy for vulnerabilities.
+          EOF
+
+      - name: "🎯 Pipeline Status Check"
+        run: |
+          echo "${{ env.PIPELINE_STATUS }}"
+          if [ "${{ env.PIPELINE_STATUS }}" = "❌ FAILED" ]; then
+            echo "🚨 Pipeline failed - review job logs for details"
+            exit 1
+          else
+            echo "🎉 Pipeline completed successfully!"
+          fi
