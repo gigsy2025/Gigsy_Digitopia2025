@@ -210,7 +210,7 @@ jobs:
           echo "=== Docker Login Verification ==="
           echo "Registry: ${{ env.REGISTRY }}"
           echo "Image Repository: ${{ env.IMAGE_REPOSITORY }}"
-          
+
           # Test docker access
           docker info || echo "❌ Docker daemon not accessible"
           echo "✅ Docker login verification complete"
@@ -221,11 +221,11 @@ jobs:
           # 📌 Immutable commit-based tag (always created)
           COMMIT_SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           COMMIT_TAG="${{ env.IMAGE_REPOSITORY }}:${COMMIT_SHA_SHORT}"
-          
+
           # ✅ Robust output setting with verification
           echo "commit-tag=${COMMIT_TAG}" >> $GITHUB_OUTPUT
           echo "📦 Immutable tag: ${COMMIT_TAG}"
-          
+
           # 🔍 Verify the output was written correctly
           if grep -q "commit-tag=${COMMIT_TAG}" "$GITHUB_OUTPUT" 2>/dev/null; then
             echo "✅ commit-tag successfully written to GITHUB_OUTPUT"
@@ -270,7 +270,7 @@ jobs:
           echo "environment-tag from step: ${{ steps.tags.outputs.environment-tag }}"
           echo "pr-tag from step: ${{ steps.tags.outputs.pr-tag }}"
           echo "================================"
-          
+
           if [ -z "${{ steps.tags.outputs.commit-tag }}" ]; then
             echo "❌ ERROR: commit-tag step output is empty!"
             echo "This indicates the tags step failed to set outputs"
