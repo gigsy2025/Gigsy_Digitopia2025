@@ -15,8 +15,21 @@ jest.mock("@clerk/nextjs", () => ({
 // Import after mocking
 import { useUser } from "@clerk/nextjs";
 
-// Get the mocked version - we'll use any to work around strict typing
-const mockUseUser = useUser as jest.MockedFunction<any>;
+// Define the type structure we need for testing
+type MockUserData = {
+  id: string;
+  fullName: string | null;
+  emailAddresses: Array<{ emailAddress: string }>;
+};
+
+type MockUseUserReturn = {
+  isLoaded: boolean;
+  isSignedIn: boolean | undefined;
+  user: MockUserData | null;
+};
+
+// Get the mocked version with proper typing
+const mockUseUser = useUser as jest.MockedFunction<() => MockUseUserReturn>;
 
 describe("AuthDisplay", () => {
   beforeEach(() => {
