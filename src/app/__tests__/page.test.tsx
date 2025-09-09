@@ -1,58 +1,59 @@
 import { render, screen } from "@testing-library/react";
 import HomePage from "@/app/page";
 
-// Mock the theme toggle component
-jest.mock("@/components/theme-toggle", () => ({
-  ModeToggle: () => <div data-testid="mode-toggle">Theme Toggle</div>,
+// Mock Clerk components
+jest.mock("@clerk/nextjs", () => ({
+  SignInButton: () => <button data-testid="sign-in-button">Sign In</button>,
+  UserButton: () => <button data-testid="user-button">User Menu</button>,
 }));
 
+// Mock Convex components
+jest.mock("convex/react", () => ({
+  Authenticated: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="authenticated">{children}</div>
+  ),
+  Unauthenticated: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="unauthenticated">{children}</div>
+  ),
+  useQuery: jest.fn(),
+}));
+
+// Mock the Badge component
+jest.mock("@/components/Badge", () => {
+  return function MockBadge() {
+    return <div data-testid="badge">Badge Component</div>;
+  };
+});
+
 describe("HomePage", () => {
-  it("renders the main heading correctly", () => {
+  it("renders the authenticated section with user button and badge", () => {
     render(<HomePage />);
 
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent("Create T3 App");
+    const authenticatedSection = screen.getByTestId("authenticated");
+    expect(authenticatedSection).toBeInTheDocument();
+
+    const userButton = screen.getByTestId("user-button");
+    expect(userButton).toBeInTheDocument();
+
+    const badge = screen.getByTestId("badge");
+    expect(badge).toBeInTheDocument();
   });
 
-  it("renders the theme toggle component", () => {
+  it("renders the unauthenticated section with sign in button", () => {
     render(<HomePage />);
 
-    const themeToggle = screen.getByTestId("mode-toggle");
-    expect(themeToggle).toBeInTheDocument();
+    const unauthenticatedSection = screen.getByTestId("unauthenticated");
+    expect(unauthenticatedSection).toBeInTheDocument();
+
+    const signInButton = screen.getByTestId("sign-in-button");
+    expect(signInButton).toBeInTheDocument();
   });
 
-  it("renders navigation links", () => {
+  it("renders both authenticated and unauthenticated sections", () => {
     render(<HomePage />);
 
-    const firstStepsLink = screen.getByRole("link", { name: /first steps/i });
-    const documentationLink = screen.getByRole("link", {
-      name: /documentation/i,
-    });
-
-    expect(firstStepsLink).toBeInTheDocument();
-    expect(firstStepsLink).toHaveAttribute(
-      "href",
-      "https://create.t3.gg/en/usage/first-steps",
-    );
-
-    expect(documentationLink).toBeInTheDocument();
-    expect(documentationLink).toHaveAttribute(
-      "href",
-      "https://create.t3.gg/en/introduction",
-    );
-  });
-
-  it("has proper CSS classes for styling", () => {
-    render(<HomePage />);
-
-    const main = screen.getByRole("main");
-    expect(main).toHaveClass(
-      "flex",
-      "min-h-screen",
-      "flex-col",
-      "items-center",
-      "justify-center",
-    );
+    // Both sections should render (they're both present in the JSX)
+    expect(screen.getByTestId("authenticated")).toBeInTheDocument();
+    expect(screen.getByTestId("unauthenticated")).toBeInTheDocument();
   });
 });

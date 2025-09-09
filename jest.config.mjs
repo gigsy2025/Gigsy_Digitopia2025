@@ -28,6 +28,21 @@ const config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+
+  // Transform ES modules from node_modules
+  transformIgnorePatterns: [
+    "node_modules/(?!(@clerk/|convex/|next-themes/|@radix-ui/|lucide-react/))",
+  ],
+
+  // Handle ES modules
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
+
+  // Global setup for ES modules
+  globals: {
+    "ts-jest": {
+      useESM: true,
+    },
+  },
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
