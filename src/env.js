@@ -9,7 +9,7 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
     CONVEX_DEPLOYMENT: z.string().optional(),
-    CLERK_SECRET_KEY: z.string().min(1),
+    CLERK_SECRET_KEY: z.string().min(1).optional(),
   },
 
   /**
@@ -20,7 +20,7 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_CLERK_FRONTEND_API_URL: z.string().optional(),
   },
 
