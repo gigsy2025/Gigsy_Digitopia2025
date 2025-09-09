@@ -266,7 +266,7 @@ jobs:
           echo "- ENV_TAG: ${ENV_TAG:-not_set}"
           echo "- PR_TAG: ${PR_TAG:-not_set}"
 
-      - name: "� Verify Step Outputs"
+      - name: "Verify Step Outputs"
         run: |
           echo "=== Step Output Verification ==="
           echo "commit-tag from step: ${{ steps.tags.outputs.commit-tag }}"
@@ -282,7 +282,7 @@ jobs:
             echo "✅ Step outputs are working correctly"
           fi
 
-      - name: "�🔨 Build and Push Docker Image"
+      - name: "🔨 Build and Push Docker Image"
         id: build
         uses: docker/build-push-action@v5
         with:
