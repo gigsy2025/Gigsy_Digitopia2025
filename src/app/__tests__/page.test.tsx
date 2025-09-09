@@ -1,23 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import HomePage from "@/app/page";
 
-// Mock Clerk components
-jest.mock("@clerk/nextjs", () => ({
-  SignInButton: () => <button data-testid="sign-in-button">Sign In</button>,
-  UserButton: () => <button data-testid="user-button">User Menu</button>,
-}));
-
-// Mock Convex components
-jest.mock("convex/react", () => ({
-  Authenticated: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="authenticated">{children}</div>
-  ),
-  Unauthenticated: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="unauthenticated">{children}</div>
-  ),
-  useQuery: jest.fn(),
-}));
-
 // Mock the Badge component
 jest.mock("@/components/Badge", () => {
   return function MockBadge() {
@@ -25,35 +8,80 @@ jest.mock("@/components/Badge", () => {
   };
 });
 
+// Mock the AuthDisplay component
+jest.mock("@/components/AuthDisplay", () => {
+  return function MockAuthDisplay() {
+    return <div data-testid="auth-display">Auth Display Component</div>;
+  };
+});
+
 describe("HomePage", () => {
-  it("renders the authenticated section with user button and badge", () => {
+  it("renders the main heading correctly", () => {
     render(<HomePage />);
 
-    const authenticatedSection = screen.getByTestId("authenticated");
-    expect(authenticatedSection).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent("Welcome to Gigsy");
+  });
 
-    const userButton = screen.getByTestId("user-button");
-    expect(userButton).toBeInTheDocument();
+  it("renders the auth display component", () => {
+    render(<HomePage />);
+
+    const authDisplay = screen.getByTestId("auth-display");
+    expect(authDisplay).toBeInTheDocument();
+  });
+
+  it("renders the badge component", () => {
+    render(<HomePage />);
 
     const badge = screen.getByTestId("badge");
     expect(badge).toBeInTheDocument();
   });
 
-  it("renders the unauthenticated section with sign in button", () => {
+  it("renders the getting started section", () => {
     render(<HomePage />);
 
-    const unauthenticatedSection = screen.getByTestId("unauthenticated");
-    expect(unauthenticatedSection).toBeInTheDocument();
-
-    const signInButton = screen.getByTestId("sign-in-button");
-    expect(signInButton).toBeInTheDocument();
+    const gettingStartedHeading = screen.getByRole("heading", {
+      name: /getting started/i,
+    });
+    expect(gettingStartedHeading).toBeInTheDocument();
   });
 
-  it("renders both authenticated and unauthenticated sections", () => {
+  it("renders the real-time features section", () => {
     render(<HomePage />);
 
-    // Both sections should render (they're both present in the JSX)
-    expect(screen.getByTestId("authenticated")).toBeInTheDocument();
-    expect(screen.getByTestId("unauthenticated")).toBeInTheDocument();
+    const realTimeFeaturesHeading = screen.getByRole("heading", {
+      name: /real-time features/i,
+    });
+    expect(realTimeFeaturesHeading).toBeInTheDocument();
+  });
+
+  it("has proper CSS classes for styling", () => {
+    render(<HomePage />);
+
+    const main = screen.getByRole("main");
+    expect(main).toHaveClass(
+      "flex",
+      "min-h-screen",
+      "flex-col",
+      "items-center",
+      "justify-center",
+    );
+  });
+
+  it("renders all major components in correct order", () => {
+    render(<HomePage />);
+
+    const container = screen.getByRole("main").querySelector(".container");
+    expect(container).toBeInTheDocument();
+
+    // Check that components are rendered in expected order
+    const heading = screen.getByRole("heading", { level: 1 });
+    const authDisplay = screen.getByTestId("auth-display");
+    const badge = screen.getByTestId("badge");
+
+    expect(heading).toBeInTheDocument();
+    expect(authDisplay).toBeInTheDocument();
+    expect(badge).toBeInTheDocument();
   });
 });
