@@ -125,6 +125,8 @@ jobs:
         run: pnpm run build
         env:
           NODE_ENV: production
+          SKIP_ENV_VALIDATION: true
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
       - name: "💾 Upload Build Artifacts"
         uses: actions/upload-artifact@v4
@@ -308,6 +310,8 @@ jobs:
             VERSION=${{ github.ref_name }}
             REVISION=${{ github.sha }}
             BUILD_NUMBER=${{ github.run_number }}
+            SKIP_ENV_VALIDATION=true
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_c3VpdGVkLWNyb3ctNTkuY2xlcmsuYWNjb3VudHMuZGV2JA
 
       - name: "📋 Generate SBOM (Software Bill of Materials)"
         uses: anchore/sbom-action@v0

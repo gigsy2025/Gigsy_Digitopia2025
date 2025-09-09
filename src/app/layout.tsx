@@ -28,8 +28,14 @@ const geist = Geist({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Get the publishable key with fallback for build environments
+  const publishableKey =
+    env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+    "pk_test_placeholder";
+
   return (
-    <ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}>
+    <ClerkProvider publishableKey={publishableKey}>
       <ConvexClientProvider>
         <html lang="en" className={`${geist.variable}`}>
           <body>
