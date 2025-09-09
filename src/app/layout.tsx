@@ -1,5 +1,6 @@
 import ConvexClientProvider from "@/providers/ConvexClientProvider";
 import "@/styles/globals.css";
+import { env } from "@/env";
 import {
   ClerkProvider,
   SignedIn,
@@ -28,7 +29,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <ConvexClientProvider>
         <html lang="en" className={`${geist.variable}`}>
           <body>
