@@ -13,6 +13,7 @@ import {
 import { type Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
+import { Providers } from "@/components/jotai-provider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -39,27 +40,29 @@ export default function RootLayout({
       <ConvexClientProvider>
         <html lang="en" className={`${geist.variable}`}>
           <body>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <header className="flex h-16 items-center justify-end gap-4 p-4">
-                <SignedOut>
-                  <SignInButton />
-                  <SignUpButton>
-                    <button className="text-ceramic-white h-10 cursor-pointer rounded-full bg-[#6c47ff] px-4 text-sm font-medium sm:h-12 sm:px-5 sm:text-base">
-                      Sign Up
-                    </button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </header>
-              {children}
-            </ThemeProvider>
+            <Providers>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <header className="flex h-16 items-center justify-end gap-4 p-4">
+                  <SignedOut>
+                    <SignInButton />
+                    <SignUpButton>
+                      <button className="text-ceramic-white h-10 cursor-pointer rounded-full bg-[#6c47ff] px-4 text-sm font-medium sm:h-12 sm:px-5 sm:text-base">
+                        Sign Up
+                      </button>
+                    </SignUpButton>
+                  </SignedOut>
+                  <SignedIn>
+                    <UserButton />
+                  </SignedIn>
+                </header>
+                {children}
+              </ThemeProvider>
+            </Providers>
           </body>
         </html>
       </ConvexClientProvider>
