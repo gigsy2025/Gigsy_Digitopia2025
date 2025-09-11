@@ -21,6 +21,10 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.9",
+    "@logtail/browser": "^0.5.6",
+    "@logtail/next": "^0.2.1",
+    "@logtail/node": "^0.5.6",
+    "@logtail/pino": "^0.5.6",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.3",
     "@sentry/nextjs": "10",
@@ -32,9 +36,12 @@
     "lucide-react": "^0.542.0",
     "next": "^15.2.3",
     "next-themes": "^0.4.6",
+    "pino": "^9.9.5",
+    "pino-pretty": "^13.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.3.1",
+    "uuid": "^13.0.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -48,6 +55,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.3",
     "identity-obj-proxy": "^3.0.0",

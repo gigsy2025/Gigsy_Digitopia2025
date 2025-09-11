@@ -39,5 +39,5 @@
     "**/*.js",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "coverage"]
+  "exclude": ["node_modules", ".next", "coverage", "src/lib/logging/examples.ts", "src/lib/logging/test*.ts"]
 }

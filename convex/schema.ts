@@ -290,6 +290,47 @@ const schema = defineSchema({
     // Standard System Fields
     createdBy: v.string(),
   }).index("by_user", ["userId"]),
+
+  // --- Logging Service Tables ---
+
+  logs: defineTable({
+    // Core log data
+    level: v.string(), // "trace", "debug", "info", "warn", "error", "fatal"
+    message: v.string(), // The log message
+    context: v.string(), // Logger context: "api", "auth", "database", etc.
+
+    // Metadata
+    metadata: v.optional(v.any()), // Flexible log metadata object - allows any structure
+
+    // Correlation tracking
+    correlationId: v.optional(v.string()),
+    requestId: v.optional(v.string()),
+    userId: v.optional(v.string()),
+    sessionId: v.optional(v.string()),
+
+    // Environment info
+    service: v.string(), // "gigsy"
+    version: v.string(), // App version
+    environment: v.string(), // "development", "production"
+
+    // Source tracking
+    source: v.string(), // "client", "server", "middleware"
+    userAgent: v.optional(v.string()),
+    ip: v.optional(v.string()),
+
+    // Processing status
+    status: v.string(), // "pending", "forwarded", "failed"
+    forwardedAt: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+    retryCount: v.optional(v.number()),
+
+    // Standard System Fields
+    createdBy: v.string(),
+  })
+    .index("by_status", ["status"])
+    .index("by_level", ["level"])
+    .index("by_context", ["context"])
+    .index("by_correlation_id", ["correlationId"]),
 });
 
 export default schema;

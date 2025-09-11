@@ -1,7 +1,20 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/_betterstack/(.*)", // Allow Better Stack telemetry
+]);
 
+export default clerkMiddleware(async (auth, request) => {
+  // Skip authentication for public routes
+  if (isPublicRoute(request)) {
+    return;
+  }
+
+  // Protect all other routes
+  await auth.protect();
+});
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params

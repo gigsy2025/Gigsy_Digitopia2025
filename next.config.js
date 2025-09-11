@@ -4,13 +4,17 @@
  */
 import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
+import { withBetterStack } from "@logtail/next";
 
 /** @type {import("next").NextConfig} */
 const config = {
   output: "standalone",
 };
 
-export default withSentryConfig(config, {
+// First wrap with BetterStack/Logtail, then with Sentry
+const configWithLogtail = withBetterStack(config);
+
+export default withSentryConfig(configWithLogtail, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

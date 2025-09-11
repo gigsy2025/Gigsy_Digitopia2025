@@ -1,5 +1,7 @@
 import Badge from "@/components/Badge";
 import AuthDisplay from "@/components/AuthDisplay";
+import { Button } from "@/components/ui/button";
+import ButtonFetcher from "@/components/ButtonFetcher";
 
 export default function HomePage() {
   return (
@@ -28,6 +30,7 @@ export default function HomePage() {
           </div>
         </div>
         <Badge />
+        <ButtonFetcher />
       </div>
     </main>
   );

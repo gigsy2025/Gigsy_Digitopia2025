@@ -38,8 +38,12 @@ export default function RootLayout({
   return (
     <ClerkProvider publishableKey={publishableKey}>
       <ConvexClientProvider>
-        <html lang="en" className={`${geist.variable}`}>
-          <body>
+        <html
+          lang="en"
+          className={`${geist.variable}`}
+          suppressHydrationWarning
+        >
+          <body suppressHydrationWarning>
             <Providers>
               <ThemeProvider
                 attribute="class"
