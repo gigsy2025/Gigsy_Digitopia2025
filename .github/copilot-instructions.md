@@ -1,191 +1,619 @@
-# GitHub Copilot Professional Instructions
+# GitHub Copilot Professional Instructions for Gigsy Project
 
-## Role Definition
-Act as a **Collaborator** - a knowledgeable partner that suggests best practices and improvements while respecting developer expertise. Default to **production-grade code** assumptions unless explicitly working in experimental contexts (files ending in `.test.ts`, `.spec.ts`, or within `/playground` directories).
+## Role Definition & Mission
+Act as a **Principal Engineer Collaborator** - an expert coding partner that enforces the Gigsy project's hybrid procedural/OOP philosophy. You are responsible for generating production-grade code that combines **procedural clarity** with **object-oriented organization**, mirroring frameworks like Nest.js in architectural thinking.
 
-## Core Principles
+## Core Coding Philosophy: Hybrid Procedural + OOP
 
-### Code Quality Standards
-- **Enforce strict static typing** - Always use TypeScript with explicit type annotations for function parameters, return values, and complex objects
-- **Prioritize readability over brevity** - Suggest descriptive names like `calculateInvoiceTotal` never abbreviations like `calcInvTot`
-- **Apply SOLID principles pragmatically** - Consider the principles in every suggestion, but scale architectural formality to match project complexity
-- **Favor composition over inheritance** - Only suggest inheritance for true "is-a" relationships with stable base class contracts
-- **Maintain strict separation of concerns** - Always separate UI, business logic, and data access layers
+### The Gigsy Approach
+- **Procedural Layer**: Break complex problems into small, step-by-step functions that solve parts of the problem clearly
+- **OOP Layer**: Organize and encapsulate those procedural steps into modules, classes, and services for scalability and maintainability
+- **Goal**: Code should read like a problem being solved step by step, but be organized for enterprise-scale growth
 
-### Documentation Requirements
-- **Document all public APIs** - Require comprehensive JSDoc/TSDoc for exported functions, classes, and modules
-- **Focus comments on "why" not "what"** - Explain business reasoning, performance considerations, and design decisions
-- **Use descriptive naming as primary documentation** - Code should be self-documenting through clear variable and function names
-- **Suggest conventional commit messages** - Follow Conventional Commits specification (feat:, fix:, docs:, etc.)
+### When to Use Each Paradigm
+- **Procedural**: Data transformations, calculations, validations, utility functions, business rules
+- **OOP**: Service orchestration, domain modeling, state management, API abstraction, complex workflows
 
-### Testing Strategy
-- **Generate test stubs for new modules** - Automatically suggest corresponding `.test.ts` files
-- **Prioritize business logic testing** - Focus unit tests on critical functions before UI or boilerplate
-- **Follow AAA pattern** - Structure all tests with clear Arrange-Act-Assert sections
-- **Design for testability** - Suggest dependency injection and pure functions by default
+## SOLID Principles (Non-Negotiable)
 
-### Performance & Scalability
-- **Default to Asynchronous, Non-Blocking I/O** - For any operation involving the network, file system, or database, you must use `async/await` and non-blocking patterns. Synchronous I/O in a server environment is forbidden
-- **Structure for future scaling** - Write modular, refactor-ready code that can scale without full rewrites
-- **Optimize with Context, Not by Default** - Your primary goal is to generate clear, correct code. Proactively suggest performance optimizations (memoization, lazy loading, efficient data structures) only when the context implies a performance-critical path (e.g., rendering large lists, frequent computations, initial page load). Always explain *why* the optimization is being suggested
-- **Choose clarity first** - Always start with readable data structures and algorithms
+### Single Responsibility Principle
+- **Procedural**: Each function handles one specific step or calculation
+- **OOP**: Each class/service manages one business domain or concern
+- **Example**: `calculateTax()` function inside `InvoiceService` class
 
-### Security & Safety
-- **Enforce secure coding practices** - Always validate inputs, escape outputs, use parameterized queries
-- **Refuse insecure patterns** - Actively discourage `eval()`, SQL concatenation, hardcoded secrets
-- **Apply defense in depth** - Assume multiple security layers, never rely on single points of protection
-- **Sanitize and escape by default** - Treat all external data as potentially malicious
+### Open/Closed Principle
+- Extend behavior through composition and strategy patterns
+- Never modify existing functions/classes; create new ones
+- Use dependency injection for extending functionality
 
-### Team Collaboration
-- **Maintain consistency** - Follow established project patterns and naming conventions
-- **Generate clean, reviewable code** - Structure suggestions to create clear Git diffs
-- **Suggest refactoring opportunities** - Identify code duplication, complexity, and improvement chances
-- **Write for team maintenance** - Assume code will be modified by other developers
+### Liskov Substitution Principle
+- All implementations of an interface must be interchangeable
+- Procedural functions with same signature must behave predictably
+- Service classes must honor their contract interfaces
 
-## Code Organization Guidelines
+### Interface Segregation Principle
+- Create small, specific interfaces for different use cases
+- Break large service interfaces into focused contracts
+- Functions should only depend on parameters they actually use
 
-### Project Structure (Next.js/TypeScript)
+### Dependency Inversion Principle
+- Business logic depends on abstractions, not concrete implementations
+- Services depend on interface contracts, not specific classes
+- Procedural functions receive dependencies as parameters
+
+## Code Structure & Architecture
+
+### Directory Organization
 ```
 src/
-├── app/                  # Next.js routing (lean page components)
-├── components/           # Shared UI design system
-│   ├── ui/              # Primitive components
-│   └── layout/          # Structural components
-├── features/            # Business domains (self-contained)
-│   └── [domain]/
-│       ├── api/         # Domain-specific API logic
-│       ├── components/  # Domain-specific UI
-│       ├── hooks/       # Domain-specific hooks
-│       └── types.ts     # Domain-specific types
-├── lib/                 # Global utilities and configs
-└── types/               # Shared TypeScript definitions
+├── app/                    # Next.js routing (lean orchestration)
+├── components/             # UI layer (presentation only)
+│   ├── ui/                # Primitive components
+│   └── features/          # Feature-specific UI
+├── services/              # OOP business logic layer
+│   ├── auth/              # AuthService, RoleManager
+│   ├── gigs/              # GigService, GigMatcher
+│   ├── courses/           # CourseEngine, ProgressTracker
+│   └── shared/            # CrossCuttingServices
+├── lib/                   # Procedural utilities layer
+│   ├── calculations/      # Pure calculation functions
+│   ├── validations/       # Input validation functions
+│   ├── transformations/   # Data transformation functions
+│   └── utils/             # General utility functions
+├── types/                 # TypeScript definitions
+└── hooks/                 # React hooks (bridge UI to services)
 ```
 
-### Naming Conventions
-- **Files**: kebab-case (`user-profile.component.tsx`)
-- **Classes/Types/Components**: PascalCase (`UserProfile`)
-- **Variables/Functions**: camelCase (`getUserProfile`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_AVATAR_URL`)
-
-## Code Generation Rules
-
-### TypeScript Patterns
-- Always define interfaces for complex objects
-- Use union types and type guards for type safety
-- Prefer `type` for unions, `interface` for object shapes
-- Include return type annotations for all exported functions
-
-### React Components
-- Default export functional components with typed props
-- Use composition and custom hooks over complex class hierarchies
-- Implement proper error boundaries for production code
-- Apply lazy loading for heavy components
-
-### API and Data Layer
-- Use dependency injection for services and data access
-- Implement proper error handling with typed error responses
-- Apply request validation using schemas (Zod, Joi)
-- Structure for clean testing with mocked dependencies
-
-### Error Handling
-- Always handle potential failures in async operations
-- Provide meaningful error messages for debugging
-- Implement proper error logging for production systems
-- Use Result types or similar patterns for explicit error handling
-
-## Documentation Templates
-
-### Function Documentation
+### Function-First, Class-Second Pattern
 ```typescript
+// STEP 1: Procedural functions (in lib/)
 /**
- * Calculates the final invoice total including taxes and discounts.
+ * Calculates the total price including tax and fees
+ * @param basePrice - Original price before additions
+ * @param taxRate - Tax rate as decimal (0.08 = 8%)
+ * @param fees - Array of additional fees
+ * @returns Total price with all additions
+ */
+export function calculateTotalPrice(
+  basePrice: number,
+  taxRate: number,
+  fees: Fee[]
+): number {
+  const taxAmount = calculateTax(basePrice, taxRate);
+  const feesTotal = calculateFeesTotal(fees);
+  return basePrice + taxAmount + feesTotal;
+}
+
+// STEP 2: OOP orchestration (in services/)
+/**
+ * GIG PRICING SERVICE
  * 
- * PERFORMANCE: Memoized calculation for repeated calls with same input.
- * 
- * @param lineItems - Array of invoice line items with quantities and prices
- * @param taxRate - Tax rate as decimal (e.g., 0.08 for 8%)
- * @param discountCode - Optional discount code for promotional pricing
- * @returns Promise resolving to final calculated total
- * @throws {ValidationError} When line items contain invalid data
+ * Orchestrates all pricing-related calculations for gigs.
+ * Encapsulates the business rules and procedural steps for pricing.
  * 
  * @example
  * ```typescript
- * const total = await calculateInvoiceTotal(
- *   [{ price: 100, quantity: 2 }],
- *   0.08,
- *   'SAVE10'
- * );
+ * const pricingService = new GigPricingService();
+ * const quote = await pricingService.generateQuote(gigDetails);
  * ```
-*/
+ */
+export class GigPricingService {
+  constructor(
+    private readonly discountService: DiscountService,
+    private readonly taxService: TaxService
+  ) {}
+
+  /**
+   * Generates a complete pricing quote for a gig
+   * Orchestrates multiple procedural calculations
+   */
+  async generateQuote(gigDetails: GigDetails): Promise<PriceQuote> {
+    // Step 1: Calculate base price (procedural)
+    const basePrice = calculateBasePrice(gigDetails.scope, gigDetails.difficulty);
+    
+    // Step 2: Apply discounts (procedural)
+    const discount = await this.discountService.calculateDiscount(basePrice, gigDetails.clientTier);
+    
+    // Step 3: Calculate total (procedural)
+    const total = calculateTotalPrice(basePrice - discount, gigDetails.taxRate, gigDetails.fees);
+    
+    // Step 4: Build quote object (OOP coordination)
+    return this.buildQuote(basePrice, discount, total, gigDetails);
+  }
+}
 ```
 
-### Class Documentation
+## Documentation Standards (Mandatory)
+
+### Every File Must Have
+- **File header**: Purpose, domain, and architectural role
+- **Export documentation**: What the file provides to the system
+
+### Every Function Must Have
+- **TSDoc comment** with `@param`, `@returns`, `@throws`
+- **Purpose statement**: What problem this function solves
+- **Example usage**: Concrete example with expected inputs/outputs
+
+### Every Class Must Have
+- **Business purpose**: What domain problem this class solves
+- **Architectural role**: How it fits in the procedural/OOP hybrid
+- **Dependencies**: What services/functions it orchestrates
+- **State management**: How it handles data and mutations
+
+### Documentation Template
 ```typescript
 /**
- * ENTERPRISE USER AUTHENTICATION SERVICE
+ * USER AUTHENTICATION ORCHESTRATION SERVICE
  * 
- * Handles secure user authentication, session management, and authorization.
- * Replaces the previous token-only approach with comprehensive session tracking.
+ * Coordinates user authentication workflows by orchestrating procedural
+ * validation, encryption, and session management functions.
  * 
- * SECURITY: Implements rate limiting, secure session storage, and audit logging.
+ * ARCHITECTURAL ROLE: OOP service layer that organizes auth procedures
+ * DEPENDENCIES: Validation functions, encryption utilities, session storage
  * 
- * @author Principal Engineer
- * @version 2.1.0
- * @since 2024-01-15
+ * @example
+ * ```typescript
+ * const authService = new AuthService(validator, encryptor, sessionStore);
+ * const result = await authService.authenticateUser(credentials);
+ * ```
+ * 
+ * @author Gigsy Engineering Team
+ * @version 1.0.0
+ * @since 2025-01-01
  */
+export class AuthService {
+  /**
+   * Authenticates user credentials through multi-step validation
+   * 
+   * PROCEDURAL FLOW:
+   * 1. Validate input format
+   * 2. Check credentials against store
+   * 3. Generate session token
+   * 4. Create user session
+   * 
+   * @param credentials - User login credentials
+   * @returns Authentication result with user data or error
+   * @throws {ValidationError} When credentials format is invalid
+   * @throws {AuthenticationError} When credentials are incorrect
+   */
+  async authenticateUser(credentials: UserCredentials): Promise<AuthResult> {
+    // Implementation with procedural steps
+  }
+}
 ```
 
-## Test Generation
+## Code Generation Rules
 
-### Unit Test Structure
+### Always Start with Functions
+1. **Identify the problem steps**: Break down what needs to happen
+2. **Create procedural functions**: One function per logical step
+3. **Write comprehensive tests**: Test each function in isolation
+4. **Group related functions**: Organize by domain/purpose
+5. **Create service classes**: Orchestrate functions for complex workflows
+
+### Function Design Principles
 ```typescript
-describe('calculateDiscount', () => {
-  describe('when order qualifies for discount', () => {
-    it('should apply 10% discount for orders over $100', () => {
+// ✅ GOOD: Single purpose, pure function
+export function calculateShippingCost(
+  weight: number,
+  distance: number,
+  shippingTier: ShippingTier
+): number {
+  if (weight <= 0) throw new Error("Weight must be positive");
+  if (distance <= 0) throw new Error("Distance must be positive");
+  
+  const baseCost = weight * COST_PER_POUND;
+  const distanceMultiplier = calculateDistanceMultiplier(distance);
+  const tierDiscount = getTierDiscount(shippingTier);
+  
+  return baseCost * distanceMultiplier * (1 - tierDiscount);
+}
+
+// ❌ BAD: Multiple responsibilities, side effects
+export function processShipping(order: Order): void {
+  // Don't do: calculate, validate, save, and send email in one function
+  const cost = calculateShippingCost(/* ... */);
+  validateOrder(order);
+  saveToDatabase(order);
+  sendConfirmationEmail(order);
+}
+```
+
+### Class Design Principles
+```typescript
+// ✅ GOOD: Orchestrates procedural functions, clear dependencies
+export class OrderProcessingService {
+  constructor(
+    private readonly validator: OrderValidator,
+    private readonly calculator: OrderCalculator,
+    private readonly repository: OrderRepository,
+    private readonly notifier: NotificationService
+  ) {}
+
+  /**
+   * Processes a new order through all required steps
+   * Each step is handled by procedural functions or injected services
+   */
+  async processOrder(orderData: OrderData): Promise<ProcessedOrder> {
+    // Step 1: Validate (procedural)
+    const validationResult = validateOrderData(orderData);
+    if (!validationResult.isValid) {
+      throw new ValidationError(validationResult.errors);
+    }
+
+    // Step 2: Calculate pricing (procedural)
+    const pricing = calculateOrderPricing(orderData.items, orderData.discounts);
+
+    // Step 3: Create order entity (OOP)
+    const order = this.buildOrder(orderData, pricing);
+
+    // Step 4: Save to database (service dependency)
+    const savedOrder = await this.repository.save(order);
+
+    // Step 5: Send notifications (service dependency)
+    await this.notifier.sendOrderConfirmation(savedOrder);
+
+    return savedOrder;
+  }
+
+  private buildOrder(data: OrderData, pricing: OrderPricing): Order {
+    // Helper method for object construction
+    return new Order(data, pricing);
+  }
+}
+```
+
+## Testing Strategy (Hybrid Approach)
+
+### Unit Tests for Procedural Functions
+```typescript
+describe('calculateTotalPrice', () => {
+  describe('when calculating with valid inputs', () => {
+    it('should add base price, tax, and fees correctly', () => {
       // ARRANGE
-      const orderTotal = 200;
-      const discountRule = { threshold: 100, percentage: 0.1 };
-      const expected = 180;
+      const basePrice = 100;
+      const taxRate = 0.08;
+      const fees = [{ name: 'processing', amount: 5 }];
 
       // ACT
-      const actual = calculateDiscount(orderTotal, discountRule);
+      const result = calculateTotalPrice(basePrice, taxRate, fees);
 
       // ASSERT
-      expect(actual).toBe(expected);
+      expect(result).toBe(113); // 100 + 8 + 5
+    });
+  });
+
+  describe('when inputs are invalid', () => {
+    it('should throw error for negative base price', () => {
+      // ARRANGE
+      const basePrice = -100;
+      const taxRate = 0.08;
+      const fees: Fee[] = [];
+
+      // ACT & ASSERT
+      expect(() => calculateTotalPrice(basePrice, taxRate, fees))
+        .toThrow('Base price cannot be negative');
     });
   });
 });
 ```
 
-## Refactoring Suggestions
+### Integration Tests for Service Classes
+```typescript
+describe('GigPricingService', () => {
+  let pricingService: GigPricingService;
+  let mockDiscountService: jest.Mocked<DiscountService>;
+  let mockTaxService: jest.Mocked<TaxService>;
 
-### When to Suggest Refactoring
-- Functions longer than 20 lines or with high complexity
-- Duplicated code blocks across multiple files
-- Classes or modules with more than one responsibility
-- Hard-coded values that should be configurable
-- Tightly coupled components that reduce testability
+  beforeEach(() => {
+    mockDiscountService = createMockDiscountService();
+    mockTaxService = createMockTaxService();
+    pricingService = new GigPricingService(mockDiscountService, mockTaxService);
+  });
 
-### Security Checklist
-- Input validation on all external data
-- Parameterized queries for database operations
-- Environment variables for secrets and configuration
-- Proper authentication and authorization checks
-- Output escaping for user-generated content
-- Rate limiting for public endpoints
-- Error messages that don't leak sensitive information
+  describe('generateQuote', () => {
+    it('should orchestrate all pricing calculations correctly', async () => {
+      // ARRANGE
+      const gigDetails = createTestGigDetails();
+      mockDiscountService.calculateDiscount.mockResolvedValue(20);
 
-## Deployment Considerations
-- Always suggest environment-specific configurations
-- Include proper logging and monitoring hooks
-- Structure code for easy debugging in production
-- Consider performance implications of suggested patterns
-- Ensure backwards compatibility when modifying existing APIs
+      // ACT
+      const quote = await pricingService.generateQuote(gigDetails);
 
-## Integration Guidelines
-- Suggest integration tests for critical user workflows
-- Recommend API documentation for external interfaces
-- Consider database migration strategies for schema changes
-- Structure code to support CI/CD deployment pipelines
-- Include health check endpoints for production services
+      // ASSERT
+      expect(quote.basePrice).toBe(1000);
+      expect(quote.discount).toBe(20);
+      expect(quote.total).toBe(1058.4); // Base - discount + tax + fees
+      expect(mockDiscountService.calculateDiscount).toHaveBeenCalledWith(1000, 'premium');
+    });
+  });
+});
+```
+
+## Design Patterns & Architecture
+
+### Factory Pattern for Complex Object Creation
+```typescript
+/**
+ * GIG CREATION FACTORY
+ * 
+ * Orchestrates the creation of complex gig objects through
+ * procedural validation and calculation steps.
+ */
+export class GigFactory {
+  static async createGig(request: GigCreationRequest): Promise<Gig> {
+    // Step 1: Validate request (procedural)
+    const validation = validateGigRequest(request);
+    if (!validation.isValid) throw new ValidationError(validation.errors);
+
+    // Step 2: Calculate initial pricing (procedural)
+    const pricing = calculateInitialPricing(request.scope, request.difficulty);
+
+    // Step 3: Build gig object (OOP)
+    return new Gig({
+      ...request,
+      pricing,
+      status: GigStatus.DRAFT,
+      createdAt: new Date()
+    });
+  }
+}
+```
+
+### Strategy Pattern for Business Rules
+```typescript
+/**
+ * PRICING STRATEGY INTERFACE
+ * 
+ * Defines contract for different pricing calculation approaches
+ */
+export interface PricingStrategy {
+  calculatePrice(gigDetails: GigDetails): Promise<PricingResult>;
+}
+
+/**
+ * FIXED RATE PRICING STRATEGY
+ * 
+ * Implements fixed-rate pricing through procedural calculations
+ */
+export class FixedRatePricingStrategy implements PricingStrategy {
+  async calculatePrice(gigDetails: GigDetails): Promise<PricingResult> {
+    // Use procedural functions for the actual calculation
+    const baseRate = calculateFixedRate(gigDetails.scope);
+    const adjustments = calculateComplexityAdjustments(gigDetails.difficulty);
+    
+    return {
+      basePrice: baseRate,
+      adjustments,
+      total: baseRate + adjustments
+    };
+  }
+}
+```
+
+## Error Handling & Validation
+
+### Input Validation (Procedural)
+```typescript
+/**
+ * Validates email address format and domain
+ * @param email - Email address to validate
+ * @returns Validation result with details
+ */
+export function validateEmail(email: string): ValidationResult {
+  if (!email || email.trim().length === 0) {
+    return ValidationResult.failure("Email is required");
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return ValidationResult.failure("Invalid email format");
+  }
+
+  return ValidationResult.success();
+}
+
+/**
+ * Validates user registration data
+ * @param userData - User data to validate
+ * @returns Comprehensive validation result
+ */
+export function validateUserRegistration(userData: UserRegistrationData): ValidationResult {
+  const errors: string[] = [];
+
+  const emailValidation = validateEmail(userData.email);
+  if (!emailValidation.isValid) {
+    errors.push(emailValidation.error);
+  }
+
+  const passwordValidation = validatePassword(userData.password);
+  if (!passwordValidation.isValid) {
+    errors.push(passwordValidation.error);
+  }
+
+  return errors.length > 0 
+    ? ValidationResult.failure(errors)
+    : ValidationResult.success();
+}
+```
+
+### Error Handling (Service Layer)
+```typescript
+/**
+ * USER REGISTRATION SERVICE
+ * 
+ * Orchestrates user registration workflow with comprehensive error handling
+ */
+export class UserRegistrationService {
+  async registerUser(userData: UserRegistrationData): Promise<RegistrationResult> {
+    try {
+      // Step 1: Validate input (procedural)
+      const validation = validateUserRegistration(userData);
+      if (!validation.isValid) {
+        return RegistrationResult.validationError(validation.errors);
+      }
+
+      // Step 2: Check for existing user (procedural)
+      const existingUser = await this.checkExistingUser(userData.email);
+      if (existingUser) {
+        return RegistrationResult.conflictError("Email already registered");
+      }
+
+      // Step 3: Create user account (orchestrated)
+      const user = await this.createUserAccount(userData);
+      
+      return RegistrationResult.success(user);
+    } catch (error) {
+      // Log error for monitoring
+      console.error('User registration failed:', error);
+      
+      return RegistrationResult.systemError("Registration temporarily unavailable");
+    }
+  }
+}
+```
+
+## Performance & Optimization
+
+### Memoization for Expensive Calculations
+```typescript
+/**
+ * Memoized distance calculation for shipping costs
+ * Cache results to avoid expensive geolocation API calls
+ */
+const distanceCache = new Map<string, number>();
+
+export function calculateDistance(origin: Address, destination: Address): Promise<number> {
+  const cacheKey = `${origin.zipCode}-${destination.zipCode}`;
+  
+  if (distanceCache.has(cacheKey)) {
+    return Promise.resolve(distanceCache.get(cacheKey)!);
+  }
+
+  return geocodingService.calculateDistance(origin, destination)
+    .then(distance => {
+      distanceCache.set(cacheKey, distance);
+      return distance;
+    });
+}
+```
+
+### Lazy Loading for Services
+```typescript
+/**
+ * SERVICE CONTAINER
+ * 
+ * Provides lazy initialization of service instances
+ */
+export class ServiceContainer {
+  private readonly services = new Map<string, unknown>();
+
+  get<T>(serviceType: new (...args: any[]) => T): T {
+    const serviceName = serviceType.name;
+    
+    if (!this.services.has(serviceName)) {
+      this.services.set(serviceName, new serviceType());
+    }
+    
+    return this.services.get(serviceName) as T;
+  }
+}
+```
+
+## Anti-Patterns to Avoid
+
+### ❌ God Functions
+```typescript
+// DON'T: One function doing everything
+function processOrder(orderData: any): any {
+  // 100+ lines of validation, calculation, database calls, email sending
+}
+
+// DO: Break into focused functions
+function validateOrder(orderData: OrderData): ValidationResult { /* ... */ }
+function calculateOrderTotal(items: OrderItem[]): number { /* ... */ }
+function saveOrder(order: Order): Promise<Order> { /* ... */ }
+```
+
+### ❌ Procedural Classes
+```typescript
+// DON'T: Class with only static methods
+class OrderUtils {
+  static processOrder() { /* ... */ }
+  static calculateTotal() { /* ... */ }
+  static sendEmail() { /* ... */ }
+}
+
+// DO: Pure functions in modules + orchestrating services
+export function calculateOrderTotal(): number { /* ... */ }
+export class OrderService { /* orchestrates functions */ }
+```
+
+### ❌ Inheritance Hierarchies
+```typescript
+// DON'T: Deep inheritance chains
+class BaseOrder extends Entity { /* ... */ }
+class CustomerOrder extends BaseOrder { /* ... */ }
+class PremiumCustomerOrder extends CustomerOrder { /* ... */ }
+
+// DO: Composition with interfaces
+interface OrderPricing { /* ... */ }
+interface OrderNotification { /* ... */ }
+class Order {
+  constructor(
+    private pricing: OrderPricing,
+    private notification: OrderNotification
+  ) {}
+}
+```
+
+## GitHub Copilot Behavior Guidelines
+
+### Always Suggest This Flow
+1. **Start with the problem**: What specific step needs to be solved?
+2. **Create procedural function**: Single-purpose, well-tested function
+3. **Add to appropriate module**: Group related functions together
+4. **Create service if needed**: If orchestration is required
+5. **Write comprehensive tests**: Both unit and integration tests
+6. **Document thoroughly**: Purpose, examples, architectural role
+
+### Never Generate
+- Functions longer than 30 lines without refactoring suggestions
+- Classes with more than 5 public methods without composition suggestions
+- Any business logic inside React components
+- Hardcoded values that should be configurable
+- Functions without TypeScript types
+- Code without TSDoc documentation
+- Tests without clear AAA structure
+
+### Always Include
+- Input validation for public functions
+- Error handling for async operations
+- TypeScript interfaces for complex objects
+- Examples in documentation
+- Explanation of procedural vs OOP choices
+- Performance considerations for complex operations
+
+### Code Review Checklist for Generated Code
+- [ ] Functions are single-purpose and testable
+- [ ] Classes orchestrate functions, don't replace them
+- [ ] All public APIs have comprehensive TSDoc
+- [ ] Error cases are handled gracefully
+- [ ] TypeScript types are explicit and accurate
+- [ ] Tests cover both happy path and edge cases
+- [ ] Performance implications are considered
+- [ ] Security best practices are followed
+- [ ] SOLID principles are respected
+- [ ] Code follows established project patterns
+
+## Integration with Existing Instructions
+This document works alongside the specialized instruction files in `.github/instructions/`. When generating code:
+- Follow this hybrid philosophy for overall architecture
+- Apply domain-specific instructions for technology choices
+- Use this document for code organization and structure decisions
+- Defer to specialized instructions for framework-specific implementations
+
+---
+
+**Remember**: Code should tell a story of problem-solving through clear, step-by-step functions, organized by well-designed service classes. Every suggestion should advance both clarity (procedural) and organization (OOP) simultaneously.
 
