@@ -46,3 +46,10 @@ yarn-error.log*
 .idea
 # Sentry Config File
 .env.sentry-build-plugin
+
+
+
+
+
+setup-vercel-env.ps1
+setup-vercel-env.sh

@@ -170,7 +170,10 @@ export class EnterpriseLogger implements ILogger {
   private createConfig(userConfig?: Partial<LoggerConfig>): LoggerConfig {
     const currentEnv = this.getCurrentEnvironment();
     const isDevelopment = currentEnv === "development";
-    const isProduction = currentEnv === "production";
+
+    // Allow environment variable control over sampling
+    const enableSampling = process.env.ENABLE_LOG_SAMPLING === "true";
+    const samplingRate = parseFloat(process.env.LOG_SAMPLING_RATE ?? "1.0");
 
     return {
       isEnabled: true,
@@ -179,8 +182,8 @@ export class EnterpriseLogger implements ILogger {
         (isDevelopment ? "debug" : "info"),
       enableConsole: isDevelopment,
       enableRemote: true,
-      enableSampling: isProduction,
-      samplingRate: isProduction ? 0.1 : 1.0, // 10% in production, 100% in development
+      enableSampling: enableSampling, // Use environment variable control
+      samplingRate: samplingRate, // Use environment variable control
       enableBuffering: true,
       bufferSize: 100,
       flushInterval: 5000, // 5 seconds

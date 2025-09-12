@@ -55,6 +55,10 @@ export function checkEnvironmentVariables() {
     { name: "LOG_LEVEL", type: "server", required: false },
     { name: "APP_NAME", type: "server", required: false },
     { name: "APP_VERSION", type: "server", required: false },
+
+    // Sampling Configuration
+    { name: "ENABLE_LOG_SAMPLING", type: "server", required: false },
+    { name: "LOG_SAMPLING_RATE", type: "server", required: false },
   ];
 
   // Check each variable
