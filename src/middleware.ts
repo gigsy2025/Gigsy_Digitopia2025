@@ -4,6 +4,11 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/_betterstack/(.*)", // Allow Better Stack telemetry
+  "/api/webhooks(.*)", // Allow Clerk webhooks
+  "/api/users/webhook(.*)", // Allow Clerk webhooks
+  "/api/public(.*)", // Allow public API routes
+  "/trpc/public(.*)", // Allow public tRPC routes
+  "/favicon.ico", // Allow favicon
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
