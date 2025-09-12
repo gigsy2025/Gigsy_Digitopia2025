@@ -8,8 +8,6 @@ const ButtonFetcher = () => {
 
   const FetchInfoLog = () => {
     try {
-      // log.debug("User logged in", { userId: 42 });
-      console.log("Info log sent to Logtail");
       try {
         fetch("/api/logging", { method: "GET" }).catch((error) => {
           console.error("Error calling logging API:", error);
@@ -19,6 +17,8 @@ const ButtonFetcher = () => {
       }
     } catch (error) {
       console.error("Error sending log to Logtail:", error);
+    } finally {
+      console.log("Info log sent to Logtail");
     }
   };
 
