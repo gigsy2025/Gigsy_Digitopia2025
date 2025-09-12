@@ -46,7 +46,7 @@ interface TestUser {
   name: string;
   avatarUrl?: string;
   roles: string[];
-  profile: TestUserProfile;
+  profile?: TestUserProfile; // Profile is optional to match Convex schema
   balances: TestBalanceResult[];
   _creationTime: number;
   updatedAt: number;
@@ -76,7 +76,7 @@ interface TestUserUpdateResult {
  * Provides isolated testing environment with predictable data
  */
 class MockConvexTestingHelper {
-  private mockData: Map<string, TestUser> = new Map();
+  private mockData = new Map<string, TestUser>();
   private mockStatistics: TestUserStatistics;
 
   constructor() {
@@ -111,7 +111,7 @@ class MockConvexTestingHelper {
       throw new Error("Clerk ID is required for user initialization");
     }
 
-    if (!args.email || !args.email.includes("@")) {
+    if (!args.email?.includes("@")) {
       throw new Error("Valid email address is required");
     }
 
@@ -259,10 +259,12 @@ class MockConvexTestingHelper {
       // Count users by role (primary role)
       const primaryRole = user.roles[0] || "user";
       if (primaryRole in usersByRole) {
-        (usersByRole as Record<string, number>)[primaryRole]++;
+        const roleKey = primaryRole as keyof typeof usersByRole;
+        usersByRole[roleKey]++;
       }
 
-      totalCompleteness += user.profile.completeness;
+      // Safely access profile completeness with fallback
+      totalCompleteness += user.profile?.completeness ?? 0;
 
       if (user._creationTime > oneDayAgo) {
         recentSignups++;
@@ -306,7 +308,7 @@ describe("User Management Service", () => {
       expect(result.name).toBe(userArgs.name);
       expect(result.roles).toEqual(["user"]); // Default role
       expect(result.balances).toHaveLength(3); // EGP, USD, EUR
-      expect(result.profile.completeness).toBe(10);
+      expect(result.profile?.completeness).toBe(10);
     });
 
     test("should initialize user with custom role and initial balance", () => {
@@ -589,13 +591,13 @@ describe("User Management Service", () => {
 
       // ASSERT
       expect(result.profile).toBeDefined();
-      expect(result.profile.skills).toEqual([]);
-      expect(result.profile.experienceLevel).toBe("beginner");
-      expect(result.profile.education).toEqual([]);
-      expect(result.profile.workExperience).toEqual([]);
-      expect(result.profile.completeness).toBe(10);
-      expect(result.profile.version).toBe(1);
-      expect(result.profile.lastUpdated).toBeDefined();
+      expect(result.profile?.skills).toEqual([]);
+      expect(result.profile?.experienceLevel).toBe("beginner");
+      expect(result.profile?.education).toEqual([]);
+      expect(result.profile?.workExperience).toEqual([]);
+      expect(result.profile?.completeness).toBe(10);
+      expect(result.profile?.version).toBe(1);
+      expect(result.profile?.lastUpdated).toBeDefined();
     });
   });
 });
