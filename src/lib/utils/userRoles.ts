@@ -28,6 +28,7 @@ export const createUserWithDefaults = (
     ...userData,
     roles: userData.roles ?? DEFAULT_USER_ROLES,
     initialBalance: userData.initialBalance ?? 0,
+    avatarUrl: userData.avatarUrl ?? "", // Provide default empty string for avatarUrl
   };
 };
 
@@ -37,10 +38,18 @@ export const createUserWithDefaults = (
  * @returns Validated user data with defaults or validation errors
  */
 export const validateAndCreateUser = (userData: unknown) => {
+  // Ensure userData is an object
+  const userDataObj =
+    userData !== null && typeof userData === "object"
+      ? (userData as Record<string, unknown>)
+      : {};
+
   // Apply defaults before validation
   const dataWithDefaults = {
-    ...userData,
-    roles: (userData as any)?.roles ?? DEFAULT_USER_ROLES,
+    ...userDataObj,
+    roles: Array.isArray(userDataObj.roles)
+      ? userDataObj.roles
+      : DEFAULT_USER_ROLES,
   };
 
   return CreateUserWithBalanceSchema.safeParse(dataWithDefaults);
