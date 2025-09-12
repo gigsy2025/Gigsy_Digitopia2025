@@ -24,6 +24,7 @@
 
 import { Logtail as BetterStackLogger } from "@logtail/browser";
 import * as Sentry from "@sentry/nextjs";
+import { debugEnvironmentVariables } from "@/lib/utils/env-checker";
 import type {
   ILogger,
   LogLevel,
@@ -56,6 +57,11 @@ export class EnterpriseLogger implements ILogger {
     this.config = this.createConfig(config);
     this.baseContext = baseContext ?? {};
     this.metrics = this.initializeMetrics();
+
+    // Debug environment variables on initialization
+    if (this.config.enableConsole || process.env.NODE_ENV === "development") {
+      debugEnvironmentVariables();
+    }
 
     // Initialize Better Stack logger for client-side logging
     if (this.config.enableRemote && typeof window !== "undefined") {
@@ -103,16 +109,39 @@ export class EnterpriseLogger implements ILogger {
    * Safely get Better Stack source token
    */
   private getBetterStackToken(): string | undefined {
+    let token: string | undefined;
+
     if (typeof window !== "undefined") {
       // Client-side: use public environment variable
-      return process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN;
+      token = process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN;
+      console.log("[LOGGING DEBUG] Client-side token check:", {
+        found: !!token,
+        length: token?.length,
+        prefix: token?.substring(0, 8),
+        allEnvVars: Object.keys(process.env).filter((key) =>
+          key.includes("BETTER_STACK"),
+        ),
+      });
     } else {
       // Server-side: prefer private token, fallback to public
-      return (
+      token =
         process.env.BETTER_STACK_SOURCE_TOKEN ??
-        process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN
-      );
+        process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN;
+      console.log("[LOGGING DEBUG] Server-side token check:", {
+        found: !!token,
+        length: token?.length,
+        prefix: token?.substring(0, 8),
+        privateTokenExists: !!process.env.BETTER_STACK_SOURCE_TOKEN,
+        publicTokenExists: !!process.env.NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN,
+        nodeEnv: process.env.NODE_ENV,
+        platform: process.platform,
+        allEnvVars: Object.keys(process.env).filter((key) =>
+          key.includes("BETTER_STACK"),
+        ),
+      });
     }
+
+    return token;
   }
 
   /**
