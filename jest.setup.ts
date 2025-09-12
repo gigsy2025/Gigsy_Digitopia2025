@@ -79,3 +79,69 @@ jest.mock("next/navigation", () => ({
     return "";
   },
 }));
+
+// Mock Clerk
+jest.mock("@clerk/nextjs", () => ({
+  useUser: jest.fn(() => ({
+    user: null,
+    isLoaded: true,
+    isSignedIn: false,
+  })),
+  useAuth: jest.fn(() => ({
+    userId: null,
+    sessionId: null,
+    isLoaded: true,
+    isSignedIn: false,
+  })),
+  auth: jest.fn(() =>
+    Promise.resolve({
+      userId: null,
+      sessionId: null,
+    }),
+  ),
+  SignIn: jest.fn(
+    ({ children }: { children?: unknown }) => children as unknown,
+  ),
+  SignUp: jest.fn(
+    ({ children }: { children?: unknown }) => children as unknown,
+  ),
+  UserButton: jest.fn(() => "User Button"),
+  ClerkProvider: jest.fn(
+    ({ children }: { children: unknown }) => children as unknown,
+  ),
+}));
+
+// Mock Clerk server functions
+jest.mock("@clerk/nextjs/server", () => ({
+  auth: jest.fn(() =>
+    Promise.resolve({
+      userId: null,
+      sessionId: null,
+    }),
+  ),
+}));
+
+// Mock Better Stack logger
+jest.mock("@logtail/browser", () => ({
+  Logtail: jest.fn().mockImplementation(() => ({
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    flush: jest.fn(() => Promise.resolve()),
+  })),
+}));
+
+// Mock Sentry
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  configureScope: jest.fn(),
+  withScope: jest.fn((callback: (scope: unknown) => unknown) => callback({})),
+}));
+
+// Mock performance.now for consistent timing in tests
+global.performance = {
+  ...global.performance,
+  now: jest.fn(() => Date.now()),
+};

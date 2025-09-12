@@ -29,13 +29,16 @@ const config = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
 
-  // Transform ES modules from node_modules
+  // Transform ES modules from node_modules - include all packages that use ES modules
   transformIgnorePatterns: [
-    "node_modules/(?!(@clerk/|convex/|next-themes/|@radix-ui/|lucide-react/))",
+    "node_modules/(?!(@clerk/|@logtail/|convex/|next-themes/|@radix-ui/|lucide-react/|@sentry/))",
   ],
 
-  // Handle ES modules
+  // Handle ES modules and .mjs files
   extensionsToTreatAsEsm: [".ts", ".tsx"],
+
+  // Module file extensions Jest should process
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "mjs"],
 
   // Global setup for ES modules
   globals: {

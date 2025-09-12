@@ -15,6 +15,13 @@ jest.mock("@/components/AuthDisplay", () => {
   };
 });
 
+// Mock the ButtonFetcher component
+jest.mock("@/components/ButtonFetcher", () => {
+  return function MockButtonFetcher() {
+    return <div data-testid="button-fetcher">Button Fetcher Component</div>;
+  };
+});
+
 describe("HomePage", () => {
   it("renders the main heading correctly", () => {
     render(<HomePage />);
@@ -36,6 +43,13 @@ describe("HomePage", () => {
 
     const badge = screen.getByTestId("badge");
     expect(badge).toBeInTheDocument();
+  });
+
+  it("renders the button fetcher component", () => {
+    render(<HomePage />);
+
+    const buttonFetcher = screen.getByTestId("button-fetcher");
+    expect(buttonFetcher).toBeInTheDocument();
   });
 
   it("renders the getting started section", () => {
