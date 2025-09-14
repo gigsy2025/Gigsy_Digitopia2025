@@ -29,6 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { AppSidebar } from "@/components/AppSidebar";
+import { SkillsCheck } from "@/components/SkillsCheck";
 
 export const metadata: Metadata = {
   title: "Gigsy App",
@@ -83,6 +84,9 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {children}
         </div>
+
+        {/* Skills Onboarding Check */}
+        <SkillsCheck />
       </SidebarInset>
     </SidebarProvider>
   );
