@@ -203,13 +203,15 @@ const ItemContent: React.FC<{ item: NavigationItem }> = ({ item }) => (
         aria-hidden={true}
       />
     )}
-    <div className="flex flex-col gap-0.5 leading-none">
-      <span className="font-medium">{item.title}</span>
+    <div className="flex min-w-0 flex-1 flex-col gap-0.5 leading-none">
+      <span className="truncate font-medium">{item.title}</span>
       {item.subtitle && (
-        <span className="text-muted-foreground text-xs">{item.subtitle}</span>
+        <span className="text-muted-foreground truncate text-xs group-data-[collapsible=icon]:hidden">
+          {item.subtitle}
+        </span>
       )}
     </div>
-    <div className="ml-auto flex items-center gap-1">
+    <div className="ml-auto flex items-center gap-1 group-data-[collapsible=icon]:hidden">
       {item.badge && (
         <Badge variant="secondary" className="px-1.5 py-0.5 text-xs">
           {item.badge}
