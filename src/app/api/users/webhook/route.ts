@@ -55,34 +55,43 @@ interface AlternativeClerkUserData {
  * @param userData - Raw user data from Clerk
  * @returns Validated and normalized user data
  */
-function validateAndNormalizeClerkData(userData: ClerkUserData | AlternativeClerkUserData) {
+function validateAndNormalizeClerkData(
+  userData: ClerkUserData | AlternativeClerkUserData,
+) {
   // Validate required fields
   if (!userData.id) {
     throw new Error("Missing required field: id");
   }
 
   // Handle different possible email data structures from Clerk
-  let emailAddresses: Array<{ email_address: string; verification?: { status: string } }> = [];
-  
+  let emailAddresses: Array<{
+    email_address: string;
+    verification?: { status: string };
+  }> = [];
+
   if (userData.email_addresses && Array.isArray(userData.email_addresses)) {
     emailAddresses = userData.email_addresses;
-  } else if ('email' in userData && typeof userData.email === 'string') {
+  } else if ("email" in userData && typeof userData.email === "string") {
     // Fallback: if email is directly on the object
     emailAddresses = [{ email_address: userData.email }];
-  } else if ('primary_email_address_id' in userData && userData.email_addresses) {
+  } else if (
+    "primary_email_address_id" in userData &&
+    userData.email_addresses
+  ) {
     // Alternative structure: might have primary_email_address_id reference
     emailAddresses = userData.email_addresses;
   }
 
   if (emailAddresses.length === 0) {
-    throw new Error("Missing required field: email_addresses or valid email data");
+    throw new Error(
+      "Missing required field: email_addresses or valid email data",
+    );
   }
 
   // Get primary email (first verified email or first email)
   const primaryEmail =
-    emailAddresses.find(
-      (email) => email.verification?.status === "verified",
-    ) ?? emailAddresses[0];
+    emailAddresses.find((email) => email.verification?.status === "verified") ??
+    emailAddresses[0];
 
   if (!primaryEmail?.email_address) {
     throw new Error("No valid email address found");
@@ -110,7 +119,9 @@ function validateAndNormalizeClerkData(userData: ClerkUserData | AlternativeCler
     email: primaryEmail.email_address.toLowerCase().trim(),
     name: fullName,
     avatarUrl,
-    roles: ["user"] as Array<"user" | "admin" | "moderator" | "freelancer" | "client">, // Mutable array type
+    roles: ["user"] as Array<
+      "user" | "admin" | "moderator" | "freelancer" | "client"
+    >, // Mutable array type
     initialCurrency: "EGP" as const, // Default to EGP for Egyptian market
     initialBalance: 0,
   };
@@ -155,29 +166,35 @@ export async function POST(req: NextRequest) {
         // Initialize user in Convex database
         // Note: Using string literal due to import path issues - this is the correct mutation name
         const MUTATION_NAME = "users:initializeUser";
-        
+
         // Type-safe mutation call with explicit typing
         type UserData = {
           clerkId: string;
           email: string;
           name: string;
           avatarUrl?: string;
-          roles: Array<"user" | "admin" | "moderator" | "freelancer" | "client">;
+          roles: Array<
+            "user" | "admin" | "moderator" | "freelancer" | "client"
+          >;
           initialCurrency: "EGP" | "USD" | "EUR";
           initialBalance: number;
         };
-        
+
         type InitializeUserMutation = (
           this: void,
-          name: string, 
-          args: UserData
+          name: string,
+          args: UserData,
         ) => Promise<{
           success: boolean;
           userId: string;
           message: string;
-          balances: Array<{ currency: string; amount: number; isActive: boolean }>;
+          balances: Array<{
+            currency: string;
+            amount: number;
+            isActive: boolean;
+          }>;
         }>;
-        
+
         const mutation = convex.mutation.bind(convex) as InitializeUserMutation;
         const result = await mutation(MUTATION_NAME, userData);
 
