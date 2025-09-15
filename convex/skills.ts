@@ -978,17 +978,31 @@ export const updateUserSkills = mutation({
     const completeness = calculateProfileCompleteness({
       ...user,
       profile: {
-        ...currentProfile,
+        bio: currentProfile?.bio,
+        headline: currentProfile?.headline,
+        location: currentProfile?.location,
         skills: validSkills,
+        experienceLevel: currentProfile?.experienceLevel ?? "beginner",
+        education: currentProfile?.education ?? [],
+        workExperience: currentProfile?.workExperience ?? [],
+        portfolio: currentProfile?.portfolio,
+        completeness: currentProfile?.completeness,
+        lastUpdated: currentProfile?.lastUpdated,
+        version: currentProfile?.version,
       },
     });
 
     // Create optimized profile update with required fields
     const profileUpdate = currentProfile
       ? {
-          ...currentProfile,
+          bio: currentProfile.bio,
+          headline: currentProfile.headline,
+          location: currentProfile.location,
           skills: validSkills,
           experienceLevel: currentProfile.experienceLevel ?? "beginner",
+          education: currentProfile.education ?? [],
+          workExperience: currentProfile.workExperience ?? [],
+          portfolio: currentProfile.portfolio,
           completeness,
           lastUpdated: Date.now(),
           version: (currentProfile.version ?? 0) + 1,
@@ -1072,17 +1086,29 @@ export const addUserSkills = mutation({
     const completeness = calculateProfileCompleteness({
       ...user,
       profile: {
-        ...user.profile,
+        bio: user.profile?.bio,
+        headline: user.profile?.headline,
+        location: user.profile?.location,
         skills: finalSkills,
+        experienceLevel: user.profile?.experienceLevel ?? "beginner",
+        education: user.profile?.education ?? [],
+        workExperience: user.profile?.workExperience ?? [],
+        portfolio: user.profile?.portfolio,
+        completeness: user.profile?.completeness,
+        lastUpdated: user.profile?.lastUpdated,
+        version: user.profile?.version,
       },
     });
 
     const profileUpdate = {
-      ...user.profile,
+      bio: user.profile?.bio,
+      headline: user.profile?.headline,
+      location: user.profile?.location,
       skills: finalSkills,
       education: user.profile?.education ?? [],
       workExperience: user.profile?.workExperience ?? [],
       experienceLevel: user.profile?.experienceLevel ?? "beginner",
+      portfolio: user.profile?.portfolio,
       completeness,
       lastUpdated: Date.now(),
       version: (user.profile?.version ?? 0) + 1,
@@ -1140,17 +1166,29 @@ export const removeUserSkills = mutation({
     const completeness = calculateProfileCompleteness({
       ...user,
       profile: {
-        ...user.profile,
+        bio: user.profile?.bio,
+        headline: user.profile?.headline,
+        location: user.profile?.location,
         skills: updatedSkills,
+        experienceLevel: user.profile?.experienceLevel ?? "beginner",
+        education: user.profile?.education ?? [],
+        workExperience: user.profile?.workExperience ?? [],
+        portfolio: user.profile?.portfolio,
+        completeness: user.profile?.completeness,
+        lastUpdated: user.profile?.lastUpdated,
+        version: user.profile?.version,
       },
     });
 
     const profileUpdate = {
-      ...user.profile,
+      bio: user.profile?.bio,
+      headline: user.profile?.headline,
+      location: user.profile?.location,
       skills: updatedSkills,
       education: user.profile?.education ?? [],
       workExperience: user.profile?.workExperience ?? [],
       experienceLevel: user.profile?.experienceLevel ?? "beginner",
+      portfolio: user.profile?.portfolio,
       completeness,
       lastUpdated: Date.now(),
       version: (user.profile?.version ?? 0) + 1,

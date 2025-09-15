@@ -25,7 +25,7 @@ export interface Skill {
   category: SkillCategory;
 
   /** Alternative names and synonyms for search */
-  aliases?: string[];
+  aliases?: readonly string[];
 
   /** Brief description of the skill */
   description?: string;
@@ -37,7 +37,7 @@ export interface Skill {
   userCount?: number;
 
   /** Related skills for suggestions */
-  relatedSkills?: string[];
+  relatedSkills?: readonly string[];
 }
 
 /**
@@ -300,6 +300,43 @@ export interface SkillsCheckState {
 
   /** Session cookie exists */
   hasSessionCookie: boolean;
+}
+
+/**
+ * Return type for useSkillsService hook
+ */
+export interface UseSkillsService {
+  /** Current user data */
+  user: any | null;
+
+  /** Available skills catalog */
+  skillsCatalog: Skill[];
+
+  /** Popular skills */
+  popularSkills: Skill[];
+
+  /** Loading state */
+  isLoading: boolean;
+
+  /** Saving state */
+  isSaving: boolean;
+
+  /** Error state */
+  error: Error | null;
+
+  /** Search skills function */
+  searchSkills: (options: SkillsSearchOptions) => Promise<Skill[]>;
+
+  /** Save skills function */
+  saveSkills: (data: SkillsFormData) => Promise<void>;
+
+  /** Get recommendations function */
+  getRecommendations: (
+    selectedSkills: string[],
+  ) => Promise<SkillsRecommendation[]>;
+
+  /** Track analytics event */
+  trackEvent: (event: SkillsAnalyticsEvent) => void;
 }
 
 export default SkillsFormSchema;

@@ -13,6 +13,7 @@
 
 import React, { useCallback, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import type {
   SkillsFormData,
   SkillsAnalyticsEvent,
@@ -21,15 +22,7 @@ import type {
   SkillsSearchOptions,
 } from "@/types/skills";
 
-// Mock API until Convex generates types
-const mockApi = {
-  skills: {
-    getCurrentUser: null as any,
-    checkUserHasSkills: null as any,
-    getSkillsCatalog: null as any,
-    updateUserSkills: null as any,
-  },
-};
+// Types are now provided by Convex through the generated api import
 
 /**
  * Main skills service hook
@@ -38,11 +31,11 @@ export function useSkillsService(): UseSkillsService {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<Error | null>(null);
 
-  // Convex queries and mutations (TODO: Replace with actual API when generated)
-  const user = null; // useQuery(api.skills.getCurrentUser);
-  const skillsCheck = null; // useQuery(api.skills.checkUserHasSkills);
-  const skillsCatalog = null; // useQuery(api.skills.getSkillsCatalog, {});
-  const updateSkillsMutation = null; // useMutation(api.skills.updateUserSkills);
+  // Convex queries and mutations
+  const user = useQuery(api.skills.getCurrentUser);
+  const skillsCheck = useQuery(api.skills.checkUserHasSkills);
+  const skillsCatalog = useQuery(api.skills.getSkillsCatalog, {});
+  const updateSkillsMutation = useMutation(api.skills.updateUserSkills);
 
   // Loading states
   const isLoading =
@@ -71,7 +64,7 @@ export function useSkillsService(): UseSkillsService {
           throw new Error("Failed to search skills");
         }
 
-        const data = await results.json();
+        const data = (await results.json()) as { skills: Skill[] };
         return data.skills || [];
       } catch (error) {
         setSearchError(error as Error);
@@ -84,7 +77,7 @@ export function useSkillsService(): UseSkillsService {
           if (options.query) {
             const query = options.query.toLowerCase();
             filtered = filtered.filter(
-              (skill) =>
+              (skill: Skill) =>
                 skill.name.toLowerCase().includes(query) ||
                 skill.category.toLowerCase().includes(query),
             );
@@ -92,13 +85,13 @@ export function useSkillsService(): UseSkillsService {
 
           if (options.category && options.category !== "all") {
             filtered = filtered.filter(
-              (skill) => skill.category === options.category,
+              (skill: Skill) => skill.category === options.category,
             );
           }
 
           if (options.excludeSelected?.length) {
             filtered = filtered.filter(
-              (skill) => !options.excludeSelected!.includes(skill.id),
+              (skill: Skill) => !options.excludeSelected!.includes(skill.id),
             );
           }
 
@@ -137,7 +130,7 @@ export function useSkillsService(): UseSkillsService {
           skills: data.skills,
         });
 
-        if (!result.success) {
+        if (!result?.success) {
           throw new Error("Failed to save skills");
         }
 
@@ -166,14 +159,14 @@ export function useSkillsService(): UseSkillsService {
   const getRecommendations = useCallback(
     async (selectedSkills: string[]) => {
       try {
-        const allSkills = skillsCatalog?.skills || [];
+        const allSkills = skillsCatalog?.skills ?? [];
 
         // Simple recommendation logic - can be enhanced with ML/AI
         const recommendations = allSkills
-          .filter((skill) => !selectedSkills.includes(skill.id))
-          .filter((skill) => skill.isPopular)
+          .filter((skill: Skill) => !selectedSkills.includes(skill.id))
+          .filter((skill: Skill) => skill.isPopular)
           .slice(0, 5)
-          .map((skill) => ({
+          .map((skill: Skill) => ({
             skills: [skill],
             reason: "popular" as const,
             confidence: 0.8,
@@ -217,9 +210,9 @@ export function useSkillsService(): UseSkillsService {
   );
 
   return {
-    user: user || null,
-    skillsCatalog: skillsCatalog?.skills || [],
-    popularSkills: skillsCatalog?.popularSkills || [],
+    user: user ?? null,
+    skillsCatalog: skillsCatalog?.skills ?? [],
+    popularSkills: skillsCatalog?.popularSkills ?? [],
     isLoading: isLoading || isSearching,
     isSaving,
     error: searchError,
@@ -250,9 +243,9 @@ export function useSkillsCheck() {
   return {
     shouldShowOnboarding:
       skillsCheck?.shouldShowOnboarding && !hasSessionCookie,
-    hasSkills: skillsCheck?.hasSkills || false,
+    hasSkills: skillsCheck?.hasSkills ?? false,
     isLoading: skillsCheck === undefined,
-    user: skillsCheck?.user || null,
+    user: skillsCheck?.user ?? null,
     hasSessionCookie,
   };
 }
