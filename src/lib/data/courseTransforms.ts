@@ -144,15 +144,15 @@ export function transformConvexCourse(
         }
       : author
         ? {
-            id: author.id as Id<"users">,
-            _id: author.id as Id<"users">,
+            id: author.id,
+            _id: author.id,
             name: author.name,
             title: author.title,
             avatarUrl: author.avatarUrl,
             isVerified: false,
           }
         : {
-            id: (convexCourse.authorId ?? "") as Id<"users">,
+            id: convexCourse.authorId ?? ("" as Id<"users">),
             _id: (convexCourse.authorId ?? "") as Id<"users">,
             name: "Unknown Author",
             isVerified: false,
@@ -279,20 +279,22 @@ export function enhanceCourseWithStats(
       ...course.stats,
       ...stats,
     },
-    rating: stats.averageRating || course.rating,
-    enrollmentCount: stats.enrollmentCount || course.enrollmentCount,
+    rating: stats.averageRating ?? course.rating,
+    enrollmentCount: stats.enrollmentCount ?? course.enrollmentCount,
   };
 }
 
 /**
  * Type guard to check if data is a valid Convex course
  */
-export function isValidConvexCourse(data: any): data is ConvexCourseData {
+export function isValidConvexCourse(data: unknown): data is ConvexCourseData {
   return (
-    data &&
+    data !== null &&
     typeof data === "object" &&
-    data._id &&
-    typeof data._creationTime === "number" &&
-    data.authorId
+    data !== undefined &&
+    "_id" in data &&
+    "_creationTime" in data &&
+    typeof (data as Record<string, unknown>)._creationTime === "number" &&
+    "authorId" in data
   );
 }

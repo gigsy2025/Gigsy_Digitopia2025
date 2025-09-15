@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import { useMemo, useCallback } from "react";
-import type {
-  CourseSummary,
-  CourseFiltersType,
-  CourseCategoryType,
-  CourseDifficultyLevel,
-} from "@/types/courses";
+import { useMemo } from "react";
+import type { CourseSummary, CourseFiltersType } from "@/types/courses";
 
 // Cache configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -79,9 +74,24 @@ class LRUCache<T> {
 // Global cache instances
 const courseCache = new LRUCache<CourseSummary[]>();
 const filterCache = new LRUCache<CourseSummary[]>();
+const statsCache = new LRUCache<CourseStats>();
+
+// Define course stats type
+interface CourseStats {
+  totalCourses: number;
+  totalStudents: number;
+  averageRating: number;
+  totalDuration: number;
+  categories: string[];
+  difficulties: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+}
 
 // Utility functions for performance optimization
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => unknown>(
   func: T,
   delay: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -92,7 +102,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: never[]) => unknown>(
   func: T,
   delay: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -132,6 +142,7 @@ export const useOptimizedCourseFiltering = (
     }
 
     // Apply filters
+    // eslint-disable-next-line prefer-const
     let filtered = courses.filter((course) => {
       // Search filter
       if (filters.search) {
@@ -147,18 +158,12 @@ export const useOptimizedCourseFiltering = (
 
       // Category filter
       if (filters.categories && filters.categories.length > 0) {
-        if (!filters.categories.includes(course.category as CourseCategoryType))
-          return false;
+        if (!filters.categories.includes(course.category)) return false;
       }
 
       // Difficulty filter
       if (filters.difficulties && filters.difficulties.length > 0) {
-        if (
-          !filters.difficulties.includes(
-            course.difficulty as CourseDifficultyLevel,
-          )
-        )
-          return false;
+        if (!filters.difficulties.includes(course.difficulty)) return false;
       }
 
       // Price filter
@@ -193,7 +198,7 @@ export const useOptimizedCourseFiltering = (
       return true;
     });
 
-    // Apply sorting
+    // Apply sorting (mutates the array in place)
     if (filters.sortBy) {
       filtered.sort((a, b) => {
         switch (filters.sortBy) {
@@ -236,13 +241,13 @@ export const useOptimizedCourseFiltering = (
 export const useOptimizedCourseStats = (courses: CourseSummary[]) => {
   return useMemo(() => {
     const cacheKey = `stats-${courses.length}-${courses.map((c) => c._id).join(",")}`;
-    const cached = courseCache.get(cacheKey);
+    const cached = statsCache.get(cacheKey);
 
     if (cached) {
-      return cached[0]; // Stats are stored as single item array
+      return cached;
     }
 
-    const stats = {
+    const stats: CourseStats = {
       totalCourses: courses.length,
       totalStudents: courses.reduce(
         (sum, course) => sum + course.stats.enrollmentCount,
@@ -267,7 +272,7 @@ export const useOptimizedCourseStats = (courses: CourseSummary[]) => {
       },
     };
 
-    courseCache.set(cacheKey, [stats] as any);
+    statsCache.set(cacheKey, stats);
     return stats;
   }, [courses]);
 };
@@ -307,18 +312,16 @@ export const useIntersectionObserver = (
 };
 
 // Optimized search with debouncing
-export const useOptimizedSearch = (
-  initialValue: string = "",
-  delay: number = 300,
-) => {
+export const useOptimizedSearch = (initialValue = "", delay = 300) => {
   const [searchTerm, setSearchTerm] = React.useState(initialValue);
   const [debouncedSearchTerm, setDebouncedSearchTerm] =
     React.useState(initialValue);
 
-  const debouncedSetSearch = useCallback(
-    debounce((term: string) => {
-      setDebouncedSearchTerm(term);
-    }, delay),
+  const debouncedSetSearch = React.useMemo(
+    () =>
+      debounce((term: string) => {
+        setDebouncedSearchTerm(term);
+      }, delay),
     [delay],
   );
 
@@ -360,7 +363,8 @@ export const performanceMonitor = {
   clearCaches: () => {
     courseCache.clear();
     filterCache.clear();
+    statsCache.clear();
   },
 };
 
-export { courseCache, filterCache };
+export { courseCache, filterCache, statsCache };

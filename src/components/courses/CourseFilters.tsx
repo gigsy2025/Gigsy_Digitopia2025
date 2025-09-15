@@ -189,7 +189,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [localSearchTerm, setLocalSearchTerm] = useState(
-    filters.searchTerm || "",
+    filters.searchTerm ?? "",
   );
 
   // Debounced search handler

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { CourseListProps, CourseSummary } from "@/types/courses";
+import type { CourseListProps } from "@/types/courses";
 import CourseCard from "./CourseCard";
 import {
   Grid3X3,
@@ -88,7 +88,7 @@ const LayoutControls: React.FC<{
               key={cols}
               variant={currentColumns === cols ? "default" : "ghost"}
               size="sm"
-              onClick={() => onColumnsChange(cols as 1 | 2 | 3 | 4 | "auto")}
+              onClick={() => onColumnsChange(cols)}
               className="h-8 px-2 text-xs"
               title={`${cols === "auto" ? "Auto" : cols} column${cols !== 1 && cols !== "auto" ? "s" : ""}`}
             >
@@ -407,7 +407,12 @@ const CourseList: React.FC<CourseListProps> = ({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={onPageChange || (() => {})}
+          onPageChange={
+            onPageChange ??
+            (() => {
+              console.warn("onPageChange handler not provided");
+            })
+          }
         />
       )}
     </div>
