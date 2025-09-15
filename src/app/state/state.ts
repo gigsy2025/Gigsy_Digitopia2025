@@ -1,11 +1,5 @@
 import { atom } from "jotai";
 
-const countAtom = atom(0);
-
-const countryAtom = atom("Japan");
-
-const citiesAtom = atom(["Tokyo", "Kyoto", "Osaka"]);
-
 export const animeAtom = atom([
   {
     title: "Ghost in the Shell",

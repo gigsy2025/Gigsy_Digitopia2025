@@ -306,8 +306,23 @@ export interface SkillsCheckState {
  * Return type for useSkillsService hook
  */
 export interface UseSkillsService {
-  /** Current user data */
-  user: any | null;
+  /** Current user data from Convex */
+  user: {
+    _id: string;
+    _creationTime: number;
+    clerkId: string;
+    email: string;
+    name: string;
+    avatarUrl?: string;
+    profile?: {
+      skills?: string[];
+      experienceLevel?: SkillLevel;
+      bio?: string;
+      headline?: string;
+      completeness?: number;
+      lastUpdated?: number;
+    };
+  } | null;
 
   /** Available skills catalog */
   skillsCatalog: Skill[];

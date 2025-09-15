@@ -1,0 +1,23 @@
+"filename", "language", "TypeScript", "Markdown", "TypeScript JSX", "JSON", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\SKILLS_IMPLEMENTATION_COMPLETE.md", "Markdown", 0, 120, 0, 0, 0, 0, 53, 173
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\skills-clean.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\skills.ts", "TypeScript", 966, 0, 0, 0, 0, 175, 88, 1229
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\skillsTest.ts", "TypeScript", 7, 0, 0, 0, 0, 0, 2, 9
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\skills_backup.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\skills_simple.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\SKILLS_MANAGEMENT_SYSTEM.md", "Markdown", 0, 225, 0, 0, 0, 0, 93, 318
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 0, 4, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 82, 0, 12, 94
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\layout.tsx", "TypeScript JSX", 0, 0, 2, 0, 0, 1, 1, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\state\state.ts", "TypeScript", -3, 0, 0, 0, 0, 0, -3, -6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\SkillsCheck.tsx", "TypeScript JSX", 0, 0, 146, 0, 0, 36, 31, 213
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\SkillsOnboardingModal.tsx", "TypeScript JSX", 0, 0, 460, 0, 0, 46, 48, 554
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\dialog.tsx", "TypeScript JSX", 0, 0, 130, 0, 0, 0, 14, 144
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\form.tsx", "TypeScript JSX", 0, 0, 125, 0, 0, 0, 23, 148
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\label.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 5, 25
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\scroll-area.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 6, 59
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useSkillsService.ts", "TypeScript", 288, 0, 0, 0, 0, 52, 51, 391
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\logging\hooks.ts", "TypeScript", -1, 0, 0, 0, 0, 0, 0, -1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\skills.ts", "TypeScript", 142, 0, 0, 0, 0, 131, 78, 351
+"Total", "-", 1403, 345, 936, 4, 82, 441, 505, 3716

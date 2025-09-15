@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { getLogger } from "@/services/observability/logging";
 import {
@@ -384,7 +384,7 @@ export function useComponentLifecycleLogger(
     },
   });
 
-  // Track component mount
+  // Track component mount and unmount
   useEffect(() => {
     void logger.info(`Component mounted: ${componentName}`, {
       custom: { lifecycleEvent: "mount", componentName },
@@ -395,7 +395,6 @@ export function useComponentLifecycleLogger(
         custom: {
           lifecycleEvent: "unmount",
           componentName,
-          totalRenders: renderCountRef.current,
         },
       });
     };
@@ -404,15 +403,16 @@ export function useComponentLifecycleLogger(
   // Track renders if enabled
   useEffect(() => {
     renderCountRef.current++;
+    const currentRenderCount = renderCountRef.current;
 
     if (logRenders) {
       void logger.debug(
-        `Component rendered: ${componentName} (${renderCountRef.current})`,
+        `Component rendered: ${componentName} (${currentRenderCount})`,
         {
           custom: {
             lifecycleEvent: "render",
             componentName,
-            renderCount: renderCountRef.current,
+            renderCount: currentRenderCount,
           },
         },
       );
