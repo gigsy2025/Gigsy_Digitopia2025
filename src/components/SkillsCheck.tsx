@@ -114,15 +114,21 @@ export function SkillsCheck({
       // Call custom callback
       onSkillsSaved?.(data);
 
-      // Analytics tracking (fire and forget)
-      fetch("/api/analytics/skills", {
+      // Analytics tracking (fire and forget) - use existing logging endpoint
+      fetch("/api/logging", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "onboarding_completed",
-          skillIds: data.skills,
-          userId: user?.id,
-          timestamp: new Date().toISOString(),
+          level: "info",
+          message: "Skills onboarding completed",
+          context: {
+            feature: "skills-analytics",
+            action: "onboarding_completed",
+            skillIds: data.skills,
+            userId: user?.id,
+            timestamp: new Date().toISOString(),
+            source: "SkillsCheck",
+          },
         }),
       }).catch((error) => {
         console.warn("Analytics tracking failed:", error);
@@ -145,14 +151,20 @@ export function SkillsCheck({
 
     onSkillsSkipped?.();
 
-    // Analytics tracking
-    fetch("/api/analytics/skills", {
+    // Analytics tracking - use existing logging endpoint
+    fetch("/api/logging", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "onboarding_skipped",
-        userId: user?.id,
-        timestamp: new Date().toISOString(),
+        level: "info",
+        message: "Skills onboarding skipped",
+        context: {
+          feature: "skills-analytics",
+          action: "onboarding_skipped",
+          userId: user?.id,
+          timestamp: new Date().toISOString(),
+          source: "SkillsCheck",
+        },
       }),
     }).catch((error) => {
       console.warn("Analytics tracking failed:", error);
