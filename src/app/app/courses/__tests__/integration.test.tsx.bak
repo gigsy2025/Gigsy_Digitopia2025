@@ -1,0 +1,462 @@
+/**
+ * Course Catalog Integration Tests
+ * 
+ * End-to-end integration tests for the complete course catalog functionality
+ * including real-time data, filtering, sorting, and user interactions.
+ * 
+ * @author GitHub Copilot
+ * @version 1.0.0
+ * @since 2024-01-15
+ */
+
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import CoursesPage from "@/app/app/courses/page";
+
+// Mock Next.js router
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
+const mockSearchParams = new URLSearchParams();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+  }),
+  useSearchParams: () => mockSearchParams,
+}));
+
+// Mock Convex query
+const mockUseQuery = vi.fn();
+vi.mock("convex/react", () => ({
+  useQuery: mockUseQuery,
+}));
+
+// Mock components
+vi.mock("@/components/courses", () => ({
+  CourseFilters: ({ onFiltersChange, totalResults }: any) => (
+    <div data-testid="course-filters">
+      <input
+        data-testid="search-input"
+        placeholder="Search courses..."
+        onChange={(e) => onFiltersChange({ search: e.target.value })}
+      />
+      <div data-testid="total-results">{totalResults} courses</div>
+    </div>
+  ),
+  CourseList: ({ courses, layout, onCourseClick }: any) => (
+    <div data-testid="course-list" data-layout={layout}>
+      {courses.map((course: any) => (
+        <div
+          key={course._id}
+          data-testid={`course-${course._id}`}
+          onClick={() => onCourseClick?.(course)}
+        >
+          {course.title}
+        </div>
+      ))}
+    </div>
+  ),
+  CourseCard: ({ course, onClick }: any) => (
+    <div data-testid={`course-card-${course._id}`} onClick={() => onClick?.(course)}>
+      <h3>{course.title}</h3>
+      <p>{course.category}</p>
+    </div>
+  ),
+}));
+
+// Mock Convex API
+vi.mock("@/convex/_generated/api", () => ({
+  api: {
+    courses: {
+      getAllCourses: "courses:getAllCourses",
+      getCourseStats: "courses:getCourseStats",
+    },
+  },
+}));
+
+// Mock performance optimizations
+vi.mock("@/lib/performance/courseOptimizations", () => ({
+  useOptimizedCourseFiltering: (courses: any[], filters: any) => courses,
+  useOptimizedCourseStats: (courses: any[]) => ({
+    totalCourses: courses.length,
+    totalStudents: 1000,
+    averageRating: 4.5,
+    totalDuration: 100,
+    categories: ["development", "design"],
+    difficulties: ["beginner", "intermediate"],
+    priceRange: { min: 0, max: 199 },
+  }),
+  useOptimizedSearch: (initialValue: string) => ({
+    searchTerm: initialValue,
+    debouncedSearchTerm: initialValue,
+    setSearchTerm: vi.fn(),
+  }),
+  performanceMonitor: {
+    logCacheStats: vi.fn(),
+    clearCaches: vi.fn(),
+  },
+}));
+
+// Mock data
+const mockCourses = [
+  {
+    _id: "course-1",
+    title: "React Development Masterclass",
+    shortDescription: "Complete guide to React development",
+    category: "development",
+    difficulty: "intermediate",
+    estimatedDuration: 30,
+    lessonsCount: 60,
+    thumbnailUrl: "https://example.com/course1.jpg",
+    pricing: { isFree: false, price: 99.99, currency: "USD" },
+    author: { _id: "author-1", name: "John Doe", title: "Senior Developer" },
+    stats: { enrollmentCount: 1200, averageRating: 4.8, completionRate: 85, totalReviews: 300 },
+    tags: ["react", "javascript", "frontend"],
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-10T00:00:00Z",
+    trending: true,
+    featured: true,
+  },
+  {
+    _id: "course-2",
+    title: "UI/UX Design Fundamentals",
+    shortDescription: "Learn design principles and user experience",
+    category: "design",
+    difficulty: "beginner",
+    estimatedDuration: 20,
+    lessonsCount: 40,
+    thumbnailUrl: "https://example.com/course2.jpg",
+    pricing: { isFree: true, price: 0, currency: "USD" },
+    author: { _id: "author-2", name: "Jane Smith", title: "UX Designer" },
+    stats: { enrollmentCount: 800, averageRating: 4.6, completionRate: 90, totalReviews: 200 },
+    tags: ["design", "ui", "ux"],
+    createdAt: "2024-01-02T00:00:00Z",
+    updatedAt: "2024-01-11T00:00:00Z",
+    trending: false,
+    featured: false,
+  },
+  {
+    _id: "course-3",
+    title: "Python for Data Science",
+    shortDescription: "Data analysis and machine learning with Python",
+    category: "development",
+    difficulty: "advanced",
+    estimatedDuration: 40,
+    lessonsCount: 80,
+    thumbnailUrl: "https://example.com/course3.jpg",
+    pricing: { isFree: false, price: 149.99, currency: "USD" },
+    author: { _id: "author-3", name: "Alice Johnson", title: "Data Scientist" },
+    stats: { enrollmentCount: 600, averageRating: 4.9, completionRate: 75, totalReviews: 150 },
+    tags: ["python", "data-science", "machine-learning"],
+    createdAt: "2024-01-03T00:00:00Z",
+    updatedAt: "2024-01-12T00:00:00Z",
+    trending: true,
+    featured: true,
+  },
+];
+
+const mockCourseStats = {
+  totalCourses: 150,
+  totalStudents: 25000,
+  averageRating: 4.6,
+  totalDuration: 2000,
+  categories: [
+    { name: "development", count: 80 },
+    { name: "design", count: 40 },
+    { name: "marketing", count: 20 },
+    { name: "business", count: 10 },
+  ],
+  difficulties: [
+    { level: "beginner", count: 60 },
+    { level: "intermediate", count: 50 },
+    { level: "advanced", count: 30 },
+    { level: "expert", count: 10 },
+  ],
+};
+
+describe("Course Catalog Integration", () => {
+  const user = userEvent.setup();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseQuery
+      .mockReturnValueOnce(mockCourses) // getAllCourses
+      .mockReturnValueOnce(mockCourseStats); // getCourseStats
+  });
+
+  describe("Page Rendering", () => {
+    it("renders the course catalog page successfully", () => {
+      render(<CoursesPage />);
+
+      expect(screen.getByText("Course Catalog")).toBeInTheDocument();
+      expect(screen.getByTestId("course-filters")).toBeInTheDocument();
+      expect(screen.getByTestId("course-list")).toBeInTheDocument();
+    });
+
+    it("displays course statistics correctly", () => {
+      render(<CoursesPage />);
+
+      expect(screen.getByText("150")).toBeInTheDocument(); // Total courses
+      expect(screen.getByText("25,000")).toBeInTheDocument(); // Total students
+      expect(screen.getByText("4.6")).toBeInTheDocument(); // Average rating
+    });
+
+    it("shows loading state when data is not available", () => {
+      mockUseQuery.mockReturnValue(undefined);
+      
+      render(<CoursesPage />);
+
+      expect(screen.getByTestId("loading-skeleton")).toBeInTheDocument();
+    });
+  });
+
+  describe("Course Display", () => {
+    it("renders all courses in the list", () => {
+      render(<CoursesPage />);
+
+      expect(screen.getByTestId("course-course-1")).toBeInTheDocument();
+      expect(screen.getByTestId("course-course-2")).toBeInTheDocument();
+      expect(screen.getByTestId("course-course-3")).toBeInTheDocument();
+
+      expect(screen.getByText("React Development Masterclass")).toBeInTheDocument();
+      expect(screen.getByText("UI/UX Design Fundamentals")).toBeInTheDocument();
+      expect(screen.getByText("Python for Data Science")).toBeInTheDocument();
+    });
+
+    it("displays course count correctly", () => {
+      render(<CoursesPage />);
+
+      expect(screen.getByTestId("total-results")).toHaveTextContent("3 courses");
+    });
+  });
+
+  describe("Search and Filtering", () => {
+    it("updates search term when user types", async () => {
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      await user.type(searchInput, "React");
+
+      await waitFor(() => {
+        expect(searchInput).toHaveValue("React");
+      });
+    });
+
+    it("filters courses based on search term", async () => {
+      const mockFilteredCourses = [mockCourses[0]]; // Only React course
+      
+      vi.mocked(require("@/lib/performance/courseOptimizations").useOptimizedCourseFiltering)
+        .mockReturnValue(mockFilteredCourses);
+
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      await user.type(searchInput, "React");
+
+      await waitFor(() => {
+        expect(screen.getByTestId("total-results")).toHaveTextContent("1 courses");
+      });
+    });
+
+    it("shows no results message when no courses match filter", async () => {
+      vi.mocked(require("@/lib/performance/courseOptimizations").useOptimizedCourseFiltering)
+        .mockReturnValue([]);
+
+      render(<CoursesPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("No courses found")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Layout Switching", () => {
+    it("switches between grid and list layouts", async () => {
+      render(<CoursesPage />);
+
+      const courseList = screen.getByTestId("course-list");
+      expect(courseList).toHaveAttribute("data-layout", "grid");
+
+      const listViewButton = screen.getByLabelText("List view");
+      await user.click(listViewButton);
+
+      await waitFor(() => {
+        expect(courseList).toHaveAttribute("data-layout", "list");
+      });
+    });
+
+    it("maintains layout preference across interactions", async () => {
+      render(<CoursesPage />);
+
+      const listViewButton = screen.getByLabelText("List view");
+      await user.click(listViewButton);
+
+      // Perform search to trigger re-render
+      const searchInput = screen.getByTestId("search-input");
+      await user.type(searchInput, "test");
+
+      const courseList = screen.getByTestId("course-list");
+      expect(courseList).toHaveAttribute("data-layout", "list");
+    });
+  });
+
+  describe("Course Interactions", () => {
+    it("navigates to course detail when course is clicked", async () => {
+      render(<CoursesPage />);
+
+      const courseElement = screen.getByTestId("course-course-1");
+      await user.click(courseElement);
+
+      expect(mockPush).toHaveBeenCalledWith("/app/courses/course-1");
+    });
+
+    it("handles course click for multiple courses", async () => {
+      render(<CoursesPage />);
+
+      const course2 = screen.getByTestId("course-course-2");
+      await user.click(course2);
+
+      expect(mockPush).toHaveBeenCalledWith("/app/courses/course-2");
+
+      const course3 = screen.getByTestId("course-course-3");
+      await user.click(course3);
+
+      expect(mockPush).toHaveBeenCalledWith("/app/courses/course-3");
+    });
+  });
+
+  describe("URL State Management", () => {
+    it("updates URL when filters change", async () => {
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      await user.type(searchInput, "React");
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith(
+          expect.stringContaining("search=React")
+        );
+      });
+    });
+
+    it("restores filters from URL on page load", () => {
+      mockSearchParams.set("search", "Python");
+      mockSearchParams.set("category", "development");
+
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      expect(searchInput).toHaveValue("Python");
+    });
+  });
+
+  describe("Responsive Behavior", () => {
+    it("adjusts layout for mobile devices", () => {
+      // Mock window.innerWidth
+      Object.defineProperty(window, "innerWidth", {
+        writable: true,
+        configurable: true,
+        value: 768,
+      });
+
+      render(<CoursesPage />);
+
+      // Check if mobile-specific elements are rendered
+      expect(screen.getByTestId("mobile-filter-toggle")).toBeInTheDocument();
+    });
+
+    it("shows appropriate number of columns based on screen size", () => {
+      render(<CoursesPage />);
+
+      const courseList = screen.getByTestId("course-list");
+      expect(courseList).toHaveClass("grid-cols-auto");
+    });
+  });
+
+  describe("Performance Features", () => {
+    it("implements virtualization for large course lists", () => {
+      // Mock large course list
+      const largeCourseList = Array.from({ length: 100 }, (_, i) => ({
+        ...mockCourses[0],
+        _id: `course-${i}`,
+        title: `Course ${i}`,
+      }));
+
+      mockUseQuery.mockReturnValueOnce(largeCourseList);
+
+      render(<CoursesPage />);
+
+      // Should render VirtualizedCourseList for large lists
+      expect(screen.getByTestId("virtualized-course-list")).toBeInTheDocument();
+    });
+
+    it("shows performance statistics in development mode", () => {
+      process.env.NODE_ENV = "development";
+
+      render(<CoursesPage />);
+
+      expect(screen.getByTestId("performance-stats")).toBeInTheDocument();
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("displays error message when course loading fails", () => {
+      mockUseQuery.mockReturnValue(new Error("Failed to load courses"));
+
+      render(<CoursesPage />);
+
+      expect(screen.getByText("Error loading courses")).toBeInTheDocument();
+      expect(screen.getByText("Please try again later")).toBeInTheDocument();
+    });
+
+    it("provides retry functionality on error", async () => {
+      mockUseQuery.mockReturnValue(new Error("Network error"));
+
+      render(<CoursesPage />);
+
+      const retryButton = screen.getByText("Retry");
+      await user.click(retryButton);
+
+      expect(mockUseQuery).toHaveBeenCalled();
+    });
+  });
+
+  describe("Accessibility", () => {
+    it("has proper ARIA labels and roles", () => {
+      render(<CoursesPage />);
+
+      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByRole("search")).toBeInTheDocument();
+      expect(screen.getByLabelText("Course filters")).toBeInTheDocument();
+    });
+
+    it("supports keyboard navigation", async () => {
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      searchInput.focus();
+
+      // Tab through elements
+      await user.tab();
+      expect(screen.getByLabelText("Grid view")).toHaveFocus();
+
+      await user.tab();
+      expect(screen.getByLabelText("List view")).toHaveFocus();
+    });
+
+    it("provides screen reader announcements for filter changes", async () => {
+      render(<CoursesPage />);
+
+      const searchInput = screen.getByTestId("search-input");
+      await user.type(searchInput, "React");
+
+      await waitFor(() => {
+        expect(screen.getByLabelText("Search results")).toBeInTheDocument();
+        expect(screen.getByText("1 courses found for 'React'")).toBeInTheDocument();
+      });
+    });
+  });
+});

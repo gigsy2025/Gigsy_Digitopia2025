@@ -44,6 +44,9 @@ const iconMap = {
   BookOpen: dynamic(() =>
     import("lucide-react").then((mod) => ({ default: mod.BookOpen })),
   ),
+  GraduationCap: dynamic(() =>
+    import("lucide-react").then((mod) => ({ default: mod.GraduationCap })),
+  ),
   Library: dynamic(() =>
     import("lucide-react").then((mod) => ({ default: mod.Library })),
   ),

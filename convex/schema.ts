@@ -299,12 +299,22 @@ const schema = defineSchema({
   courses: defineTable({
     title: v.string(),
     description: v.string(),
+    shortDescription: v.optional(v.string()),
+    category: v.optional(v.string()),
+    difficulty: v.optional(v.string()),
+    status: v.optional(v.string()),
+    estimatedDuration: v.optional(v.number()),
+    pricing: v.optional(v.any()),
     authorId: v.id("users"), // The `_id` of the user (e.g., employer, admin) who created the course.
     // Standard System Fields
     updatedAt: v.number(),
     createdBy: v.string(),
     deletedAt: v.optional(v.number()),
-  }).index("by_author", ["authorId"]),
+  })
+    .index("by_author", ["authorId"])
+    .index("by_category", ["category"])
+    .index("by_difficulty", ["difficulty"])
+    .index("by_status", ["status"]),
   // Index By Course Id is defined in the modules table
 
   modules: defineTable({

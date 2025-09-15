@@ -1,0 +1,56 @@
+Date : 2025-09-15 17:20:59
+Directory : c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy
+Total : 12 files,  1411 codes, -7 comments, 354 blanks, all 1758 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| Markdown       |          2 |        717 |          0 |        167 |        884 |
+| TypeScript JSX |          5 |        464 |         24 |        135 |        623 |
+| TypeScript     |          5 |        230 |        -31 |         52 |        251 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                  |         12 |      1,411 |         -7 |        354 |      1,758 |
+| convex                                                                                                             |          3 |       -403 |        -71 |        -94 |       -568 |
+| convex (Files)                                                                                                     |          2 |       -405 |        -71 |        -94 |       -570 |
+| convex\_generated                                                                                                  |          1 |          2 |          0 |          0 |          2 |
+| docs                                                                                                               |          2 |        717 |          0 |        167 |        884 |
+| src                                                                                                                |          7 |      1,097 |         64 |        281 |      1,442 |
+| src\app                                                                                                            |          2 |        368 |         22 |         84 |        474 |
+| src\app\app                                                                                                        |          2 |        368 |         22 |         84 |        474 |
+| src\app\app\courses                                                                                                |          2 |        368 |         22 |         84 |        474 |
+| src\app\app\courses (Files)                                                                                        |          1 |         12 |          0 |          0 |         12 |
+| src\app\app\courses\__tests__                                                                                      |          1 |        356 |         22 |         84 |        462 |
+| src\components                                                                                                     |          3 |         96 |          2 |         51 |        149 |
+| src\components\courses                                                                                             |          3 |         96 |          2 |         51 |        149 |
+| src\components\courses (Files)                                                                                     |          2 |       -187 |        -15 |        -12 |       -214 |
+| src\components\courses\__tests__                                                                                   |          1 |        283 |         17 |         63 |        363 |
+| src\lib                                                                                                            |          2 |        633 |         40 |        146 |        819 |
+| src\lib\performance                                                                                                |          2 |        633 |         40 |        146 |        819 |
+| src\lib\performance (Files)                                                                                        |          1 |        252 |         22 |         51 |        325 |
+| src\lib\performance\__tests__                                                                                      |          1 |        381 |         18 |         95 |        494 |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                           | language       | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts                                | TypeScript     |          2 |          0 |          0 |          2 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\courses.ts                                         | TypeScript     |       -414 |        -71 |        -94 |       -579 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts                                          | TypeScript     |          9 |          0 |          0 |          9 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\COURSE_CATALOG_README.md                             | Markdown       |        327 |          0 |         76 |        403 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\COURSE_CATALOG_TECHNICAL_DOCS.md                     | Markdown       |        390 |          0 |         91 |        481 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\__tests__\integration.test.tsx        | TypeScript JSX |        356 |         22 |         84 |        462 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\page.tsx                              | TypeScript JSX |         12 |          0 |          0 |         12 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\CourseCard.tsx                     | TypeScript JSX |       -251 |        -16 |        -20 |       -287 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\VirtualizedCourseList.tsx          | TypeScript JSX |         64 |          1 |          8 |         73 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\__tests__\CourseCard.test.tsx      | TypeScript JSX |        283 |         17 |         63 |        363 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\__tests__\courseOptimizations.test.ts | TypeScript     |        381 |         18 |         95 |        494 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\courseOptimizations.ts                | TypeScript     |        252 |         22 |         51 |        325 |
+| Total                                                                                                              |                |      1,411 |         -7 |        354 |      1,758 |
++--------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

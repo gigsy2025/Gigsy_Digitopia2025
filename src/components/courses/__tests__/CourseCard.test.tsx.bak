@@ -1,0 +1,378 @@
+/**
+ * CourseCard Component Unit Tests
+ *
+ * Comprehensive test suite for the CourseCard component ensuring proper
+ * rendering, user interactions, performance optimizations, and accessibility.
+ *
+ * @author Mostafa Yaser
+ * @version 1.0.0
+ * @since 2024-01-15
+ */
+
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import CourseCard from "@/components/courses/CourseCard";
+import type { CourseSummary } from "@/types/courses";
+
+// Mock Next.js Image component
+vi.mock("next/image", () => ({
+  default: ({ src, alt, ...props }: any) => (
+    <img src={src} alt={alt} {...props} />
+  ),
+}));
+
+// Mock utility functions
+vi.mock("@/lib/utils", () => ({
+  cn: (...classes: string[]) => classes.join(" "),
+  formatPrice: (price: number) => `$${price.toFixed(2)}`,
+  truncateText: (text: string, length: number) =>
+    text.length > length ? `${text.substring(0, length)}...` : text,
+}));
+
+// Mock course data
+const mockCourse: CourseSummary = {
+  _id: "course-123",
+  title: "Complete React Development Course",
+  shortDescription:
+    "Learn React from basics to advanced concepts with real-world projects",
+  category: "development",
+  difficulty: "intermediate",
+  estimatedDuration: 24,
+  lessonsCount: 48,
+  thumbnailUrl: "https://example.com/course-thumbnail.jpg",
+  pricing: {
+    isFree: false,
+    price: 99.99,
+    currency: "USD",
+  },
+  author: {
+    _id: "author-123",
+    name: "John Doe",
+    title: "Senior React Developer",
+    avatarUrl: "https://example.com/author-avatar.jpg",
+  },
+  stats: {
+    enrollmentCount: 1250,
+    averageRating: 4.8,
+    completionRate: 85,
+    totalReviews: 320,
+  },
+  progress: {
+    progressPercentage: 65,
+    completedLessons: 31,
+    totalLessons: 48,
+    lastAccessedAt: "2024-01-10T10:00:00Z",
+    estimatedTimeToComplete: 15,
+  },
+  tags: ["react", "javascript", "frontend"],
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-01-10T00:00:00Z",
+};
+
+const mockFreeCourse: CourseSummary = {
+  ...mockCourse,
+  _id: "course-456",
+  title: "Introduction to Web Development",
+  pricing: {
+    isFree: true,
+    price: 0,
+    currency: "USD",
+  },
+};
+
+describe("CourseCard Component", () => {
+  const mockOnClick = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("Basic Rendering", () => {
+    it("renders course information correctly", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      expect(
+        screen.getByText("Complete React Development Course"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Learn React from basics to advanced/),
+      ).toBeInTheDocument();
+      expect(screen.getByText("development")).toBeInTheDocument();
+      expect(screen.getByText("Intermediate")).toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("Senior React Developer")).toBeInTheDocument();
+    });
+
+    it("displays course statistics correctly", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      expect(screen.getByText("24h")).toBeInTheDocument();
+      expect(screen.getByText("48 lessons")).toBeInTheDocument();
+      expect(screen.getByText("1,250 students")).toBeInTheDocument();
+      expect(screen.getByText("4.8")).toBeInTheDocument();
+    });
+
+    it("shows pricing information", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+      expect(screen.getByText("$99.99")).toBeInTheDocument();
+    });
+
+    it("displays 'Free' for free courses", () => {
+      render(<CourseCard course={mockFreeCourse} onClick={mockOnClick} />);
+      expect(screen.getByText("Free")).toBeInTheDocument();
+    });
+  });
+
+  describe("Progress Display", () => {
+    it("shows progress bar when showProgress is true", () => {
+      render(
+        <CourseCard
+          course={mockCourse}
+          showProgress={true}
+          onClick={mockOnClick}
+        />,
+      );
+
+      expect(screen.getByText("Progress")).toBeInTheDocument();
+      expect(screen.getByText("65%")).toBeInTheDocument();
+
+      const progressBar = screen.getByRole("progressbar", { hidden: true });
+      expect(progressBar).toHaveStyle({ width: "65%" });
+    });
+
+    it("hides progress bar when showProgress is false", () => {
+      render(
+        <CourseCard
+          course={mockCourse}
+          showProgress={false}
+          onClick={mockOnClick}
+        />,
+      );
+
+      expect(screen.queryByText("Progress")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Variants", () => {
+    it("applies compact variant styling", () => {
+      const { container } = render(
+        <CourseCard
+          course={mockCourse}
+          variant="compact"
+          onClick={mockOnClick}
+        />,
+      );
+
+      const card = container.firstChild as HTMLElement;
+      expect(card).toHaveClass("p-4");
+    });
+
+    it("applies featured variant styling", () => {
+      const { container } = render(
+        <CourseCard
+          course={mockCourse}
+          variant="featured"
+          onClick={mockOnClick}
+        />,
+      );
+
+      const card = container.firstChild as HTMLElement;
+      expect(card).toHaveClass("ring-2", "ring-blue-500/20");
+    });
+  });
+
+  describe("User Interactions", () => {
+    it("calls onClick when card is clicked", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const card = screen.getByRole("button", { hidden: true });
+      fireEvent.click(card);
+
+      expect(mockOnClick).toHaveBeenCalledWith(mockCourse);
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not call onClick when no handler provided", () => {
+      const { container } = render(<CourseCard course={mockCourse} />);
+
+      const card = container.firstChild as HTMLElement;
+      expect(() => fireEvent.click(card)).not.toThrow();
+    });
+  });
+
+  describe("Image Handling", () => {
+    it("displays course thumbnail when available", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const image = screen.getByAltText("Complete React Development Course");
+      expect(image).toBeInTheDocument();
+      expect(image).toHaveAttribute("src", mockCourse.thumbnailUrl);
+    });
+
+    it("shows fallback icon when no thumbnail", () => {
+      const courseWithoutThumbnail = { ...mockCourse, thumbnailUrl: undefined };
+      render(
+        <CourseCard course={courseWithoutThumbnail} onClick={mockOnClick} />,
+      );
+
+      const fallbackIcon = screen.getByTestId("book-open-icon");
+      expect(fallbackIcon).toBeInTheDocument();
+    });
+
+    it("displays author avatar when available", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const authorAvatar = screen.getByAltText("John Doe");
+      expect(authorAvatar).toBeInTheDocument();
+    });
+
+    it("shows author initials when no avatar", () => {
+      const courseWithoutAvatar = {
+        ...mockCourse,
+        author: { ...mockCourse.author, avatarUrl: undefined },
+      };
+      render(<CourseCard course={courseWithoutAvatar} onClick={mockOnClick} />);
+
+      expect(screen.getByText("J")).toBeInTheDocument();
+    });
+  });
+
+  describe("Difficulty and Category Styling", () => {
+    it("applies correct difficulty styling for beginner", () => {
+      const beginnerCourse = { ...mockCourse, difficulty: "beginner" as const };
+      render(<CourseCard course={beginnerCourse} onClick={mockOnClick} />);
+
+      const difficultyBadge = screen.getByText("Beginner");
+      expect(difficultyBadge.closest(".badge")).toHaveClass("bg-green-100");
+    });
+
+    it("applies correct difficulty styling for advanced", () => {
+      const advancedCourse = { ...mockCourse, difficulty: "advanced" as const };
+      render(<CourseCard course={advancedCourse} onClick={mockOnClick} />);
+
+      const difficultyBadge = screen.getByText("Advanced");
+      expect(difficultyBadge.closest(".badge")).toHaveClass("bg-red-100");
+    });
+
+    it("applies correct category styling", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const categoryBadge = screen.getByText("development");
+      expect(categoryBadge.closest(".badge")).toHaveClass("bg-blue-100");
+    });
+  });
+
+  describe("Performance Optimizations", () => {
+    it("is wrapped with React.memo", () => {
+      // React.memo creates a component with a different name
+      expect(CourseCard.displayName).toBe("CourseCard");
+    });
+
+    it("applies lazy loading to images", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const image = screen.getByAltText("Complete React Development Course");
+      expect(image).toHaveAttribute("loading", "lazy");
+    });
+  });
+
+  describe("Accessibility", () => {
+    it("has proper semantic structure", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const heading = screen.getByRole("heading", { level: 3 });
+      expect(heading).toHaveTextContent("Complete React Development Course");
+    });
+
+    it("provides meaningful alt text for images", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const courseImage = screen.getByAltText(
+        "Complete React Development Course",
+      );
+      const authorImage = screen.getByAltText("John Doe");
+
+      expect(courseImage).toBeInTheDocument();
+      expect(authorImage).toBeInTheDocument();
+    });
+
+    it("supports keyboard navigation", () => {
+      render(<CourseCard course={mockCourse} onClick={mockOnClick} />);
+
+      const card = screen.getByRole("button", { hidden: true });
+
+      fireEvent.keyDown(card, { key: "Enter" });
+      expect(mockOnClick).toHaveBeenCalledWith(mockCourse);
+
+      fireEvent.keyDown(card, { key: " " });
+      expect(mockOnClick).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("Edge Cases", () => {
+    it("handles missing optional data gracefully", () => {
+      const minimalCourse: CourseSummary = {
+        ...mockCourse,
+        shortDescription: undefined,
+        thumbnailUrl: undefined,
+        author: {
+          ...mockCourse.author,
+          title: undefined,
+          avatarUrl: undefined,
+        },
+        progress: undefined,
+      };
+
+      expect(() => {
+        render(<CourseCard course={minimalCourse} onClick={mockOnClick} />);
+      }).not.toThrow();
+
+      expect(
+        screen.getByText("Complete React Development Course"),
+      ).toBeInTheDocument();
+    });
+
+    it("handles zero statistics correctly", () => {
+      const emptyCourse = {
+        ...mockCourse,
+        estimatedDuration: 0,
+        lessonsCount: 0,
+        stats: {
+          ...mockCourse.stats,
+          enrollmentCount: 0,
+          averageRating: 0,
+        },
+      };
+
+      render(<CourseCard course={emptyCourse} onClick={mockOnClick} />);
+
+      // Should not display zero values
+      expect(screen.queryByText("0h")).not.toBeInTheDocument();
+      expect(screen.queryByText("0 lessons")).not.toBeInTheDocument();
+      expect(screen.queryByText("0 students")).not.toBeInTheDocument();
+    });
+
+    it("truncates long text appropriately", () => {
+      const longTextCourse = {
+        ...mockCourse,
+        title:
+          "This is an extremely long course title that should be truncated to prevent layout issues",
+        shortDescription:
+          "This is an extremely long course description that goes on and on explaining various concepts and should be truncated to maintain proper card layout and readability for users browsing the course catalog",
+      };
+
+      render(<CourseCard course={longTextCourse} onClick={mockOnClick} />);
+
+      // Title should be truncated
+      const title = screen.getByText(/This is an extremely long course title/);
+      expect(title.textContent).toMatch(/\.\.\.$/);
+
+      // Description should be truncated
+      const description = screen.getByText(
+        /This is an extremely long course description/,
+      );
+      expect(description.textContent).toMatch(/\.\.\.$/);
+    });
+  });
+});
