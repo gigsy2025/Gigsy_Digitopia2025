@@ -158,6 +158,26 @@ const sortOptions = [
   },
 ];
 
+// Utility functions for handling priceRange union type
+const getPriceRangeValues = (
+  priceRange?: [number, number] | { min: number; max: number },
+): [number, number] | null => {
+  if (!priceRange) return null;
+  if (Array.isArray(priceRange)) {
+    return priceRange;
+  }
+  return [priceRange.min, priceRange.max];
+};
+
+const isPriceRangeEqual = (
+  priceRange: [number, number] | { min: number; max: number } | undefined,
+  min: number,
+  max: number,
+): boolean => {
+  const values = getPriceRangeValues(priceRange);
+  return values ? values[0] === min && values[1] === max : false;
+};
+
 const CourseFilters: React.FC<CourseFiltersProps> = ({
   filters,
   onFiltersChange,
@@ -173,12 +193,15 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   );
 
   // Debounced search handler
-  const debouncedSearch = useCallback(
-    debounce((searchTerm: string) => {
-      onFiltersChange({ ...filters, searchTerm, page: 1 });
-    }, 300),
-    [filters, onFiltersChange],
-  );
+  const debouncedSearch = useCallback(() => {
+    let timeout: NodeJS.Timeout;
+    return (searchTerm: string) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        onFiltersChange({ ...filters, searchTerm, page: 1 });
+      }, 300);
+    };
+  }, [filters, onFiltersChange])();
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,10 +228,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
     switch (filterKey) {
       case "free":
-        updatedFilters.priceRange =
-          filters.priceRange?.[0] === 0 && filters.priceRange?.[1] === 0
-            ? undefined
-            : [0, 0];
+        updatedFilters.priceRange = isPriceRangeEqual(filters.priceRange, 0, 0)
+          ? undefined
+          : [0, 0];
         break;
       case "new":
         updatedFilters.isNew = !filters.isNew;
@@ -242,7 +264,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   const isQuickFilterActive = (filterKey: string): boolean => {
     switch (filterKey) {
       case "free":
-        return filters.priceRange?.[0] === 0 && filters.priceRange?.[1] === 0;
+        return isPriceRangeEqual(filters.priceRange, 0, 0);
       case "new":
         return !!filters.isNew;
       case "popular":
@@ -314,7 +336,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </Label>
             <select
               id="sort-select"
-              value={filters.sortBy || "relevance"}
+              value={filters.sortBy ?? "relevance"}
               onChange={(e) =>
                 handleFilterChange("sortBy", e.target.value as SortOption)
               }
@@ -404,7 +426,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
                       onClick={() => {
-                        const currentCategories = filters.categories || [];
+                        const currentCategories = filters.categories ?? [];
                         const newCategories = isSelected
                           ? currentCategories.filter(
                               (c) => c !== category.value,
@@ -448,7 +470,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
                       onClick={() => {
-                        const currentDifficulties = filters.difficulties || [];
+                        const currentDifficulties = filters.difficulties ?? [];
                         const newDifficulties = isSelected
                           ? currentDifficulties.filter(
                               (d) => d !== difficulty.value,
@@ -484,8 +506,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={
-                    filters.priceRange?.[0] === 0 &&
-                    filters.priceRange?.[1] === 0
+                    isPriceRangeEqual(filters.priceRange, 0, 0)
                       ? "default"
                       : "outline"
                   }
@@ -497,8 +518,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 </Button>
                 <Button
                   variant={
-                    filters.priceRange?.[0] === 1 &&
-                    filters.priceRange?.[1] === 50
+                    isPriceRangeEqual(filters.priceRange, 1, 50)
                       ? "default"
                       : "outline"
                   }
@@ -510,8 +530,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 </Button>
                 <Button
                   variant={
-                    filters.priceRange?.[0] === 51 &&
-                    filters.priceRange?.[1] === 100
+                    isPriceRangeEqual(filters.priceRange, 51, 100)
                       ? "default"
                       : "outline"
                   }
@@ -523,7 +542,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 </Button>
                 <Button
                   variant={
-                    filters.priceRange?.[0] === 101 ? "default" : "outline"
+                    isPriceRangeEqual(filters.priceRange, 101, 1000)
+                      ? "default"
+                      : "outline"
                   }
                   size="sm"
                   onClick={() => handleFilterChange("priceRange", [101, 1000])}
@@ -560,17 +581,5 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
     </div>
   );
 };
-
-// Debounce utility function
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
 
 export default CourseFilters;
