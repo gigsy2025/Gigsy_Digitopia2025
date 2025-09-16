@@ -33,7 +33,7 @@ import Providers from "@/providers/Providers";
 import { resolveCurrentUser } from "@/lib/auth/userResolver.server";
 
 // Force dynamic rendering since we need to access user session
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Gigsy App",
