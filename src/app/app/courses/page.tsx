@@ -113,7 +113,7 @@ const FEATURED_CATEGORIES = [
  * with search, filtering, and course display functionality.
  */
 const CourseCatalogPage: React.FC = () => {
-  const { user, isAdmin } = useUser();
+  const { isAdmin } = useUser();
 
   // console.info("User data in DashboardPage:", user);
   console.info("Is Admin:", isAdmin);

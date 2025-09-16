@@ -135,8 +135,8 @@ function buildUserProfile(
 
   // Get full name or fallback to first/last name
   const displayName =
-    user.fullName ||
-    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+    user.fullName ??
+    [user.firstName, user.lastName].filter(Boolean).join(" ") ??
     undefined;
 
   return {

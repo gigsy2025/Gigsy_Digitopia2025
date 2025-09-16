@@ -152,7 +152,7 @@ export function useUserDisplay() {
       };
     }
 
-    const displayName = user.name || user.email || "Unknown User";
+    const displayName = user.name ?? user.email ?? "Unknown User";
     const initials = user.name
       ? user.name
           .split(" ")
@@ -160,7 +160,7 @@ export function useUserDisplay() {
           .join("")
           .toUpperCase()
           .slice(0, 2)
-      : user.email?.charAt(0).toUpperCase() || "U";
+      : (user.email?.charAt(0).toUpperCase() ?? "U");
 
     return {
       displayName,
@@ -188,7 +188,7 @@ export function ConditionalRender({
   const isAuth = useIsAuthenticated();
 
   if (isAuth) {
-    return <>{authenticated || children}</>;
+    return <>{authenticated ?? children}</>;
   }
 
   return <>{unauthenticated}</>;

@@ -12,6 +12,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   useUser,
   usePermission,
@@ -22,6 +23,7 @@ import {
   RoleGate,
   PermissionGate,
 } from "@/providers/UserContext";
+import type { Permission } from "@/types/auth";
 
 /**
  * Example: Basic user information display
@@ -37,8 +39,8 @@ export function UserProfileExample() {
       {/* Basic user info */}
       <div>
         <p>Name: {displayName}</p>
-        <p>Email: {email || "No email"}</p>
-        <p>Role: {user?.role || "guest"}</p>
+        <p>Email: {email ?? "No email"}</p>
+        <p>Role: {user?.role ?? "guest"}</p>
         <p>Verified: {isVerified ? "Yes" : "No"}</p>
       </div>
 
@@ -52,9 +54,11 @@ export function UserProfileExample() {
       {/* Avatar display */}
       <div className="flex items-center gap-2">
         {avatar ? (
-          <img
+          <Image
             src={avatar}
             alt={displayName}
+            width={32}
+            height={32}
             className="h-8 w-8 rounded-full"
           />
         ) : (
@@ -94,7 +98,7 @@ export function PermissionBasedUIExample() {
       {/* Using PermissionGate component */}
       <PermissionGate
         permission="manage_gigs"
-        fallback={<p>You don't have permission to manage gigs.</p>}
+        fallback={<p>You don&apos;t have permission to manage gigs.</p>}
       >
         <button className="btn-primary">Manage My Gigs</button>
       </PermissionGate>
@@ -107,7 +111,6 @@ export function PermissionBasedUIExample() {
  */
 export function RoleBasedAccessExample() {
   const hasEmployerAccess = useMinimumRole("employer");
-  const hasAdminAccess = useMinimumRole("admin");
 
   return (
     <div className="space-y-4">
@@ -217,10 +220,11 @@ export function BusinessPermissionsExample() {
  * Example: Navigation menu with role-based items
  */
 export function NavigationExample() {
-  const { user } = useUser();
-  const { canManageGigs, canAccessAdmin } = useBusinessPermissions();
-
-  const menuItems = [
+  const menuItems: Array<{
+    label: string;
+    href: string;
+    permission: Permission | null;
+  }> = [
     { label: "Dashboard", href: "/app", permission: null },
     { label: "Browse Gigs", href: "/app/gigs", permission: "view_public" },
     {
@@ -252,7 +256,7 @@ export function NavigationExample() {
         }
 
         return (
-          <PermissionGate key={item.href} permission={item.permission as any}>
+          <PermissionGate key={item.href} permission={item.permission}>
             <a href={item.href} className="nav-link">
               {item.label}
             </a>
