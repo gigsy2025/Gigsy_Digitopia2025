@@ -19,7 +19,6 @@
 import { type Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
 
 import {
   SidebarInset,
@@ -30,6 +29,8 @@ import { Separator } from "@/components/ui/separator";
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { SkillsCheck } from "@/components/SkillsCheck";
+import Providers from "@/providers/Providers";
+import { resolveCurrentUser } from "@/lib/auth/userResolver.server";
 
 export const metadata: Metadata = {
   title: "Gigsy App",
@@ -48,12 +49,13 @@ interface AppLayoutProps {
  *
  * Provides the main application shell with sidebar navigation,
  * breadcrumbs, and responsive design for authenticated users.
+ * Includes secure user metadata fetching and context hydration.
  */
 export default async function AppLayout({ children }: AppLayoutProps) {
-  // Check authentication
-  const user = await currentUser();
+  // Resolve user with metadata from Clerk
+  const initialUser = await resolveCurrentUser();
 
-  if (!user) {
+  if (!initialUser) {
     redirect("/sign-in");
   }
 
@@ -62,30 +64,32 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
-      <SidebarInset>
-        {/* Main App Header */}
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+    <Providers initialUser={initialUser}>
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppSidebar />
+        <SidebarInset>
+          {/* Main App Header */}
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
 
-            {/* Simple breadcrumb for now */}
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <span>Dashboard</span>
-              <span>/</span>
-              <span className="text-foreground">Overview</span>
+              {/* Simple breadcrumb for now */}
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                <span>Dashboard</span>
+                <span>/</span>
+                <span className="text-foreground">Overview</span>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Main Content Area */}
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+          {/* Main Content Area */}
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
 
-        {/* Skills Onboarding Check */}
-        <SkillsCheck />
-      </SidebarInset>
-    </SidebarProvider>
+          {/* Skills Onboarding Check */}
+          <SkillsCheck />
+        </SidebarInset>
+      </SidebarProvider>
+    </Providers>
   );
 }

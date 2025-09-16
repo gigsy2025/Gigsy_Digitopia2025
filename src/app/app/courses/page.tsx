@@ -64,6 +64,7 @@ import {
   RefreshCw,
   Share2,
 } from "lucide-react";
+import { useUser } from "@/providers/UserContext";
 
 // Default filters configuration
 const DEFAULT_FILTERS: CourseFiltersType = {
@@ -112,6 +113,11 @@ const FEATURED_CATEGORIES = [
  * with search, filtering, and course display functionality.
  */
 const CourseCatalogPage: React.FC = () => {
+  const { user, isAdmin } = useUser();
+
+  // console.info("User data in DashboardPage:", user);
+  console.info("Is Admin:", isAdmin);
+  // alert("Is Admin:" + isAdmin);
   const router = useRouter();
   const searchParams = useSearchParams();
 

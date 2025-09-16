@@ -9,6 +9,7 @@
  * @since 2025-01-14
  */
 
+import { useUser } from "@/providers/UserContext";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
