@@ -1,0 +1,57 @@
+"filename", "language", "Markdown", "TypeScript", "TypeScript JSX", "JSON", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\courses.ts", "TypeScript", 0, 69, 0, 0, 0, 0, 1, 70
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\coursesMutations.ts", "TypeScript", 0, 411, 0, 0, 0, 76, 74, 561
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\files.ts", "TypeScript", 0, 341, 0, 0, 0, 86, 55, 482
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\lessons.ts", "TypeScript", 0, 297, 0, 0, 0, 65, 48, 410
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts", "TypeScript", 0, 228, 0, 0, 0, 32, 32, 292
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\AUTHENTICATION_SYSTEM.md", "Markdown", 294, 0, 0, 0, 0, 0, 112, 406
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\COURSE_CATALOG_README.md", "Markdown", 2, 0, 0, 0, 0, 0, 40, 42
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\COURSE_CATALOG_TECHNICAL_DOCS.md", "Markdown", 2, 0, 0, 0, 0, 0, 32, 34
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\PERFORMANCE_OPTIMIZATION_GUIDE.md", "Markdown", 296, 0, 0, 0, 0, 0, 77, 373
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 0, 10, 0, 0, 0, 10
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 268, 0, 30, 298
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\admin\courses\create\page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 11, 4, 29
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\admin\layout.tsx", "TypeScript JSX", 0, 0, 22, 0, 0, 11, 4, 37
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\page.tsx", "TypeScript JSX", 0, 0, 64, 0, 0, 2, 4, 70
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\__tests__\integration.test.tsx", "TypeScript JSX", 0, 0, -356, 0, 0, -22, -84, -462
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\page.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 6, 9, 68
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\layout.tsx", "TypeScript JSX", 0, 0, 4, 0, 0, 2, 1, 7
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\page.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 1, 2, 28
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\admin\AdminCourseForm.tsx", "TypeScript JSX", 0, 0, 1333, 0, 0, 69, 96, 1498
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\CourseCard.tsx", "TypeScript JSX", 0, 0, 86, 0, 0, 9, 11, 106
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\CourseFilters.tsx", "TypeScript JSX", 0, 0, 89, 0, 0, 0, 2, 91
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\CourseList.tsx", "TypeScript JSX", 0, 0, 17, 0, 0, 0, 1, 18
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\VirtualizedCourseList.tsx", "TypeScript JSX", 0, 0, -10, 0, 0, 5, -2, -7
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\__tests__\CourseCard.test.tsx", "TypeScript JSX", 0, 0, -283, 0, 0, -17, -63, -363
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\index.ts", "TypeScript", 0, -1, 0, 0, 0, -10, 0, -11
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\examples\AuthExamples.tsx", "TypeScript JSX", 0, 0, 219, 0, 0, 36, 34, 289
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\CourseVideoPlayer.tsx", "TypeScript JSX", 0, 0, 298, 0, 0, 37, 49, 384
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\KiboVideoPlayer.tsx", "TypeScript JSX", 0, 0, 823, 0, 0, 73, 102, 998
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\shared\FileUpload.tsx", "TypeScript JSX", 0, 0, 450, 0, 0, 62, 63, 575
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\accordion.tsx", "TypeScript JSX", 0, 0, 49, 0, 0, 5, 7, 61
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\alert-dialog.tsx", "TypeScript JSX", 0, 0, 126, 0, 0, 6, 13, 145
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\alert.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 5, 6, 64
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\card.tsx", "TypeScript JSX", 0, 0, 71, 0, 0, 5, 8, 84
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\kibo-ui\video-player\index.tsx", "TypeScript JSX", 0, 0, 103, 0, 0, 0, 23, 126
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\progress.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 5, 3, 31
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\select.tsx", "TypeScript JSX", 0, 0, 145, 0, 0, 5, 13, 163
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\switch.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 5, 3, 32
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\textarea.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 5, 4, 29
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\auth\policies.ts", "TypeScript", 0, 113, 0, 0, 0, 72, 27, 212
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\auth\userResolver.server.ts", "TypeScript", 0, 127, 0, 0, 0, 73, 26, 226
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\data\courseTransforms.ts", "TypeScript", 0, 244, 0, 0, 0, 40, 17, 301
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\__tests__\courseOptimizations.test.ts", "TypeScript", 0, -381, 0, 0, 0, -18, -95, -494
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\caching.ts", "TypeScript", 0, 408, 0, 0, 0, 121, 81, 610
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\courseOptimizations.ts", "TypeScript", 0, 41, 0, 0, 0, 2, 3, 46
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\image-optimization.ts", "TypeScript", 0, 217, 0, 0, 0, 62, 50, 329
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\index.ts", "TypeScript", 0, 67, 0, 0, 0, 24, 11, 102
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\monitoring.ts", "TypeScript", 0, 391, 0, 0, 0, 124, 74, 589
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\video-optimization.ts", "TypeScript", 0, 302, 0, 0, 0, 96, 63, 461
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\validations\courses.ts", "TypeScript", 0, 63, 0, 0, 0, 0, 1, 64
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\providers\Providers.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 27, 5, 48
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\providers\UserContext.tsx", "TypeScript JSX", 0, 0, 139, 0, 0, 66, 33, 238
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\auth.ts", "TypeScript", 0, 70, 0, 0, 0, 65, 14, 149
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\courses-simple.ts", "TypeScript", 0, 88, 0, 0, 0, 44, 26, 158
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\courses.ts", "TypeScript", 0, 348, 0, 0, 0, 147, 158, 653
+"Total", "-", 594, 3449, 3617, 10, 268, 1520, 1308, 10766

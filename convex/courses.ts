@@ -135,7 +135,36 @@ const CourseUpdateSchema = v.object({
 // UTILITY FUNCTIONS
 // =============================================================================
 
-function validateAndNormalizeCourseData(data: any) {
+// Define a type for course input data based on validation schemas
+type CourseInput = {
+  title?: string;
+  description?: string;
+  shortDescription?: string;
+  category?:
+    | "development"
+    | "design"
+    | "marketing"
+    | "writing"
+    | "data"
+    | "business"
+    | "creative"
+    | "technology"
+    | "soft-skills"
+    | "languages";
+  difficulty?: "beginner" | "intermediate" | "advanced" | "expert";
+  status?: "draft" | "published" | "archived" | "coming_soon" | "private";
+  estimatedDuration?: number;
+  pricing?: {
+    isFree: boolean;
+    price?: number;
+    currency?: "EGP" | "USD" | "EUR";
+    discountPercentage?: number;
+    originalPrice?: number;
+    paymentType?: "one-time" | "subscription" | "per-module";
+  };
+};
+
+function validateAndNormalizeCourseData(data: CourseInput) {
   const title = data.title?.trim();
   const description = data.description?.trim();
   const shortDescription = data.shortDescription?.trim();
@@ -182,12 +211,12 @@ function validateAndNormalizeCourseData(data: any) {
   return {
     title,
     description,
-    shortDescription: shortDescription || description.substring(0, 150) + "...",
-    category: data.category || "development",
-    difficulty: data.difficulty || "beginner",
-    status: data.status || "draft",
-    estimatedDuration: data.estimatedDuration || 1,
-    pricing: data.pricing || { isFree: true, price: 0, currency: "USD" },
+    shortDescription: shortDescription ?? description.substring(0, 150) + "...",
+    category: data.category ?? "development",
+    difficulty: data.difficulty ?? "beginner",
+    status: data.status ?? "draft",
+    estimatedDuration: data.estimatedDuration ?? 1,
+    pricing: data.pricing ?? { isFree: true, price: 0, currency: "USD" },
   };
 }
 
@@ -414,11 +443,28 @@ export const update = mutation({
       title: string;
       description: string;
       shortDescription: string;
-      category: string;
-      difficulty: string;
-      status: string;
+      category:
+        | "development"
+        | "design"
+        | "marketing"
+        | "writing"
+        | "data"
+        | "business"
+        | "creative"
+        | "technology"
+        | "soft-skills"
+        | "languages";
+      difficulty: "beginner" | "intermediate" | "advanced" | "expert";
+      status: "draft" | "published" | "archived" | "coming_soon" | "private";
       estimatedDuration: number;
-      pricing: any;
+      pricing: {
+        isFree: boolean;
+        price?: number;
+        currency?: "EGP" | "USD" | "EUR";
+        discountPercentage?: number;
+        originalPrice?: number;
+        paymentType?: "one-time" | "subscription" | "per-module";
+      };
       updatedAt: number;
     }> = {
       updatedAt: Date.now(),

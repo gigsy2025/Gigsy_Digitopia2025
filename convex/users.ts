@@ -13,6 +13,7 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { ConvexError } from "convex/values";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 
 // --- Constants ---
 const DEFAULT_CURRENCIES = ["EGP", "USD", "EUR"] as const;
@@ -601,3 +602,37 @@ export const generateUserEmbedding = internalMutation({
     return { success: true };
   },
 });
+
+// =============================================================================
+// AUTHENTICATION UTILITIES
+// =============================================================================
+
+/**
+ * Get authenticated user ID from context
+ * Returns the database user ID if authenticated, null otherwise
+ */
+export async function getUserId(ctx: any): Promise<Id<"users"> | null> {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) return null;
+
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .unique();
+
+  return user?._id || null;
+}
+
+/**
+ * Get authenticated user record from database
+ * Returns the full user document if authenticated and exists
+ */
+export async function getAuthenticatedUser(ctx: any): Promise<any | null> {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) return null;
+
+  return await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .unique();
+}

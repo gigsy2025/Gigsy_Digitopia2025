@@ -9,14 +9,14 @@
  * @since 2025-01-14
  */
 
-import { type Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Dashboard - Gigsy",
-  description: "Your personalized freelance dashboard",
-};
+import Link from "next/link";
+import { useUser } from "@/providers/UserContext";
 
 export default function DashboardPage() {
+  const { isAdmin } = useUser();
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -164,8 +164,10 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          <a
+        <div
+          className={`grid gap-4 ${isAdmin ? "md:grid-cols-4" : "md:grid-cols-3"}`}
+        >
+          <Link
             href="/app/work/post"
             className="bg-card hover:bg-accent flex flex-col items-center justify-center rounded-lg border p-6 text-center transition-colors"
           >
@@ -185,10 +187,10 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-sm">
               Find talented freelancers
             </p>
-          </a>
+          </Link>
 
-          <a
-            href="/app/learn/catalog"
+          <Link
+            href="/app/courses"
             className="bg-card hover:bg-accent flex flex-col items-center justify-center rounded-lg border p-6 text-center transition-colors"
           >
             <svg
@@ -206,9 +208,37 @@ export default function DashboardPage() {
             </svg>
             <h3 className="font-medium">Browse Courses</h3>
             <p className="text-muted-foreground text-sm">Learn new skills</p>
-          </a>
+          </Link>
 
-          <a
+          {/* Admin Only: Create Course Action */}
+          {isAdmin && (
+            <Link
+              href="/admin/courses/create"
+              className="bg-card hover:bg-accent border-primary/20 flex flex-col items-center justify-center rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 p-6 text-center transition-colors dark:from-blue-950/50 dark:to-indigo-950/50"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="text-primary mb-2 h-8 w-8"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                <path d="M12 7v6" />
+                <path d="M9 10h6" />
+              </svg>
+              <h3 className="text-primary font-medium">Create Course</h3>
+              <p className="text-muted-foreground text-sm">
+                Add new learning content
+              </p>
+            </Link>
+          )}
+
+          <Link
             href="/app/profile"
             className="bg-card hover:bg-accent flex flex-col items-center justify-center rounded-lg border p-6 text-center transition-colors"
           >
@@ -229,7 +259,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-sm">
               Enhance your presence
             </p>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

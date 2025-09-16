@@ -297,6 +297,18 @@ const CourseCatalogPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Admin Only: Create Course Button */}
+            {isAdmin && (
+              <Button
+                onClick={() => router.push("/admin/courses/create")}
+                className="h-9"
+                size="sm"
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Create Course
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"

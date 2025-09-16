@@ -1,12 +1,112 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { cn, formatPrice, truncateText } from "@/lib/utils";
-import type { CourseCardProps } from "@/types/courses";
-import { Clock, Users, Star, BookOpen, Play } from "lucide-react";
+import type { CourseCardProps, CourseMediaAssets } from "@/types/courses";
+import {
+  Clock,
+  Users,
+  Star,
+  BookOpen,
+  Play,
+  FileVideo,
+  ImageIcon,
+} from "lucide-react";
+
+/**
+ * Loading skeleton component for course images
+ */
+const CourseImageSkeleton: React.FC<{ className?: string }> = ({
+  className,
+}) => (
+  <div
+    className={cn(
+      "animate-pulse bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800",
+      className,
+    )}
+  >
+    <div className="flex h-full w-full items-center justify-center">
+      <ImageIcon className="h-12 w-12 text-gray-400 dark:text-gray-600" />
+    </div>
+  </div>
+);
+
+/**
+ * Enhanced course image component with fallbacks and lazy loading
+ */
+const CourseImage: React.FC<{
+  media: CourseMediaAssets;
+  title: string;
+  className?: string;
+  priority?: boolean;
+}> = ({ media, title, className, priority = false }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoading(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+    setImageLoading(false);
+  }, []);
+
+  // Determine the best image source
+  const getImageSource = (): string | null => {
+    if (media.thumbnailUrl) return media.thumbnailUrl;
+    if (media.bannerUrl) return media.bannerUrl;
+    return null;
+  };
+
+  const imageSource = getImageSource();
+
+  return (
+    <div className={cn("relative overflow-hidden", className)}>
+      {imageLoading && (
+        <CourseImageSkeleton className="absolute inset-0 z-10" />
+      )}
+
+      {imageSource && !imageError ? (
+        <Image
+          src={imageSource}
+          alt={title}
+          fill
+          className={cn(
+            "object-cover transition-all duration-500 group-hover:scale-105",
+            imageLoading ? "opacity-0" : "opacity-100",
+          )}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          loading={priority ? "eager" : "lazy"}
+          priority={priority}
+          quality={85}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900">
+          <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-600" />
+        </div>
+      )}
+
+      {/* Video indicator for intro videos */}
+      {media.introVideoUrl && (
+        <div className="absolute bottom-3 left-3">
+          <Badge
+            variant="secondary"
+            className="border-0 bg-black/70 text-white"
+          >
+            <FileVideo className="mr-1 h-3 w-3" />
+            Preview
+          </Badge>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Difficulty level styling
 const difficultyConfig = {
@@ -64,46 +164,47 @@ const CourseCard: React.FC<CourseCardProps> = React.memo(
         course.category.toLowerCase() as keyof typeof categoryColors
       ] || categoryColors.default;
 
-    const handleCardClick = () => {
+    const handleCardClick = useCallback(() => {
       onClick?.(course);
-    };
+    }, [onClick, course]);
 
     return (
       <div
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:shadow-lg dark:border-gray-700 dark:bg-gray-800",
+          "group relative cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-out hover:shadow-lg dark:border-gray-700 dark:bg-gray-800",
           variant === "compact" && "p-4",
           variant === "featured" &&
             "shadow-lg ring-2 ring-blue-500/20 dark:ring-blue-400/20",
+          variant === "default" && "p-6",
           className,
         )}
         onClick={handleCardClick}
       >
-        {/* Course Image */}
-        <div className="relative mb-4 h-48 overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900">
-          {course.thumbnailUrl ? (
-            <Image
-              src={course.thumbnailUrl}
-              alt={course.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              loading="lazy"
-              quality={85}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-600" />
-            </div>
-          )}
+        {/* Enhanced Course Image with Media Assets */}
+        <div className="relative mb-4 h-48 overflow-hidden rounded-lg">
+          <CourseImage
+            media={course.media}
+            title={course.title}
+            className="h-full w-full"
+            priority={variant === "featured"}
+          />
 
           {/* Price Badge */}
           {course.pricing && (
             <div className="absolute top-3 right-3">
-              <Badge className="border-0 bg-white/90 font-semibold text-gray-900">
+              <Badge className="border-0 bg-white/95 font-semibold text-gray-900 shadow-sm backdrop-blur-sm">
                 {course.pricing.isFree
                   ? "Free"
                   : formatPrice(course.pricing.price ?? 0)}
+              </Badge>
+            </div>
+          )}
+
+          {/* Featured Badge */}
+          {variant === "featured" && (
+            <div className="absolute top-3 left-3">
+              <Badge className="border-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm">
+                ⭐ Featured
               </Badge>
             </div>
           )}
@@ -137,8 +238,8 @@ const CourseCard: React.FC<CourseCardProps> = React.memo(
             </p>
           )}
 
-          {/* Course Metadata */}
-          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+          {/* Enhanced Course Metadata with Modern Icons */}
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
             {course.estimatedDuration > 0 && (
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -151,7 +252,7 @@ const CourseCard: React.FC<CourseCardProps> = React.memo(
                 <span>{course.lessonsCount} lessons</span>
               </div>
             )}
-            {course.stats.enrollmentCount > 0 && (
+            {course.stats?.enrollmentCount > 0 && (
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
                 <span>
@@ -159,7 +260,7 @@ const CourseCard: React.FC<CourseCardProps> = React.memo(
                 </span>
               </div>
             )}
-            {course.stats.averageRating > 0 && (
+            {course.stats?.averageRating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 <span>{course.stats.averageRating.toFixed(1)}</span>
@@ -180,23 +281,23 @@ const CourseCard: React.FC<CourseCardProps> = React.memo(
               </div>
               <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                 <div
-                  className="h-2 rounded-full bg-blue-600 transition-all duration-300 dark:bg-blue-500"
+                  className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 dark:from-blue-400 dark:to-blue-500"
                   style={{ width: `${course.progress.progressPercentage}%` }}
                 />
               </div>
             </div>
           )}
 
-          {/* Author Information */}
-          <div className="flex items-center gap-3 border-t border-gray-100 pt-2 dark:border-gray-700">
-            <Avatar className="h-8 w-8">
+          {/* Enhanced Author Information with Modern Avatar */}
+          <div className="flex items-center gap-3 border-t border-gray-100 pt-3 dark:border-gray-700">
+            <Avatar className="h-9 w-9 ring-2 ring-gray-100 dark:ring-gray-700">
               {course.author.avatarUrl ? (
                 <Image
                   src={course.author.avatarUrl}
                   alt={course.author.name}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 text-sm font-medium text-white">

@@ -16,6 +16,61 @@
 import { z } from "zod";
 import type { Id } from "../../convex/_generated/dataModel";
 
+// =============================================================================
+// ZOD VALIDATION SCHEMAS (Must be defined before use)
+// =============================================================================
+
+/**
+ * Course difficulty validation schema
+ */
+export const CourseDifficultySchema = z.enum(
+  ["beginner", "intermediate", "advanced", "expert"],
+  {
+    errorMap: () => ({
+      message: "Difficulty must be beginner, intermediate, advanced, or expert",
+    }),
+  },
+);
+
+/**
+ * Course category validation schema
+ */
+export const CourseCategorySchema = z.enum(
+  [
+    "development",
+    "design",
+    "marketing",
+    "writing",
+    "data",
+    "business",
+    "creative",
+    "technology",
+    "soft-skills",
+    "languages",
+  ],
+  {
+    errorMap: () => ({
+      message: "Please select a valid category",
+    }),
+  },
+);
+
+/**
+ * Course status validation schema
+ */
+export const CourseStatusSchema = z.enum(
+  ["draft", "published", "archived", "coming_soon", "private"],
+  {
+    errorMap: () => ({
+      message: "Invalid course status",
+    }),
+  },
+);
+
+// =============================================================================
+// TYPE DEFINITIONS
+// =============================================================================
+
 /**
  * Course difficulty levels for skill progression
  */
@@ -276,6 +331,84 @@ export interface CourseStats {
 }
 
 /**
+ * Course media assets for modern LMS experience
+ */
+export interface CourseMediaAssets {
+  /** Course thumbnail image (Convex storage ID) */
+  thumbnailId?: Id<"_storage">;
+
+  /** Course banner image (Convex storage ID) */
+  bannerId?: Id<"_storage">;
+
+  /** Course intro video (Convex storage ID) */
+  introVideoId?: Id<"_storage">;
+
+  /** Course thumbnail URL for display */
+  thumbnailUrl?: string;
+
+  /** Course banner URL for display */
+  bannerUrl?: string;
+
+  /** Course intro video URL for display */
+  introVideoUrl?: string;
+
+  /** Alternative formats and resolutions */
+  thumbnailVariants?: {
+    small?: string;
+    medium?: string;
+    large?: string;
+    webp?: string;
+  };
+
+  /** Banner responsive variants */
+  bannerVariants?: {
+    mobile?: string;
+    tablet?: string;
+    desktop?: string;
+    webp?: string;
+  };
+
+  /** Video metadata for intro video */
+  introVideoMeta?: {
+    duration?: number;
+    resolution?: string;
+    fileSize?: number;
+    format?: string;
+  };
+}
+
+/**
+ * Course pricing models with enhanced options
+ */
+export interface CoursePricingEnhanced extends CoursePricing {
+  /** Pricing type matching schema */
+  pricingType?: "free" | "one-time" | "subscription";
+
+  /** Subscription pricing details */
+  subscription?: {
+    interval: "month" | "year";
+    trialDays?: number;
+  };
+
+  /** Multi-currency support */
+  pricing?: {
+    [key in "EGP" | "USD" | "EUR"]?: {
+      amount: number;
+      currency: string;
+      symbol: string;
+    };
+  };
+
+  /** Discount campaigns */
+  campaigns?: Array<{
+    name: string;
+    discountPercent: number;
+    validUntil: number;
+    isActive: boolean;
+  }>;
+}
+
+/**
  * Course summary for catalog display
  */
 export interface CourseSummary {
@@ -290,6 +423,9 @@ export interface CourseSummary {
 
   /** Short description for cards */
   shortDescription: string;
+
+  /** Full description for detail view */
+  description?: string;
 
   /** Course author information */
   author: CourseAuthor;
@@ -318,17 +454,23 @@ export interface CourseSummary {
     estimatedDuration?: number;
   }>;
 
-  /** Course thumbnail/cover image */
+  /** Modern media assets */
+  media: CourseMediaAssets;
+
+  /** Course thumbnail/cover image (deprecated - use media.thumbnailUrl) */
   thumbnailUrl?: string;
 
-  /** Course pricing information */
-  pricing: CoursePricing;
+  /** Enhanced course pricing */
+  pricing: CoursePricingEnhanced;
 
   /** Course statistics */
   stats: CourseStats;
 
   /** Skills taught in this course */
   skills: string[];
+
+  /** Course tags for search and categorization */
+  tags: string[];
 
   /** Estimated duration (hours) */
   estimatedDuration: number;
@@ -348,6 +490,9 @@ export interface CourseSummary {
   /** Featured status */
   featured?: boolean;
 
+  /** Public visibility flag */
+  isPublic?: boolean;
+
   /** Enrollment count for compatibility */
   enrollmentCount?: number;
 
@@ -356,6 +501,15 @@ export interface CourseSummary {
 
   /** User's progress if enrolled */
   progress?: CourseProgress;
+
+  /** Advanced analytics */
+  analytics?: {
+    averageRating: number;
+    totalRatings: number;
+    completionCount: number;
+    viewCount?: number;
+    lastUpdated: number;
+  };
 }
 
 /**
@@ -397,7 +551,7 @@ export interface CourseDetail extends CourseSummary {
 }
 
 /**
- * Course module structure
+ * Course module structure with enhanced media support
  */
 export interface CourseModule {
   /** Module unique identifier */
@@ -412,21 +566,70 @@ export interface CourseModule {
   /** Module order in course */
   order: number;
 
+  /** Module order index for database compatibility */
+  orderIndex?: number;
+
+  /** Module thumbnail image (Convex storage ID) */
+  thumbnailId?: Id<"_storage">;
+
+  /** Module thumbnail URL for display */
+  thumbnailUrl?: string;
+
   /** Estimated duration (minutes) */
   estimatedDuration: number;
 
   /** Module lessons */
   lessons: CourseLesson[];
 
+  /** Lesson count for analytics */
+  lessonCount?: number;
+
   /** Whether module is locked */
   isLocked?: boolean;
 
+  /** Whether completion is required */
+  isRequired?: boolean;
+
   /** Module completion requirement */
   completionRequirement?: "all-lessons" | "percentage" | "assessment";
+
+  /** Completion tracking */
+  completionCount?: number;
+
+  /** Module creation metadata */
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 /**
- * Course lesson structure
+ * Enhanced lesson content types with modern media support
+ */
+export type EnhancedLessonContentType =
+  | "text" // Markdown content
+  | "video" // Video content (Convex storage or YouTube)
+  | "file" // File attachment (PDF, docs, etc.)
+  | "audio" // Audio content
+  | "interactive" // Interactive exercises
+  | "quiz" // Assessment
+  | "assignment" // Homework/project
+  | "live" // Live session
+  | "youtube" // YouTube video (legacy)
+  | "external"; // External content link
+
+/**
+ * Lesson content union type for flexible content storage
+ */
+export type LessonContent =
+  | { type: "text"; data: string }
+  | { type: "video"; data: Id<"_storage"> }
+  | { type: "file"; data: Id<"_storage"> }
+  | { type: "youtube"; data: string }
+  | { type: "external"; data: string };
+
+/**
+ * Course lesson structure with enhanced content support
  */
 export interface CourseLesson {
   /** Lesson unique identifier */
@@ -435,14 +638,29 @@ export interface CourseLesson {
   /** Lesson title */
   title: string;
 
-  /** Lesson content */
+  /** Lesson description */
+  description?: string;
+
+  /** Modern content type */
+  contentType: EnhancedLessonContentType;
+
+  /** Lesson content (text or storage ID) */
   content: string;
 
-  /** Content type */
-  contentType: LessonContentType;
+  /** Structured content for complex lessons */
+  contentData?: LessonContent;
+
+  /** Lesson thumbnail (Convex storage ID) */
+  thumbnailId?: Id<"_storage">;
+
+  /** Lesson thumbnail URL for display */
+  thumbnailUrl?: string;
 
   /** Lesson order in module */
   order: number;
+
+  /** Lesson order index for database compatibility */
+  orderIndex?: number;
 
   /** Estimated duration (minutes) */
   estimatedDuration: number;
@@ -450,17 +668,44 @@ export interface CourseLesson {
   /** Whether lesson is completed */
   isCompleted?: boolean;
 
-  /** Video URL if applicable */
+  /** Whether completion is required */
+  isRequired?: boolean;
+
+  /** Video URL if applicable (legacy) */
   videoUrl?: string;
 
-  /** Additional resources */
-  resources?: LessonResource[];
+  /** Lesson resource attachments (Convex storage IDs) */
+  resources?: Array<Id<"_storage">>;
+
+  /** Additional lesson resources with metadata */
+  resourcesData?: LessonResource[];
+
+  /** Completion tracking */
+  completionCount?: number;
+
+  /** Lesson creation metadata */
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: number;
+  updatedAt?: number;
+
+  /** Video player configuration */
+  videoConfig?: {
+    autoplay?: boolean;
+    showControls?: boolean;
+    allowDownload?: boolean;
+    startTime?: number;
+    endTime?: number;
+  };
 }
 
 /**
- * Lesson resource attachments
+ * Enhanced lesson resource attachments with file metadata
  */
 export interface LessonResource {
+  /** Resource ID (Convex storage ID) */
+  id?: Id<"_storage">;
+
   /** Resource title */
   title: string;
 
@@ -468,10 +713,292 @@ export interface LessonResource {
   url: string;
 
   /** Resource type */
-  type: "pdf" | "link" | "download" | "exercise";
+  type:
+    | "pdf"
+    | "link"
+    | "download"
+    | "exercise"
+    | "video"
+    | "audio"
+    | "image"
+    | "document";
 
   /** File size if applicable */
   fileSize?: string;
+
+  /** File size in bytes for sorting/filtering */
+  fileSizeBytes?: number;
+
+  /** File format/extension */
+  format?: string;
+
+  /** Download count for analytics */
+  downloadCount?: number;
+
+  /** Resource description */
+  description?: string;
+
+  /** Whether resource is required */
+  isRequired?: boolean;
+
+  /** Resource access control */
+  accessLevel?: "public" | "enrolled" | "premium";
+}
+
+/**
+ * Enhanced course creation/update validation schema with media support
+ */
+export const CourseCreateEnhancedSchema = z.object({
+  title: z
+    .string()
+    .min(5, "Course title must be at least 5 characters")
+    .max(200, "Course title must be under 200 characters"),
+
+  description: z
+    .string()
+    .min(20, "Description must be at least 20 characters")
+    .max(5000, "Description must be under 5000 characters"),
+
+  shortDescription: z
+    .string()
+    .min(10, "Short description must be at least 10 characters")
+    .max(500, "Short description must be under 500 characters")
+    .optional(),
+
+  category: CourseCategorySchema,
+
+  difficulty: CourseDifficultySchema,
+
+  status: CourseStatusSchema.default("draft"),
+
+  // Enhanced pricing with new schema structure
+  pricingType: z.enum(["free", "one-time", "subscription"]).default("free"),
+
+  price: z.number().min(0, "Price must be non-negative").optional(),
+
+  // Media asset fields (Convex storage IDs)
+  thumbnailId: z.string().optional(),
+
+  bannerId: z.string().optional(),
+
+  introVideoId: z.string().optional(),
+
+  // Legacy thumbnail URL for compatibility
+  thumbnailUrl: z.string().url("Must be a valid URL").optional(),
+
+  // Enhanced metadata
+  skills: z
+    .array(z.string())
+    .min(1, "Course must teach at least one skill")
+    .max(15, "Maximum 15 skills per course"),
+
+  tags: z.array(z.string()).max(20, "Maximum 20 tags per course"),
+
+  learningObjectives: z
+    .array(z.string())
+    .min(1, "Must specify at least one learning objective")
+    .max(10, "Maximum 10 learning objectives"),
+
+  prerequisites: z.array(z.string()).max(8, "Maximum 8 prerequisites"),
+
+  targetAudience: z
+    .array(z.string())
+    .min(1, "Must specify target audience")
+    .max(5, "Maximum 5 target audience groups"),
+
+  estimatedDuration: z
+    .number()
+    .min(0.5, "Course must be at least 30 minutes")
+    .max(500, "Course cannot exceed 500 hours"),
+
+  language: z.string().min(2, "Language must be specified").default("en"),
+
+  format: z
+    .enum(["self-paced", "instructor-led", "hybrid", "live"])
+    .default("self-paced"),
+
+  // Visibility control
+  isPublic: z.boolean().default(false),
+
+  // Advanced course settings
+  allowDownloads: z.boolean().default(false),
+
+  enableDiscussions: z.boolean().default(true),
+
+  requireSequentialProgress: z.boolean().default(false),
+
+  // Certificate settings
+  certificateEnabled: z.boolean().default(false),
+
+  certificateRequirements: z
+    .object({
+      completionRate: z.number().min(0).max(100).default(100),
+      timeSpent: z.number().min(0).optional(),
+      quizScore: z.number().min(0).max(100).optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Module creation schema with enhanced media support
+ */
+export const ModuleCreateSchema = z.object({
+  courseId: z.string().min(1, "Course ID is required"),
+
+  title: z
+    .string()
+    .min(3, "Module title must be at least 3 characters")
+    .max(200, "Module title must be under 200 characters"),
+
+  description: z
+    .string()
+    .max(1000, "Module description must be under 1000 characters")
+    .optional(),
+
+  thumbnailId: z.string().optional(),
+
+  estimatedDuration: z.number().min(1, "Must be at least 1 minute").optional(),
+
+  isRequired: z.boolean().default(true),
+
+  orderIndex: z.number().min(0).optional(),
+});
+
+/**
+ * Lesson creation schema with enhanced content types
+ */
+export const LessonCreateSchema = z.object({
+  moduleId: z.string().min(1, "Module ID is required"),
+
+  title: z
+    .string()
+    .min(3, "Lesson title must be at least 3 characters")
+    .max(200, "Lesson title must be under 200 characters"),
+
+  description: z
+    .string()
+    .max(1000, "Lesson description must be under 1000 characters")
+    .optional(),
+
+  contentType: z.enum([
+    "text",
+    "video",
+    "file",
+    "audio",
+    "interactive",
+    "quiz",
+    "assignment",
+    "live",
+    "youtube",
+    "external",
+  ]),
+
+  content: z.string().min(1, "Content is required"),
+
+  thumbnailId: z.string().optional(),
+
+  estimatedDuration: z.number().min(1, "Must be at least 1 minute").optional(),
+
+  isRequired: z.boolean().default(true),
+
+  resources: z.array(z.string()).optional(),
+
+  videoConfig: z
+    .object({
+      autoplay: z.boolean().default(false),
+      showControls: z.boolean().default(true),
+      allowDownload: z.boolean().default(false),
+      startTime: z.number().min(0).optional(),
+      endTime: z.number().min(0).optional(),
+    })
+    .optional(),
+
+  orderIndex: z.number().min(0).optional(),
+});
+
+/**
+ * File upload validation schema for course media
+ */
+export const CourseFileUploadSchema = z.object({
+  category: z.enum([
+    "course-thumbnail",
+    "course-banner",
+    "course-intro-video",
+    "module-thumbnail",
+    "lesson-video",
+    "lesson-thumbnail",
+    "lesson-resource",
+  ]),
+
+  expectedFileSize: z
+    .number()
+    .min(1)
+    .max(1024 * 1024 * 1024)
+    .optional(), // 1GB max
+
+  contentType: z.string().min(1, "Content type is required"),
+
+  fileName: z.string().min(1, "File name is required"),
+});
+
+/**
+ * Video player component props
+ */
+export interface VideoPlayerProps {
+  /** Video source - can be Convex storage ID, YouTube URL, or direct URL */
+  src: string;
+
+  /** Video type detection */
+  type?: "convex" | "youtube" | "url";
+
+  /** Video title for accessibility */
+  title?: string;
+
+  /** Video poster/thumbnail image */
+  poster?: string;
+
+  /** Player configuration */
+  config?: {
+    autoplay?: boolean;
+    controls?: boolean;
+    muted?: boolean;
+    loop?: boolean;
+    playbackRates?: number[];
+    quality?: "auto" | "high" | "medium" | "low";
+  };
+
+  /** Player dimensions */
+  width?: number | string;
+  height?: number | string;
+
+  /** Responsive aspect ratio */
+  aspectRatio?: "16:9" | "4:3" | "1:1" | "auto";
+
+  /** Player skin/theme */
+  theme?: "default" | "minimal" | "dark" | "light";
+
+  /** Event handlers */
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  onProgress?: (progress: number) => void;
+  onError?: (error: Error) => void;
+
+  /** Loading state */
+  loading?: boolean;
+
+  /** Error state */
+  error?: string;
+
+  /** Additional CSS classes */
+  className?: string;
+
+  /** Analytics tracking */
+  onAnalytics?: (event: {
+    action: "play" | "pause" | "seek" | "ended";
+    position: number;
+    duration: number;
+  }) => void;
 }
 
 /**
@@ -677,55 +1204,8 @@ export interface CourseAnalyticsEvent {
 }
 
 // =============================================================================
-// ZOD VALIDATION SCHEMAS
+// ADDITIONAL ZOD VALIDATION SCHEMAS
 // =============================================================================
-
-/**
- * Course difficulty validation schema
- */
-export const CourseDifficultySchema = z.enum(
-  ["beginner", "intermediate", "advanced", "expert"],
-  {
-    errorMap: () => ({
-      message: "Difficulty must be beginner, intermediate, advanced, or expert",
-    }),
-  },
-);
-
-/**
- * Course category validation schema
- */
-export const CourseCategorySchema = z.enum(
-  [
-    "development",
-    "design",
-    "marketing",
-    "writing",
-    "data",
-    "business",
-    "creative",
-    "technology",
-    "soft-skills",
-    "languages",
-  ],
-  {
-    errorMap: () => ({
-      message: "Please select a valid category",
-    }),
-  },
-);
-
-/**
- * Course status validation schema
- */
-export const CourseStatusSchema = z.enum(
-  ["draft", "published", "archived", "coming_soon", "private"],
-  {
-    errorMap: () => ({
-      message: "Invalid course status",
-    }),
-  },
-);
 
 /**
  * Course pricing validation schema
@@ -852,8 +1332,20 @@ export const CourseEnrollmentSchema = z.object({
 });
 
 /**
- * TypeScript type inference from schemas
+ * TypeScript type inference from enhanced schemas
  */
+export type CourseCreateEnhancedInput = z.infer<
+  typeof CourseCreateEnhancedSchema
+>;
+export type ModuleCreateInput = z.infer<typeof ModuleCreateSchema>;
+export type LessonCreateInput = z.infer<typeof LessonCreateSchema>;
+export type CourseFileUploadInput = z.infer<typeof CourseFileUploadSchema>;
+
+// Type aliases for backward compatibility
+export type CourseCreateEnhanced = CourseCreateEnhancedInput;
+export type ModuleCreate = ModuleCreateInput;
+export type LessonCreate = LessonCreateInput;
+
 export type CourseCreateInput = z.infer<typeof CourseCreateSchema>;
 export type CourseSearchInput = z.infer<typeof CourseSearchSchema>;
 export type CourseEnrollmentInput = z.infer<typeof CourseEnrollmentSchema>;

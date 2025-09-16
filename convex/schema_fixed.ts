@@ -6,16 +6,6 @@ const schema = defineSchema({
     // --- Core Identity & Authentication ---
     clerkId: v.string(), // The unique identifier from the Clerk authentication service.
     email: v.string(), // The user's primary email address, used for notifications.
-    // Legacy price field for backward compatibility
-    price: v.optional(v.number()),
-    // Legacy pricing type for backward compatibility
-    pricingType: v.optional(
-      v.union(
-        v.literal("free"),
-        v.literal("one-time"),
-        v.literal("subscription"),
-      ),
-    ),
     name: v.string(), // The user's full name for display purposes.
     avatarUrl: v.optional(v.string()), // Optional URL to the user's avatar image.
 
@@ -103,8 +93,6 @@ const schema = defineSchema({
             linkedinUrl: v.optional(v.string()), // LinkedIn profile URL
           }),
         ),
-        lessonsCompleted: v.optional(v.number()),
-        lastActivityAt: v.optional(v.number()),
 
         // Profile metadata
         completeness: v.optional(v.number()), // Cached completeness percentage (0-100)
@@ -335,15 +323,6 @@ const schema = defineSchema({
         v.literal("expert"),
       ),
     ),
-    // Alias for backward compatibility
-    difficultyLevel: v.optional(
-      v.union(
-        v.literal("beginner"),
-        v.literal("intermediate"),
-        v.literal("advanced"),
-        v.literal("expert"),
-      ),
-    ),
     status: v.optional(
       v.union(
         v.literal("draft"),
@@ -379,8 +358,6 @@ const schema = defineSchema({
         ),
       }),
     ),
-    // Legacy price field for backward compatibility
-    price: v.optional(v.number()),
 
     // --- Course Content Structure ---
     learningObjectives: v.optional(v.array(v.string())),
@@ -412,8 +389,6 @@ const schema = defineSchema({
 
     // --- Standard System Fields ---
     updatedAt: v.number(),
-    lastUpdated: v.optional(v.number()), // Alias for backward compatibility
-    updatedBy: v.optional(v.string()), // Last user who updated the course
     createdBy: v.string(),
     deletedAt: v.optional(v.number()),
   })
@@ -439,9 +414,7 @@ const schema = defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     order: v.number(), // The sequence of this module within the course
-    orderIndex: v.optional(v.number()), // Alias for backward compatibility
     estimatedDuration: v.optional(v.number()), // Duration in minutes
-    lessonCount: v.optional(v.number()), // Number of lessons in this module
 
     // --- Module Media Assets ---
     thumbnailId: v.optional(v.id("_storage")), // Module thumbnail
@@ -459,7 +432,6 @@ const schema = defineSchema({
     // --- Module Status & Visibility ---
     isPublished: v.optional(v.boolean()),
     isLocked: v.optional(v.boolean()),
-    isRequired: v.optional(v.boolean()), // Whether module is required for completion
 
     // --- Standard System Fields ---
     updatedAt: v.number(),
@@ -478,7 +450,6 @@ const schema = defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     order: v.number(), // The sequence of this lesson within the module
-    orderIndex: v.optional(v.number()), // Alias for backward compatibility
     estimatedDuration: v.optional(v.number()), // Duration in minutes
 
     // --- Lesson Content (Union type for flexibility) ---
@@ -495,7 +466,6 @@ const schema = defineSchema({
       v.literal("assignment"),
       v.literal("live"),
       v.literal("external"), // For YouTube, Vimeo, etc.
-      v.literal("file"), // For uploaded files
     ),
 
     // --- Additional Media Assets ---
@@ -598,7 +568,6 @@ const schema = defineSchema({
 
     // Enrollment details
     enrolledAt: v.number(), // Enrollment timestamp
-    createdAt: v.optional(v.number()), // Alias for backward compatibility
     status: v.union(
       v.literal("active"),
       v.literal("completed"),
@@ -848,18 +817,6 @@ const schema = defineSchema({
     .index("by_user_course", ["userId", "courseId"]),
 
   // --- Logging Service Tables ---
-
-  adminLogs: defineTable({
-    // Admin action tracking
-    action: v.string(), // Action performed
-    details: v.any(), // Action details and context
-    userId: v.string(), // Admin user who performed the action
-    timestamp: v.number(), // Action timestamp
-    createdAt: v.number(), // Creation timestamp
-  })
-    .index("by_user", ["userId"])
-    .index("by_action", ["action"])
-    .index("by_timestamp", ["timestamp"]),
 
   logs: defineTable({
     // Core log data
