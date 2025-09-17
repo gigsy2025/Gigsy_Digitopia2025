@@ -137,8 +137,8 @@ function detectVideoSource(url: string): VideoSource["type"] {
 function extractYouTubeId(url: string): string | null {
   const regex =
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  const match = regex.exec(url);
+  return match?.[1] ?? null;
 }
 
 function formatTime(seconds: number): string {
@@ -193,15 +193,32 @@ function YouTubePlayer({
     settings.autoplay ? "&autoplay=1" : ""
   }${settings.loop ? "&loop=1" : ""}&controls=${settings.showControls ? 1 : 0}`;
 
+  // Define type for YouTube message data
+  interface YouTubeMessageData {
+    event: string;
+    // Add other expected properties as needed
+  }
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== "https://www.youtube.com") return;
 
       try {
-        const data = JSON.parse(event.data);
-        if (data.event === "video-ready") {
-          setIsReady(true);
-          onStateChange({ isLoading: false });
+        // Only parse if data is a string
+        if (typeof event.data === "string") {
+          const parsedData = JSON.parse(event.data);
+          // Validate the parsed data has the expected structure
+          if (
+            typeof parsedData === "object" &&
+            parsedData !== null &&
+            "event" in parsedData
+          ) {
+            const data = parsedData as YouTubeMessageData;
+            if (data.event === "video-ready") {
+              setIsReady(true);
+              onStateChange({ isLoading: false });
+            }
+          }
         }
       } catch (error) {
         console.warn("Failed to parse YouTube message:", error);
@@ -664,10 +681,35 @@ function PlayerControls({
 }
 
 // =============================================================================
+// TYPES AND INTERFACES
+// =============================================================================
+
+interface KiboVideoPlayerProps extends VideoPlayerProps {
+  videoId?: string;
+  description?: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  controls?: boolean;
+  responsive?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  onTimeUpdate?: (time: number) => void;
+  onError?: (error: Error) => void;
+  onProgress?: (progress: number) => void;
+}
+
+// =============================================================================
 // MAIN KIBO VIDEO PLAYER COMPONENT
 // =============================================================================
 
-export const KiboVideoPlayer = forwardRef<KiboVideoPlayerRef, VideoPlayerProps>(
+export const KiboVideoPlayer = forwardRef<
+  KiboVideoPlayerRef,
+  KiboVideoPlayerProps
+>(
   (
     {
       src,
@@ -752,7 +794,7 @@ export const KiboVideoPlayer = forwardRef<KiboVideoPlayerRef, VideoPlayerProps>(
         if (newState.currentTime !== undefined && onTimeUpdate) {
           onTimeUpdate(newState.currentTime);
         }
-        if (newState.error && onError) onError(newState.error);
+        if (newState.error && onError) onError(new Error(newState.error));
       },
       [onPlay, onPause, onTimeUpdate, onError],
     );
@@ -987,7 +1029,7 @@ export const KiboVideoPlayer = forwardRef<KiboVideoPlayerRef, VideoPlayerProps>(
     };
 
     return (
-      <Card className={cn("overflow-hidden", className)} {...props}>
+      <Card className={cn("overflow-hidden", className)} style={props.style}>
         <CardContent className="p-0">
           <div
             ref={containerRef}

@@ -198,7 +198,7 @@ export function EnhancedCourseVideoPlayer({
 
       try {
         await updateLessonProgress({
-          lessonId: lesson._id,
+          lessonId: lesson.id,
           courseId,
           moduleId,
           watchedDuration: currentTime,
@@ -208,7 +208,7 @@ export function EnhancedCourseVideoPlayer({
 
         // Track analytics
         await trackVideoAnalytics({
-          lessonId: lesson._id,
+          lessonId: lesson.id,
           eventType: "progress_update",
           data: {
             currentTime,
@@ -239,7 +239,7 @@ export function EnhancedCourseVideoPlayer({
       }
     },
     [
-      lesson._id,
+      lesson.id,
       courseId,
       moduleId,
       lastProgressUpdate,
@@ -255,13 +255,13 @@ export function EnhancedCourseVideoPlayer({
 
     try {
       await markLessonComplete({
-        lessonId: lesson._id,
+        lessonId: lesson.id,
         courseId,
         moduleId,
       });
 
       await trackVideoAnalytics({
-        lessonId: lesson._id,
+        lessonId: lesson.id,
         eventType: "lesson_completed",
         data: {
           totalWatchTime: watchProgress.watchedDuration,
@@ -296,7 +296,7 @@ export function EnhancedCourseVideoPlayer({
       toast.error("Failed to save completion status. Please try again.");
     }
   }, [
-    lesson._id,
+    lesson.id,
     courseId,
     moduleId,
     watchProgress.isCompleted,
@@ -316,11 +316,11 @@ export function EnhancedCourseVideoPlayer({
     setError(null);
 
     trackVideoAnalytics({
-      lessonId: lesson._id,
+      lessonId: lesson.id,
       eventType: "video_play",
       data: { currentTime: videoRef.current?.currentTime || 0 },
     });
-  }, [lesson._id, trackVideoAnalytics]);
+  }, [lesson.id, trackVideoAnalytics]);
 
   const handlePause = useCallback(() => {
     setIsTracking(false);
@@ -331,11 +331,11 @@ export function EnhancedCourseVideoPlayer({
     }
 
     trackVideoAnalytics({
-      lessonId: lesson._id,
+      lessonId: lesson.id,
       eventType: "video_pause",
       data: { currentTime: videoRef.current?.currentTime || 0 },
     });
-  }, [lesson._id, saveProgress, trackVideoAnalytics]);
+  }, [lesson.id, saveProgress, trackVideoAnalytics]);
 
   const handleTimeUpdate = useCallback(() => {
     if (!isTracking || !videoRef.current) return;
@@ -361,7 +361,7 @@ export function EnhancedCourseVideoPlayer({
     setIsTracking(false);
 
     trackVideoAnalytics({
-      lessonId: lesson._id,
+      lessonId: lesson.id,
       eventType: "video_ended",
       data: {
         totalDuration: videoRef.current?.duration || 0,
@@ -373,7 +373,7 @@ export function EnhancedCourseVideoPlayer({
       handleCompletion();
     }
   }, [
-    lesson._id,
+    lesson.id,
     watchProgress.isCompleted,
     handleCompletion,
     trackVideoAnalytics,
@@ -386,11 +386,11 @@ export function EnhancedCourseVideoPlayer({
     setIsTracking(false);
 
     trackVideoAnalytics({
-      lessonId: lesson._id,
+      lessonId: lesson.id,
       eventType: "video_error",
       data: { error: "Video load failed" },
     });
-  }, [lesson._id, trackVideoAnalytics]);
+  }, [lesson.id, trackVideoAnalytics]);
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
@@ -524,14 +524,10 @@ export function EnhancedCourseVideoPlayer({
                 </Badge>
               )}
 
-              {lesson.isFree && (
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-800"
-                >
-                  Free Preview
-                </Badge>
-              )}
+              {/* Free lesson badge removed - property does not exist */}
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                Free Preview
+              </Badge>
             </div>
           </div>
 

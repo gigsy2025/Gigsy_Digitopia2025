@@ -429,7 +429,7 @@ function getMaxFileSizeForCategory(category: string): number {
     other: 50 * 1024 * 1024, // 50MB
   };
 
-  return sizeMap[category] ?? sizeMap.other;
+  return sizeMap[category] ?? sizeMap.other ?? 50 * 1024 * 1024; // 50MB default
 }
 
 /**

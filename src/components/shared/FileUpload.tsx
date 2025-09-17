@@ -19,9 +19,9 @@
 
 "use client";
 
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -245,9 +245,13 @@ export function FileUpload({
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Convex mutations
+  // Convex mutations and queries
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveFileMetadata = useMutation(api.files.saveFileMetadata);
+  const fileMetadata = useQuery(
+    api.files.getFileMetadata,
+    value ? { storageId: value } : "skip",
+  );
 
   // Get configuration for this category
   const config = FILE_CONFIG[category];
@@ -256,10 +260,45 @@ export function FileUpload({
   const uploadLabel = label || config.label;
   const uploadDescription = description || config.description;
 
+  // Sync upload state with existing file metadata
+  useEffect(() => {
+    if (value && fileMetadata) {
+      console.log(
+        `[FileUpload] Loaded file metadata for value:`,
+        value,
+        fileMetadata,
+      );
+      setUploadState({
+        isUploading: false,
+        progress: 100,
+        error: null,
+        previewUrl: null, // We'll handle preview URL separately for existing files
+        fileName: fileMetadata.originalName,
+        fileSize: fileMetadata.fileSize,
+      });
+    } else if (!value) {
+      // Reset state when no value is provided
+      console.log(`[FileUpload] No value provided, resetting upload state.`);
+      setUploadState({
+        isUploading: false,
+        progress: 0,
+        error: null,
+        previewUrl: null,
+        fileName: null,
+        fileSize: null,
+      });
+    }
+  }, [value, fileMetadata]);
+
   // Handle file upload
   const handleUpload = useCallback(
     async (file: File) => {
-      if (disabled) return;
+      if (disabled) {
+        console.warn(`[FileUpload] Upload attempted while disabled.`);
+        return;
+      }
+
+      console.log(`[FileUpload] handleUpload called for file:`, file);
 
       // Validate file size
       if (file.size > fileSizeLimit) {
@@ -267,6 +306,7 @@ export function FileUpload({
         setUploadState((prev) => ({ ...prev, error }));
         onError?.(error);
         toast.error(error);
+        console.error(`[FileUpload] File size validation failed:`, error);
         return;
       }
 
@@ -283,12 +323,14 @@ export function FileUpload({
           fileName: file.name,
           fileSize: file.size,
         });
+        console.log(`[FileUpload] Starting upload for:`, file.name);
 
         // Generate upload URL with permission validation
         const uploadUrl = await generateUploadUrl({
           category,
           expectedFileSize: file.size,
         });
+        console.log(`[FileUpload] Upload URL generated:`, uploadUrl);
 
         // Upload file to Convex storage
         const uploadResponse = await fetch(uploadUrl, {
@@ -299,10 +341,15 @@ export function FileUpload({
         });
 
         if (!uploadResponse.ok) {
+          console.error(
+            `[FileUpload] Upload failed:`,
+            uploadResponse.statusText,
+          );
           throw new Error(`Upload failed: ${uploadResponse.statusText}`);
         }
 
         const { storageId } = await uploadResponse.json();
+        console.log(`[FileUpload] File uploaded. Storage ID:`, storageId);
 
         // Extract video metadata if applicable
         let duration: number | undefined;
@@ -315,6 +362,7 @@ export function FileUpload({
 
         if (file.type.startsWith("image/")) {
           dimensions = await getImageDimensions(file);
+          console.log(`[FileUpload] Image dimensions:`, dimensions);
         }
 
         // Save file metadata
@@ -328,6 +376,10 @@ export function FileUpload({
           dimensions,
           isPublic: ["course-thumbnail", "course-banner"].includes(category),
         });
+        console.log(
+          `[FileUpload] File metadata saved. Metadata ID:`,
+          metadataId,
+        );
 
         setUploadState((prev) => ({
           ...prev,
@@ -335,11 +387,13 @@ export function FileUpload({
           progress: 100,
         }));
 
-        onUpload(storageId);
+        onUpload(storageId as Id<"_storage">);
         toast.success(`${uploadLabel} uploaded successfully`);
+        console.log(`[FileUpload] Upload complete for:`, file.name);
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
           toast.info("Upload cancelled");
+          console.warn(`[FileUpload] Upload cancelled by user.`);
         } else {
           const errorMessage =
             error instanceof Error ? error.message : "Upload failed";
@@ -350,9 +404,11 @@ export function FileUpload({
           }));
           onError?.(errorMessage);
           toast.error(errorMessage);
+          console.error(`[FileUpload] Upload error:`, errorMessage);
         }
       } finally {
         abortControllerRef.current = null;
+        console.log(`[FileUpload] Upload process finished.`);
       }
     },
     [
@@ -371,6 +427,7 @@ export function FileUpload({
   const handleCancel = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      console.log(`[FileUpload] Upload cancelled by user.`);
     }
     setUploadState((prev) => ({
       ...prev,
@@ -389,19 +446,24 @@ export function FileUpload({
       fileName: null,
       fileSize: null,
     });
-  }, []);
+    // Clear the form value by calling onUpload with undefined
+    onUpload(undefined as any);
+    console.log(`[FileUpload] File cleared and form value reset.`);
+  }, [onUpload]);
 
   // Dropzone configuration
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
       onDrop: (acceptedFiles) => {
-        if (acceptedFiles.length > 0) {
-          handleUpload(acceptedFiles[0]);
+        if (acceptedFiles.length > 0 && acceptedFiles[0]) {
+          handleUpload(acceptedFiles[0]).catch((error) => {
+            console.error("Upload failed:", error);
+          });
         }
       },
       accept: fileAccept,
       maxFiles: 1,
-      disabled: disabled || uploadState.isUploading,
+      disabled: disabled || uploadState.isUploading || Boolean(value),
       maxSize: fileSizeLimit,
     });
 
@@ -433,18 +495,35 @@ export function FileUpload({
             <div className="space-y-2">
               <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
               <Progress value={uploadState.progress} className="w-full" />
-              <Button size="sm" variant="outline" onClick={handleCancel}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleCancel}
+              >
                 Cancel
               </Button>
             </div>
-          ) : uploadState.fileName ? (
+          ) : uploadState.fileName || (value && fileMetadata) ? (
             <div className="space-y-2">
               <Check className="mx-auto h-6 w-6 text-green-600" />
-              <p className="text-sm font-medium">{uploadState.fileName}</p>
-              <p className="text-xs text-gray-500">
-                {uploadState.fileSize && formatFileSize(uploadState.fileSize)}
+              <p className="text-sm font-medium">
+                {uploadState.fileName ||
+                  fileMetadata?.originalName ||
+                  "Uploaded file"}
               </p>
-              <Button size="sm" variant="outline" onClick={handleClear}>
+              <p className="text-xs text-gray-500">
+                {(uploadState.fileSize || fileMetadata?.fileSize) &&
+                  formatFileSize(
+                    uploadState.fileSize || fileMetadata?.fileSize || 0,
+                  )}
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleClear}
+              >
                 Remove
               </Button>
             </div>
@@ -516,11 +595,11 @@ export function FileUpload({
                     {uploadState.progress}% complete
                   </p>
                 </div>
-                <Button variant="outline" onClick={handleCancel}>
+                <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel Upload
                 </Button>
               </div>
-            ) : uploadState.fileName ? (
+            ) : uploadState.fileName || (value && fileMetadata) ? (
               <div className="space-y-4">
                 <div className="flex flex-col items-center space-y-3">
                   {showPreview && uploadState.previewUrl ? (
@@ -530,24 +609,37 @@ export function FileUpload({
                       className="h-24 w-24 rounded-lg object-cover"
                     />
                   ) : (
-                    React.createElement(getFileIcon(uploadState.fileName), {
-                      className: "h-12 w-12 text-green-600",
-                    })
+                    React.createElement(
+                      getFileIcon(
+                        uploadState.fileName ||
+                          fileMetadata?.originalName ||
+                          "unknown",
+                      ),
+                      {
+                        className: "h-12 w-12 text-green-600",
+                      },
+                    )
                   )}
                   <Check className="h-6 w-6 text-green-600" />
                 </div>
 
                 <div className="space-y-1">
-                  <p className="font-medium">{uploadState.fileName}</p>
-                  {uploadState.fileSize && (
+                  <p className="font-medium">
+                    {uploadState.fileName ||
+                      fileMetadata?.originalName ||
+                      "Uploaded file"}
+                  </p>
+                  {(uploadState.fileSize || fileMetadata?.fileSize) && (
                     <p className="text-sm text-gray-500">
-                      {formatFileSize(uploadState.fileSize)}
+                      {formatFileSize(
+                        uploadState.fileSize || fileMetadata?.fileSize || 0,
+                      )}
                     </p>
                   )}
                 </div>
 
                 <div className="flex space-x-2">
-                  <Button variant="outline" onClick={handleClear}>
+                  <Button type="button" variant="outline" onClick={handleClear}>
                     <X className="mr-2 h-4 w-4" />
                     Remove
                   </Button>
@@ -568,7 +660,9 @@ export function FileUpload({
                     Max size: {formatFileSize(fileSizeLimit)}
                   </p>
                 </div>
-                <Button variant="outline">Choose File</Button>
+                <Button type="button" variant="outline">
+                  Choose File
+                </Button>
               </div>
             )}
           </div>

@@ -369,12 +369,16 @@ export const getLearningAnalytics = query({
 
     for (let i = activityDates.length - 1; i >= 0; i--) {
       const date = activityDates[i];
+      if (!date) continue;
+
       if (date === today || date === yesterday) {
         tempStreak++;
+        const nextDate = activityDates[i + 1];
         if (
           i === activityDates.length - 1 ||
-          new Date(activityDates[i + 1]).getTime() - new Date(date).getTime() <=
-            24 * 60 * 60 * 1000
+          (nextDate &&
+            new Date(nextDate).getTime() - new Date(date).getTime() <=
+              24 * 60 * 60 * 1000)
         ) {
           currentStreak = tempStreak;
         }
@@ -387,10 +391,14 @@ export const getLearningAnalytics = query({
     for (let i = 0; i < activityDates.length; i++) {
       tempStreak = 1;
       for (let j = i + 1; j < activityDates.length; j++) {
+        const currentDate = activityDates[j];
+        const previousDate = activityDates[j - 1];
+
         if (
-          new Date(activityDates[j]).getTime() -
-            new Date(activityDates[j - 1]).getTime() <=
-          24 * 60 * 60 * 1000
+          currentDate &&
+          previousDate &&
+          new Date(currentDate).getTime() - new Date(previousDate).getTime() <=
+            24 * 60 * 60 * 1000
         ) {
           tempStreak++;
         } else {

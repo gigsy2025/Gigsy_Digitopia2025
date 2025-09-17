@@ -165,32 +165,24 @@ export function EnhancedCourseVideoPlayer({
   });
 
   // Custom hooks for video functionality
-  const { currentTime, duration, isPlaying } = useVideoTime(videoRef);
-  const { progress, updateProgress } = useVideoProgress(currentTime, duration);
+  const { state: videoState } = useVideoPlayer(
+    videoRef as React.RefObject<HTMLVideoElement>,
+  );
+  const { currentTime, duration, isPlaying } = videoState;
   const {
     play,
     pause,
     seek,
     setVolume,
     setPlaybackRate,
-    enterFullscreen,
-    exitFullscreen,
-  } = useVideoControls(videoRef);
+    skipForward,
+    skipBackward,
+  } = useVideoControls(videoRef as React.RefObject<HTMLVideoElement>);
 
-  const { trackEvent } = useVideoAnalytics(
-    lesson.id,
-    courseId,
-    moduleId,
-    sessionId,
-    trackVideoAnalytics,
-  );
+  const { trackEvent } = useVideoAnalytics(lesson.id.toString());
 
-  const { saveProgress } = useAutoSave(
-    lesson.id,
-    courseId,
-    moduleId,
-    updateLessonProgress,
-    5000, // Save every 5 seconds
+  const { handleProgressUpdate: handleAutoSave, lastSaveTime } = useAutoSave(
+    lesson.id.toString(),
   );
 
   // Progress tracking with backend integration
@@ -216,17 +208,19 @@ export function EnhancedCourseVideoPlayer({
 
         await trackVideoAnalytics({
           lessonId: lesson.id,
-          courseId,
-          moduleId,
           eventType: "progress_update",
-          eventData: {
-            currentTime,
-            duration,
-            percentage,
+          data: {
+            courseId,
+            moduleId,
+            eventData: {
+              currentTime,
+              duration,
+              percentage,
+              sessionId,
+              timestamp: Date.now(),
+              createdAt: Date.now(),
+            },
           },
-          sessionId,
-          timestamp: Date.now(),
-          createdAt: Date.now(),
         });
 
         setLastProgressUpdate(now);
@@ -272,16 +266,21 @@ export function EnhancedCourseVideoPlayer({
 
       await trackVideoAnalytics({
         lessonId: lesson.id,
-        courseId,
-        moduleId,
         eventType: "lesson_completed",
-        eventData: {
-          totalWatchTime: watchProgress.watchedDuration,
-          completionRate: 100,
+        data: {
+          courseId,
+          moduleId,
+          sessionId,
+          eventData: {
+            totalWatchTime: watchProgress.watchedDuration,
+            completionRate: 100,
+            currentTime,
+            duration,
+            sessionId,
+            timestamp: Date.now(),
+            createdAt: Date.now(),
+          },
         },
-        sessionId,
-        timestamp: Date.now(),
-        createdAt: Date.now(),
       });
 
       setWatchProgress((prev) => ({ ...prev, isCompleted: true }));
@@ -311,43 +310,24 @@ export function EnhancedCourseVideoPlayer({
   // Video event handlers
   const handlePlay = useCallback(() => {
     setIsTracking(true);
-    trackEvent({
+    trackEvent("video_play", {
       lessonId: lesson.id,
-      courseId,
-      moduleId,
-      eventType: "video_play",
-      eventData: { currentTime: currentTime },
+      currentTime: currentTime,
       sessionId,
-      timestamp: Date.now(),
-      createdAt: Date.now(),
     });
-  }, [lesson.id, trackEvent, currentTime, courseId, moduleId, sessionId]);
+  }, [lesson.id, trackEvent, currentTime, sessionId]);
 
   const handlePause = useCallback(() => {
     setIsTracking(false);
     if (currentTime && duration) {
-      saveProgress(currentTime, duration);
+      handleAutoSave(currentTime, duration);
     }
-    trackEvent({
+    trackEvent("video_pause", {
       lessonId: lesson.id,
-      courseId,
-      moduleId,
-      eventType: "video_pause",
-      eventData: { currentTime: currentTime },
+      currentTime: currentTime,
       sessionId,
-      timestamp: Date.now(),
-      createdAt: Date.now(),
     });
-  }, [
-    lesson.id,
-    saveProgress,
-    trackEvent,
-    currentTime,
-    duration,
-    courseId,
-    moduleId,
-    sessionId,
-  ]);
+  }, [lesson.id, handleAutoSave, trackEvent, currentTime, duration, sessionId]);
 
   const handleTimeUpdate = useCallback(() => {
     if (!isTracking || !currentTime || !duration) return;
@@ -361,26 +341,23 @@ export function EnhancedCourseVideoPlayer({
     }));
 
     // Save to backend periodically
-    handleProgressUpdate(currentTime, duration);
+    handleProgressUpdate(currentTime, duration).catch((error) => {
+      console.error("Failed to update progress:", error);
+    });
   }, [isTracking, currentTime, duration, handleProgressUpdate]);
 
   const handleEnded = useCallback(() => {
     setIsTracking(false);
     if (!watchProgress.isCompleted) {
-      handleCompletion();
+      handleCompletion().catch((error) => {
+        console.error("Failed to complete lesson:", error);
+      });
     }
-    trackEvent({
+    trackEvent("video_ended", {
       lessonId: lesson.id,
-      courseId,
-      moduleId,
-      eventType: "video_ended",
-      eventData: {
-        totalWatchTime: currentTime,
-        completionRate: 100,
-      },
+      totalWatchTime: currentTime,
+      completionRate: 100,
       sessionId,
-      timestamp: Date.now(),
-      createdAt: Date.now(),
     });
   }, [
     lesson.id,
@@ -388,30 +365,25 @@ export function EnhancedCourseVideoPlayer({
     handleCompletion,
     trackEvent,
     currentTime,
-    courseId,
-    moduleId,
     sessionId,
   ]);
 
   const handleError = useCallback(() => {
     setError("Failed to load video");
-    trackEvent({
+    trackEvent("video_error", {
       lessonId: lesson.id,
-      courseId,
-      moduleId,
-      eventType: "video_error",
-      eventData: { error: "Video load failed" },
+      error: "Video load failed",
       sessionId,
-      timestamp: Date.now(),
-      createdAt: Date.now(),
     });
-  }, [lesson.id, trackEvent, courseId, moduleId, sessionId]);
+  }, [lesson.id, trackEvent, sessionId]);
 
   // Action handlers
   const handleResumeVideo = useCallback(() => {
     if (watchProgress.watchedDuration > 30 && videoRef.current) {
       videoRef.current.currentTime = watchProgress.watchedDuration;
-      play();
+      play().catch((error) => {
+        console.error("Failed to play video:", error);
+      });
       toast.info(`Resumed from ${formatTime(watchProgress.watchedDuration)}`);
     }
   }, [watchProgress.watchedDuration, play]);
@@ -524,10 +496,7 @@ export function EnhancedCourseVideoPlayer({
 
       {/* Enhanced Video Player */}
       <div className="relative">
-        <MediaController
-          ref={mediaControllerRef}
-          className="w-full overflow-hidden rounded-lg bg-black"
-        >
+        <MediaController className="w-full overflow-hidden rounded-lg bg-black">
           <video
             ref={videoRef}
             src={videoSrc}
@@ -557,7 +526,7 @@ export function EnhancedCourseVideoPlayer({
             <MediaTimeRange />
             <MediaMuteButton />
             <MediaVolumeRange />
-            <MediaPlaybackRateButton rates="0.5,0.75,1,1.25,1.5,2" />
+            <MediaPlaybackRateButton rates={[0.5, 0.75, 1, 1.25, 1.5, 2]} />
             <MediaFullscreenButton />
           </MediaControlBar>
         </MediaController>
@@ -569,7 +538,7 @@ export function EnhancedCourseVideoPlayer({
               <Award className="mx-auto h-12 w-12 text-yellow-500" />
               <h3 className="text-lg font-semibold">Lesson Complete!</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Great job! You've successfully completed this lesson.
+                Great job! You&apos;ve successfully completed this lesson.
               </p>
             </div>
           </div>

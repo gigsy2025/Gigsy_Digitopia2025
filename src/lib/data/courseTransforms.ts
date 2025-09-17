@@ -172,7 +172,18 @@ export function transformConvexCourse(
 
     // Skills and metadata
     skills: convexCourse.skills ?? [],
+    tags: [],
     estimatedDuration: convexCourse.estimatedDuration ?? 0,
+
+    // Media assets
+    media: {
+      thumbnailUrl: convexCourse.thumbnailUrl ?? "/default-course.jpg",
+      bannerUrl: convexCourse.thumbnailUrl,
+      introVideoUrl: undefined,
+      thumbnailId: undefined,
+      bannerId: undefined,
+      introVideoId: undefined,
+    },
 
     // Timestamps
     createdAt: convexCourse._creationTime,
@@ -254,7 +265,19 @@ export function createEmptyCourseSummary(): CourseSummary {
       recentEnrollments: 0,
     },
     skills: [],
+    tags: [],
     estimatedDuration: 0,
+
+    // Media assets
+    media: {
+      thumbnailUrl: "/default-course.jpg",
+      bannerUrl: undefined,
+      introVideoUrl: undefined,
+      thumbnailId: undefined,
+      bannerId: undefined,
+      introVideoId: undefined,
+    },
+
     createdAt: 0,
     updatedAt: 0,
     rating: 0,

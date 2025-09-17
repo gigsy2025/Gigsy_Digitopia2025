@@ -210,7 +210,7 @@ export function useVideoProgress(
   onProgressSave?: (progress: number) => Promise<void>,
 ) {
   const [lastSaveTime, setLastSaveTime] = useState(0);
-  const saveIntervalRef = useRef<NodeJS.Timeout>();
+  const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const saveProgress = useCallback(
     throttle(async (progress: number) => {
@@ -357,7 +357,7 @@ export function useVideoControls(videoRef: React.RefObject<HTMLVideoElement>) {
   );
 
   const skipForward = useCallback(
-    (seconds: number = 10) => {
+    (seconds = 10) => {
       if (videoRef.current) {
         const newTime = Math.min(
           videoRef.current.currentTime + seconds,
@@ -370,7 +370,7 @@ export function useVideoControls(videoRef: React.RefObject<HTMLVideoElement>) {
   );
 
   const skipBackward = useCallback(
-    (seconds: number = 10) => {
+    (seconds = 10) => {
       if (videoRef.current) {
         const newTime = Math.max(videoRef.current.currentTime - seconds, 0);
         videoRef.current.currentTime = newTime;
@@ -414,7 +414,7 @@ export function useVideoKeyboardShortcuts(
         case "Space":
           event.preventDefault();
           if (videoRef.current?.paused) {
-            controls.play();
+            void controls.play();
           } else {
             controls.pause();
           }
@@ -447,9 +447,9 @@ export function useVideoKeyboardShortcuts(
           event.preventDefault();
           if (videoRef.current) {
             if (document.fullscreenElement) {
-              document.exitFullscreen();
+              void document.exitFullscreen();
             } else {
-              videoRef.current.requestFullscreen();
+              void videoRef.current.requestFullscreen();
             }
           }
           break;
@@ -468,7 +468,7 @@ export function useVideoKeyboardShortcuts(
  */
 export function useVideoResume(
   videoRef: React.RefObject<HTMLVideoElement>,
-  savedProgress: number = 0,
+  savedProgress = 0,
 ) {
   const [showResumePrompt, setShowResumePrompt] = useState(false);
 
@@ -522,7 +522,7 @@ export function getVideoPlayerProps(overrides: any = {}) {
  */
 export function getVideoPlayerClasses(
   aspectRatio: "16:9" | "4:3" | "1:1" = "16:9",
-  additionalClasses: string = "",
+  additionalClasses = "",
 ) {
   const aspectClass = {
     "16:9": "aspect-video",
@@ -533,7 +533,17 @@ export function getVideoPlayerClasses(
   return `overflow-hidden rounded-lg border ${aspectClass} ${additionalClasses}`.trim();
 }
 
-export default {
+// =============================================================================
+// ADDITIONAL EXPORTS AND ALIASES
+// =============================================================================
+
+// Export commonly used aliases
+export const formatTime = formatVideoTime;
+export const useVideoTime = useVideoPlayer;
+export const useAutoSave = useVideoProgress;
+
+// Export the video player utilities object
+const videoPlayerUtils = {
   formatVideoTime,
   calculateProgress,
   isConvexVideo,
@@ -547,4 +557,9 @@ export default {
   useVideoResume,
   getVideoPlayerProps,
   getVideoPlayerClasses,
+  formatTime,
+  useVideoTime,
+  useAutoSave,
 };
+
+export default videoPlayerUtils;

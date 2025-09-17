@@ -129,7 +129,7 @@ export class CacheManager {
   ): Promise<void> {
     const fullKey = this.config.keyPrefix + key;
     const now = Date.now();
-    const ttl = options?.ttl || this.config.defaultTtl;
+    const ttl = options?.ttl ?? this.config.defaultTtl;
 
     let processedValue = value;
     let compressed = false;
@@ -263,7 +263,12 @@ export class CacheManager {
       }
 
       return new Uint8Array(
-        chunks.reduce((acc, chunk) => [...acc, ...chunk], []),
+        chunks.reduce((acc, chunk) => {
+          const newArray = new Uint8Array(acc.length + chunk.length);
+          newArray.set(acc);
+          newArray.set(chunk, acc.length);
+          return newArray;
+        }, new Uint8Array(0)),
       );
     }
 
@@ -283,7 +288,9 @@ export class CacheManager {
       const writer = stream.writable.getWriter();
       const reader = stream.readable.getReader();
 
-      await writer.write(data);
+      // Create a new Uint8Array with a regular ArrayBuffer
+      const dataArray = new Uint8Array(data);
+      await writer.write(dataArray);
       await writer.close();
 
       const chunks: Uint8Array[] = [];
@@ -296,7 +303,12 @@ export class CacheManager {
       }
 
       const decompressed = new TextDecoder().decode(
-        new Uint8Array(chunks.reduce((acc, chunk) => [...acc, ...chunk], [])),
+        chunks.reduce((acc, chunk) => {
+          const newArray = new Uint8Array(acc.length + chunk.length);
+          newArray.set(acc);
+          newArray.set(chunk, acc.length);
+          return newArray;
+        }, new Uint8Array(0)),
       );
 
       return JSON.parse(decompressed);
@@ -339,9 +351,14 @@ export class CacheManager {
   private async evictLeastRecentlyUsed(): Promise<void> {
     if (this.accessOrder.size === 0) return;
 
-    const lruKey = Array.from(this.accessOrder.entries()).sort(
+    const entries = Array.from(this.accessOrder.entries()).sort(
       ([, a], [, b]) => a - b,
-    )[0][0];
+    );
+
+    const firstEntry = entries[0];
+    if (!firstEntry) return;
+
+    const lruKey = firstEntry[0];
 
     this.cache.delete(lruKey);
     this.accessOrder.delete(lruKey);

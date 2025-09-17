@@ -59,11 +59,13 @@ export const DEFAULT_IMAGE_CONFIG: ImageOptimizationConfig = {
 export class ImageOptimizer {
   private static instance: ImageOptimizer;
   private config: ImageOptimizationConfig;
-  private formatSupport: Map<string, boolean> = new Map();
+  private formatSupport: Map<string, boolean> = new Map<string, boolean>();
 
   private constructor(config: ImageOptimizationConfig = DEFAULT_IMAGE_CONFIG) {
     this.config = config;
-    this.detectFormatSupport();
+    this.detectFormatSupport().catch((error) => {
+      console.error("Failed to detect image format support:", error);
+    });
   }
 
   public static getInstance(config?: ImageOptimizationConfig): ImageOptimizer {
@@ -179,7 +181,7 @@ export class ImageOptimizer {
       urlObj.searchParams.set("h", options.height.toString());
     }
 
-    const quality = options?.quality || this.getOptimalQuality();
+    const quality = options?.quality ?? this.getOptimalQuality();
     urlObj.searchParams.set("q", quality.toString());
 
     if (options?.crop) {
@@ -263,6 +265,7 @@ export function useIntersectionObserver(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         const isElementIntersecting = entry.isIntersecting;
         setIsIntersecting(isElementIntersecting);
 
@@ -319,7 +322,9 @@ export class ImageCache {
     if (this.cache.size >= this.maxSize) {
       // Remove oldest entry
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(url, data);
   }

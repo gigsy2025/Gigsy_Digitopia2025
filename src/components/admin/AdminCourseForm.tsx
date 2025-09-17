@@ -30,6 +30,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useMutation, useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
@@ -118,16 +119,42 @@ import type { Id } from "convex/_generated/dataModel";
 // TYPES AND INTERFACES
 // =============================================================================
 
-interface CourseFormData extends CourseCreateEnhanced {
+// Form data structure that matches Convex mutations
+interface CourseFormData {
+  title: string;
+  description: string;
+  shortDescription?: string;
+  difficultyLevel: "beginner" | "intermediate" | "advanced";
+  pricingType: "free" | "one-time" | "subscription";
+  price?: number;
+  estimatedDuration?: number;
+  tags: string[];
+  skills: string[];
+  thumbnailId?: string;
+  bannerId?: string;
+  introVideoId?: string;
+  isPublic?: boolean;
   modules: ModuleFormData[];
 }
 
-interface ModuleFormData extends ModuleCreate {
+interface ModuleFormData {
+  title: string;
+  description?: string;
+  thumbnailId?: string;
+  estimatedDuration?: number;
+  isRequired?: boolean;
   lessons: LessonFormData[];
   isExpanded?: boolean;
 }
 
-interface LessonFormData extends LessonCreate {
+interface LessonFormData {
+  title: string;
+  description?: string;
+  contentType: "text" | "video" | "file";
+  content: string;
+  thumbnailId?: string;
+  estimatedDuration?: number;
+  isRequired?: boolean;
   isExpanded?: boolean;
 }
 
@@ -146,25 +173,23 @@ interface FormProgress {
 // =============================================================================
 
 const COURSE_CATEGORIES = [
-  "web-development",
-  "mobile-development",
-  "data-science",
-  "machine-learning",
+  "development",
   "design",
-  "business",
   "marketing",
-  "photography",
-  "music",
-  "language",
-  "other",
+  "writing",
+  "data",
+  "business",
+  "creative",
+  "technology",
+  "soft-skills",
+  "languages",
 ] as const;
 
-const COURSE_LEVELS = [
-  "beginner",
-  "intermediate",
-  "advanced",
-  "expert",
-] as const;
+const COURSE_LEVELS = ["beginner", "intermediate", "advanced"] as const;
+
+const PRICING_TYPES = ["free", "one-time", "subscription"] as const;
+
+const CONTENT_TYPES = ["text", "video", "file"] as const;
 
 const COURSE_LANGUAGES = [
   "en",
@@ -173,18 +198,9 @@ const COURSE_LANGUAGES = [
   "de",
   "it",
   "pt",
-  "ru",
   "zh",
   "ja",
   "ko",
-] as const;
-
-const CONTENT_TYPES = [
-  "video",
-  "text",
-  "quiz",
-  "assignment",
-  "resource",
 ] as const;
 
 // =============================================================================
@@ -197,7 +213,7 @@ function AdminAccessGuard({ children }: { children: React.ReactNode }) {
   // Check admin role from Clerk metadata
   const isAdmin =
     user?.publicMetadata?.role === "admin" ||
-    user?.privateMetadata?.role === "admin";
+    user?.unsafeMetadata?.role === "admin";
 
   if (!isLoaded) {
     return (
@@ -249,7 +265,7 @@ function StepNavigation({
     {
       key: "media",
       label: "Media Assets",
-      icon: <Image className="h-4 w-4" />,
+      icon: <Image className="h-4 w-4" aria-hidden="true" />,
     },
     {
       key: "structure",
@@ -273,8 +289,10 @@ function StepNavigation({
       {steps.map((step, index) => {
         const isActive = currentStep === step.key;
         const isCompleted = completedSteps.includes(step.key);
+        const previousStep = index > 0 ? steps[index - 1] : undefined;
         const isAccessible =
-          index === 0 || completedSteps.includes(steps[index - 1].key);
+          index === 0 ||
+          (previousStep && completedSteps.includes(previousStep.key));
 
         return (
           <button
@@ -320,34 +338,66 @@ export function AdminCourseForm() {
     isDraft: false,
   });
 
+  // Debug: Log form state changes
+  useEffect(() => {
+    console.log("[AdminCourseForm] Form progress state:", formProgress);
+  }, [formProgress]);
+
   // Convex mutations
   const createCourse = useMutation(api.coursesMutations.createCourse);
   const createModule = useMutation(api.coursesMutations.createModule);
   const createLesson = useMutation(api.coursesMutations.createLesson);
 
-  // Form setup
-  const form = useForm<CourseFormData>({
-    resolver: zodResolver(
-      CourseCreateEnhancedSchema.extend({
-        modules: ModuleCreateSchema.extend({
-          lessons: LessonCreateSchema.array(),
-        }).array(),
+  // Form setup with schema that matches our interface
+  const formSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    shortDescription: z.string().optional(),
+    difficultyLevel: z.enum(["beginner", "intermediate", "advanced"]),
+    pricingType: z.enum(["free", "one-time", "subscription"]),
+    price: z.number().min(0).optional(),
+    estimatedDuration: z.number().min(0).optional(),
+    tags: z.array(z.string()),
+    skills: z.array(z.string()),
+    thumbnailId: z.string().optional(),
+    bannerId: z.string().optional(),
+    introVideoId: z.string().optional(),
+    isPublic: z.boolean().optional(),
+    modules: z.array(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        thumbnailId: z.string().optional(),
+        estimatedDuration: z.number().min(0).optional(),
+        isRequired: z.boolean().optional(),
+        lessons: z.array(
+          z.object({
+            title: z.string().min(1),
+            description: z.string().optional(),
+            contentType: z.enum(["text", "video", "file"]),
+            content: z.string().min(1),
+            thumbnailId: z.string().optional(),
+            estimatedDuration: z.number().min(0).optional(),
+            isRequired: z.boolean().optional(),
+          }),
+        ),
       }),
     ),
+  });
+
+  const form = useForm<CourseFormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      description: "",
       shortDescription: "",
-      longDescription: "",
-      category: "web-development",
-      level: "beginner",
-      language: "en",
-      tags: [],
-      isPublished: false,
-      isFeatured: false,
+      difficultyLevel: "beginner",
+      pricingType: "free",
       price: 0,
-      discountPrice: 0,
-      currency: "USD",
-      enrollmentLimit: undefined,
+      estimatedDuration: 0,
+      tags: [],
+      skills: [],
+      isPublic: false,
       modules: [],
     },
     mode: "onBlur",
@@ -378,16 +428,35 @@ export function AdminCourseForm() {
     }));
   }, []);
 
+  // Memoized completion handlers to prevent infinite re-renders
+  const handleBasicStepComplete = useCallback(
+    () => markStepCompleted("media"),
+    [markStepCompleted],
+  );
+  const handleMediaStepComplete = useCallback(
+    () => markStepCompleted("structure"),
+    [markStepCompleted],
+  );
+  const handleStructureStepComplete = useCallback(
+    () => markStepCompleted("pricing"),
+    [markStepCompleted],
+  );
+  const handlePricingStepComplete = useCallback(
+    () => markStepCompleted("review"),
+    [markStepCompleted],
+  );
+
   // Add new module
   const handleAddModule = useCallback(() => {
     appendModule({
       title: "",
       description: "",
-      orderIndex: moduleFields.length,
-      isPublished: false,
+      thumbnailId: undefined,
+      estimatedDuration: 0,
+      isRequired: true,
       lessons: [],
     });
-  }, [appendModule, moduleFields.length]);
+  }, [appendModule]);
 
   // Add new lesson to module
   const handleAddLesson = useCallback(
@@ -399,74 +468,100 @@ export function AdminCourseForm() {
         {
           title: "",
           description: "",
-          contentType: "video",
-          orderIndex: currentLessons.length,
-          isPublished: false,
-          isFree: false,
+          contentType: "text" as const,
+          content: "",
+          thumbnailId: undefined,
           estimatedDuration: 0,
+          isRequired: true,
         },
       ]);
     },
     [form],
   );
 
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      console.log("[AdminCourseForm] Form values:", values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   // Handle form submission
   const handleSubmit = useCallback(
     async (data: CourseFormData) => {
+      console.log("[AdminCourseForm] handleSubmit called with data:", data);
       setFormProgress((prev) => ({ ...prev, isSubmitting: true }));
 
       try {
-        // Create the course
-        const courseId = await createCourse({
+        // Create the course with the correct field mapping
+        console.log("[AdminCourseForm] Creating course with:", {
           title: data.title,
+          description: data.description,
           shortDescription: data.shortDescription,
-          longDescription: data.longDescription,
-          category: data.category,
-          level: data.level,
-          language: data.language,
+          difficultyLevel: data.difficultyLevel,
+          pricingType: data.pricingType,
+          price: data.price,
+          estimatedDuration: data.estimatedDuration,
           tags: data.tags,
+          skills: data.skills,
           thumbnailId: data.thumbnailId,
           bannerId: data.bannerId,
           introVideoId: data.introVideoId,
-          price: data.price,
-          discountPrice: data.discountPrice,
-          currency: data.currency,
-          enrollmentLimit: data.enrollmentLimit,
-          isPublished: data.isPublished,
-          isFeatured: data.isFeatured,
+          isPublic: data.isPublic,
         });
+        const courseId = await createCourse({
+          title: data.title,
+          description: data.description,
+          shortDescription: data.shortDescription,
+          difficultyLevel: data.difficultyLevel,
+          pricingType: data.pricingType,
+          price: data.price,
+          estimatedDuration: data.estimatedDuration,
+          tags: data.tags,
+          skills: data.skills,
+          thumbnailId: data.thumbnailId as Id<"_storage"> | undefined,
+          bannerId: data.bannerId as Id<"_storage"> | undefined,
+          introVideoId: data.introVideoId as Id<"_storage"> | undefined,
+          isPublic: data.isPublic,
+        });
+        console.log("[AdminCourseForm] Course created with ID:", courseId);
 
         // Create modules and lessons
         for (const moduleData of data.modules) {
+          console.log("[AdminCourseForm] Creating module:", moduleData);
           const moduleId = await createModule({
             courseId,
             title: moduleData.title,
             description: moduleData.description,
-            orderIndex: moduleData.orderIndex,
-            thumbnailId: moduleData.thumbnailId,
-            isPublished: moduleData.isPublished,
+            thumbnailId: moduleData.thumbnailId as Id<"_storage"> | undefined,
+            estimatedDuration: moduleData.estimatedDuration,
+            isRequired: moduleData.isRequired,
           });
+          console.log("[AdminCourseForm] Module created with ID:", moduleId);
 
           for (const lessonData of moduleData.lessons) {
+            console.log("[AdminCourseForm] Creating lesson:", lessonData);
             await createLesson({
-              courseId,
               moduleId,
               title: lessonData.title,
               description: lessonData.description,
               contentType: lessonData.contentType,
-              contentUrl: lessonData.contentUrl,
-              videoId: lessonData.videoId,
-              thumbnailId: lessonData.thumbnailId,
-              textContent: lessonData.textContent,
-              orderIndex: lessonData.orderIndex,
+              content: lessonData.content,
+              thumbnailId: lessonData.thumbnailId as Id<"_storage"> | undefined,
               estimatedDuration: lessonData.estimatedDuration,
-              isPublished: lessonData.isPublished,
-              isFree: lessonData.isFree,
+              isRequired: lessonData.isRequired,
             });
+            console.log(
+              "[AdminCourseForm] Lesson created for module:",
+              moduleId,
+            );
           }
         }
 
         toast.success("Course created successfully!");
+        console.log(
+          "[AdminCourseForm] Course creation complete. Resetting form.",
+        );
 
         // Reset form or redirect
         form.reset();
@@ -477,10 +572,13 @@ export function AdminCourseForm() {
           isDraft: false,
         });
       } catch (error) {
-        console.error("Failed to create course:", error);
+        console.error("[AdminCourseForm] Failed to create course:", error);
         toast.error("Failed to create course. Please try again.");
       } finally {
         setFormProgress((prev) => ({ ...prev, isSubmitting: false }));
+        console.log(
+          "[AdminCourseForm] Submission finished. isSubmitting set to false.",
+        );
       }
     },
     [createCourse, createModule, createLesson, form],
@@ -491,17 +589,11 @@ export function AdminCourseForm() {
     switch (formProgress.currentStep) {
       case "basic":
         return (
-          <BasicInfoStep
-            form={form}
-            onComplete={() => markStepCompleted("basic")}
-          />
+          <BasicInfoStep form={form} onComplete={handleBasicStepComplete} />
         );
       case "media":
         return (
-          <MediaAssetsStep
-            form={form}
-            onComplete={() => markStepCompleted("media")}
-          />
+          <MediaAssetsStep form={form} onComplete={handleMediaStepComplete} />
         );
       case "structure":
         return (
@@ -511,15 +603,12 @@ export function AdminCourseForm() {
             onAddModule={handleAddModule}
             onRemoveModule={removeModule}
             onAddLesson={handleAddLesson}
-            onComplete={() => markStepCompleted("structure")}
+            onComplete={handleStructureStepComplete}
           />
         );
       case "pricing":
         return (
-          <PricingStep
-            form={form}
-            onComplete={() => markStepCompleted("pricing")}
-          />
+          <PricingStep form={form} onComplete={handlePricingStepComplete} />
         );
       case "review":
         return (
@@ -593,19 +682,20 @@ function BasicInfoStep({
   form: any;
   onComplete: () => void;
 }) {
-  const watchedFields = form.watch([
-    "title",
-    "shortDescription",
-    "category",
-    "level",
-  ]);
+  const watchedFields = form.watch(["title", "description", "difficultyLevel"]);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    const [title, shortDescription, category, level] = watchedFields;
-    if (title && shortDescription && category && level) {
+    const [title, description, difficultyLevel] = watchedFields;
+    const shouldComplete = title && description && difficultyLevel;
+
+    if (shouldComplete && !isCompleted) {
+      setIsCompleted(true);
       onComplete();
+    } else if (!shouldComplete && isCompleted) {
+      setIsCompleted(false);
     }
-  }, [watchedFields, onComplete]);
+  }, [watchedFields, onComplete, isCompleted]);
 
   return (
     <Card>
@@ -640,20 +730,19 @@ function BasicInfoStep({
 
           <FormField
             control={form.control}
-            name="shortDescription"
+            name="description"
             render={({ field }) => (
               <FormItem className="lg:col-span-2">
-                <Label>Short Description *</Label>
+                <Label>Course Description *</Label>
                 <FormControl>
                   <Textarea
-                    placeholder="Brief overview of the course content and outcomes..."
+                    placeholder="Comprehensive description of the course content and outcomes..."
                     rows={3}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  A concise summary that appears in course listings (max 200
-                  characters)
+                  A detailed description that appears on the course page
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -662,25 +751,23 @@ function BasicInfoStep({
 
           <FormField
             control={form.control}
-            name="category"
+            name="difficultyLevel"
             render={({ field }) => (
               <FormItem>
-                <Label>Category *</Label>
+                <Label>Difficulty Level *</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder="Select difficulty level" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {COURSE_CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category
-                          .replace("-", " ")
-                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {COURSE_LEVELS.map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {level.charAt(0).toUpperCase() + level.slice(1)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -692,23 +779,23 @@ function BasicInfoStep({
 
           <FormField
             control={form.control}
-            name="level"
+            name="pricingType"
             render={({ field }) => (
               <FormItem>
-                <Label>Difficulty Level *</Label>
+                <Label>Pricing Type</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select difficulty" />
+                      <SelectValue placeholder="Select pricing type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {COURSE_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                    {PRICING_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -774,29 +861,107 @@ function BasicInfoStep({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="skills"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Skills *</Label>
+                <FormControl>
+                  <Input
+                    placeholder="javascript, react, frontend (comma separated)"
+                    value={field.value?.join(", ") || ""}
+                    onChange={(e) => {
+                      const skills = e.target.value
+                        .split(",")
+                        .map((skill) => skill.trim())
+                        .filter(Boolean);
+                      field.onChange(skills);
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  What skills will students learn from this course?
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <FormField
           control={form.control}
-          name="longDescription"
+          name="shortDescription"
           render={({ field }) => (
             <FormItem>
-              <Label>Detailed Description</Label>
+              <Label>Short Description</Label>
               <FormControl>
                 <Textarea
-                  placeholder="Provide a comprehensive description of what students will learn, course structure, prerequisites, and outcomes..."
-                  rows={8}
+                  placeholder="Brief overview of the course content..."
+                  rows={3}
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                Detailed course information that helps students understand what
-                they'll gain
+                Optional short description for course listings
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Price</Label>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormDescription>Set to 0 for free courses</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="estimatedDuration"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Estimated Duration (hours)</Label>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    placeholder="10.5"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormDescription>
+                  Total estimated time to complete the course
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );
@@ -1063,7 +1228,7 @@ function ModuleEditor({
           <div className="flex items-center justify-between border-t pt-4">
             <FormField
               control={form.control}
-              name={`modules.${moduleIndex}.isPublished`}
+              name={`modules.${moduleIndex}.isRequired`}
               render={({ field }) => (
                 <FormItem className="flex items-center space-x-2">
                   <FormControl>
@@ -1299,7 +1464,7 @@ function LessonEditor({
 
           <FormField
             control={form.control}
-            name={`modules.${moduleIndex}.lessons.${lessonIndex}.isPublished`}
+            name={`modules.${moduleIndex}.lessons.${lessonIndex}.isRequired`}
             render={({ field }) => (
               <FormItem className="flex items-center space-x-2 pt-6">
                 <FormControl>
@@ -1426,7 +1591,7 @@ function PricingStep({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <FormField
             control={form.control}
-            name="isPublished"
+            name="isPublic"
             render={({ field }) => (
               <FormItem className="flex items-center space-x-3 rounded-lg border p-4">
                 <FormControl>
@@ -1439,27 +1604,6 @@ function PricingStep({
                   <Label>Publish Course</Label>
                   <FormDescription>
                     Make this course visible to students
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="isFeatured"
-            render={({ field }) => (
-              <FormItem className="flex items-center space-x-3 rounded-lg border p-4">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1">
-                  <Label>Featured Course</Label>
-                  <FormDescription>
-                    Highlight this course on the homepage
                   </FormDescription>
                 </div>
               </FormItem>
@@ -1566,7 +1710,7 @@ function ReviewStep({
           </Button>
 
           <Button
-            type="submit"
+            type="button"
             onClick={form.handleSubmit(onSubmit)}
             disabled={isSubmitting}
             className="min-w-32"

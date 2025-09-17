@@ -152,7 +152,9 @@ export class VideoOptimizer {
       });
     } else {
       // Fallback: Estimate based on loading performance
-      this.estimateConnectionQuality();
+      this.estimateConnectionQuality().catch((err) => {
+        console.warn("Failed to estimate connection quality:", err);
+      });
     }
   }
 
@@ -215,50 +217,62 @@ export class VideoOptimizer {
       case "slow":
         // Prefer 240p or 360p for slow connections
         return (
-          sortedQualities.find((q) => q.quality === "240p") ||
-          sortedQualities.find((q) => q.quality === "360p") ||
-          sortedQualities[0]
+          sortedQualities.find((q) => q.quality === "240p") ??
+          sortedQualities.find((q) => q.quality === "360p") ??
+          sortedQualities[0] ?? { url: "", quality: "240p", format: "mp4" }
         );
 
       case "medium":
         // Prefer 480p for medium connections, 360p for mobile
         if (viewportWidth < 768) {
           return (
-            sortedQualities.find((q) => q.quality === "360p") ||
-            sortedQualities[0]
+            sortedQualities.find((q) => q.quality === "360p") ??
+            sortedQualities[0] ?? { url: "", quality: "360p", format: "mp4" }
           );
         }
         return (
-          sortedQualities.find((q) => q.quality === "480p") ||
-          sortedQualities.find((q) => q.quality === "360p") ||
-          sortedQualities[0]
+          sortedQualities.find((q) => q.quality === "480p") ??
+          sortedQualities.find((q) => q.quality === "360p") ??
+          sortedQualities[0] ?? { url: "", quality: "480p", format: "mp4" }
         );
 
       case "fast":
         // Prefer HD for fast connections
         if (viewportWidth >= 1920) {
           return (
-            sortedQualities.find((q) => q.quality === "1080p") ||
-            sortedQualities.find((q) => q.quality === "720p") ||
-            sortedQualities[sortedQualities.length - 1]
+            sortedQualities.find((q) => q.quality === "1080p") ??
+            sortedQualities.find((q) => q.quality === "720p") ??
+            sortedQualities[sortedQualities.length - 1] ?? {
+              url: "",
+              quality: "1080p",
+              format: "mp4",
+            }
           );
         } else if (viewportWidth >= 1280) {
           return (
-            sortedQualities.find((q) => q.quality === "720p") ||
-            sortedQualities.find((q) => q.quality === "480p") ||
-            sortedQualities[sortedQualities.length - 1]
+            sortedQualities.find((q) => q.quality === "720p") ??
+            sortedQualities.find((q) => q.quality === "480p") ??
+            sortedQualities[sortedQualities.length - 1] ?? {
+              url: "",
+              quality: "720p",
+              format: "mp4",
+            }
           );
         }
         return (
-          sortedQualities.find((q) => q.quality === "480p") ||
-          sortedQualities[0]
+          sortedQualities.find((q) => q.quality === "480p") ??
+          sortedQualities[0] ?? { url: "", quality: "480p", format: "mp4" }
         );
 
       default:
         // Auto quality - let browser decide
         return (
-          sortedQualities.find((q) => q.quality === "auto") ||
-          sortedQualities[Math.floor(sortedQualities.length / 2)]
+          sortedQualities.find((q) => q.quality === "auto") ??
+          sortedQualities[Math.floor(sortedQualities.length / 2)] ?? {
+            url: "",
+            quality: "auto",
+            format: "mp4",
+          }
         );
     }
   }
@@ -266,7 +280,7 @@ export class VideoOptimizer {
   /**
    * Add video to preload queue
    */
-  public queueForPreload(url: string, priority: number = 1): void {
+  public queueForPreload(url: string, priority = 1): void {
     if (this.loadingVideos.has(url)) return;
 
     // Remove existing queue item if present
@@ -288,7 +302,9 @@ export class VideoOptimizer {
    */
   private startQueueProcessor(): void {
     setInterval(() => {
-      this.processPreloadQueue();
+      this.processPreloadQueue().catch((err) => {
+        console.warn("Error processing preload queue:", err);
+      });
     }, 100); // Check every 100ms
   }
 
@@ -372,7 +388,7 @@ export class VideoOptimizer {
    * Get cached video metadata
    */
   public getMetadata(url: string): VideoMetadata | null {
-    return this.metadataCache.get(url) || null;
+    return this.metadataCache.get(url) ?? null;
   }
 
   /**
@@ -415,7 +431,7 @@ export class VideoOptimizer {
 /**
  * React hook for video preloading
  */
-export function useVideoPreload(videoUrls: string[], priority: number = 1) {
+export function useVideoPreload(videoUrls: string[], priority = 1) {
   const optimizer = VideoOptimizer.getInstance();
 
   React.useEffect(() => {
@@ -473,14 +489,14 @@ export function useVideoLazyLoading(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setShouldLoad(true);
           observer.unobserve(videoElement);
         }
       },
       {
-        rootMargin: options?.rootMargin || "100px",
-        threshold: options?.threshold || 0.1,
+        rootMargin: options?.rootMargin ?? "100px",
+        threshold: options?.threshold ?? 0.1,
       },
     );
 

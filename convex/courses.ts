@@ -409,6 +409,9 @@ export const create = mutation({
 
     // For now, we'll use a placeholder authorId - in production this should come from auth context
     const placeholderUserId = "j97a5q4s1t4w6z8e9n7d0f1g3h5k8m2p" as Id<"users">;
+    // const user = await ctx.db.get(placeholderUserId);
+    const user = await ctx.auth.getUserIdentity();
+    console.log("[Courses Service] Authenticated user:", user);
 
     // Create the course
     const courseId = await ctx.db.insert("courses", {
@@ -416,6 +419,7 @@ export const create = mutation({
       authorId: placeholderUserId, // Should be actual authenticated user in production
       updatedAt: Date.now(),
       createdBy: "system", // Should be actual user clerk ID in production
+      language: "en", // Default language
     });
 
     return courseId;
