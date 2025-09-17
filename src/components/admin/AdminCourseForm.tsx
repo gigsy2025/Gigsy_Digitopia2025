@@ -114,59 +114,14 @@ import { FileUpload } from "@/components/shared/FileUpload";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Id } from "convex/_generated/dataModel";
-
-// =============================================================================
-// TYPES AND INTERFACES
-// =============================================================================
-
-// Form data structure that matches Convex mutations
-interface CourseFormData {
-  title: string;
-  description: string;
-  shortDescription?: string;
-  difficultyLevel: "beginner" | "intermediate" | "advanced";
-  pricingType: "free" | "one-time" | "subscription";
-  price?: number;
-  estimatedDuration?: number;
-  tags: string[];
-  skills: string[];
-  thumbnailId?: string;
-  bannerId?: string;
-  introVideoId?: string;
-  isPublic?: boolean;
-  modules: ModuleFormData[];
-}
-
-interface ModuleFormData {
-  title: string;
-  description?: string;
-  thumbnailId?: string;
-  estimatedDuration?: number;
-  isRequired?: boolean;
-  lessons: LessonFormData[];
-  isExpanded?: boolean;
-}
-
-interface LessonFormData {
-  title: string;
-  description?: string;
-  contentType: "text" | "video" | "file";
-  content: string;
-  thumbnailId?: string;
-  estimatedDuration?: number;
-  isRequired?: boolean;
-  isExpanded?: boolean;
-}
-
-type FormStep = "basic" | "media" | "structure" | "pricing" | "review";
-
-interface FormProgress {
-  currentStep: FormStep;
-  completedSteps: FormStep[];
-  isSubmitting: boolean;
-  isDraft: boolean;
-  lastSaved?: Date;
-}
+import { validateStep, validateAll } from "@/lib/validation/stepValidator";
+import type {
+  CourseFormData,
+  FormStep,
+  FormProgress,
+  ModuleFormData,
+  LessonFormData,
+} from "@/types/course";
 
 // =============================================================================
 // FORM CONFIGURATION
@@ -412,6 +367,26 @@ export function AdminCourseForm() {
     name: "modules",
   });
 
+  /**
+   * Updates the completion status of a specific step.
+   * @param step The step to update.
+   * @param isValid Whether the step is valid and should be marked as complete.
+   */
+  const updateStepCompletion = useCallback(
+    (step: FormStep, isValid: boolean) => {
+      setFormProgress((prev) => {
+        const completed = new Set(prev.completedSteps);
+        if (isValid) {
+          completed.add(step);
+        } else {
+          completed.delete(step);
+        }
+        return { ...prev, completedSteps: Array.from(completed) };
+      });
+    },
+    [],
+  );
+
   // Handle step navigation
   const handleStepChange = useCallback((step: FormStep) => {
     setFormProgress((prev) => ({
@@ -420,30 +395,26 @@ export function AdminCourseForm() {
     }));
   }, []);
 
-  // Mark step as completed
-  const markStepCompleted = useCallback((step: FormStep) => {
-    setFormProgress((prev) => ({
-      ...prev,
-      completedSteps: Array.from(new Set([...prev.completedSteps, step])),
-    }));
-  }, []);
+  /**
+   * Validates the current step and moves to the next one if valid.
+   * @param currentStep The step being completed.
+   * @param nextStep The step to navigate to upon success.
+   */
+  const handleStepComplete = useCallback(
+    (currentStep: FormStep, nextStep: FormStep) => {
+      const formData = form.getValues();
+      const isValid = validateStep(formData, currentStep);
+      updateStepCompletion(currentStep, isValid);
 
-  // Memoized completion handlers to prevent infinite re-renders
-  const handleBasicStepComplete = useCallback(
-    () => markStepCompleted("media"),
-    [markStepCompleted],
-  );
-  const handleMediaStepComplete = useCallback(
-    () => markStepCompleted("structure"),
-    [markStepCompleted],
-  );
-  const handleStructureStepComplete = useCallback(
-    () => markStepCompleted("pricing"),
-    [markStepCompleted],
-  );
-  const handlePricingStepComplete = useCallback(
-    () => markStepCompleted("review"),
-    [markStepCompleted],
+      if (isValid) {
+        handleStepChange(nextStep);
+      } else {
+        toast.error("Please complete all required fields before proceeding.");
+        // Trigger validation to show error messages
+        form.trigger();
+      }
+    },
+    [form, updateStepCompletion, handleStepChange],
   );
 
   // Add new module
@@ -455,6 +426,7 @@ export function AdminCourseForm() {
       estimatedDuration: 0,
       isRequired: true,
       lessons: [],
+      isExpanded: true,
     });
   }, [appendModule]);
 
@@ -473,6 +445,7 @@ export function AdminCourseForm() {
           thumbnailId: undefined,
           estimatedDuration: 0,
           isRequired: true,
+          isExpanded: true,
         },
       ]);
     },
@@ -480,16 +453,42 @@ export function AdminCourseForm() {
   );
 
   useEffect(() => {
-    const subscription = form.watch((values) => {
-      console.log("[AdminCourseForm] Form values:", values);
+    const subscription = form.watch((values, { name }) => {
+      console.log(
+        "[AdminCourseForm] Form values changed, changed field:",
+        name,
+      );
+      // When form values change, re-validate any steps that were marked as complete
+      formProgress.completedSteps.forEach((step) => {
+        const isValid = validateStep(values as CourseFormData, step);
+        if (!isValid) {
+          // If a completed step becomes invalid, remove it from the completed list
+          updateStepCompletion(step, false);
+        }
+      });
     });
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, formProgress.completedSteps, updateStepCompletion]);
 
   // Handle form submission
   const handleSubmit = useCallback(
     async (data: CourseFormData) => {
       console.log("[AdminCourseForm] handleSubmit called with data:", data);
+
+      // Final validation before submission
+      if (!validateAll(data)) {
+        toast.error("Please ensure all steps are correctly filled out.");
+        // Find the first invalid step and navigate to it
+        const steps: FormStep[] = ["basic", "media", "structure", "pricing"];
+        const firstInvalidStep = steps.find(
+          (step) => !validateStep(data, step),
+        );
+        if (firstInvalidStep) {
+          handleStepChange(firstInvalidStep);
+        }
+        return;
+      }
+
       setFormProgress((prev) => ({ ...prev, isSubmitting: true }));
 
       try {
@@ -581,7 +580,7 @@ export function AdminCourseForm() {
         );
       }
     },
-    [createCourse, createModule, createLesson, form],
+    [createCourse, createModule, createLesson, form, handleStepChange],
   );
 
   // Render step content
@@ -589,11 +588,17 @@ export function AdminCourseForm() {
     switch (formProgress.currentStep) {
       case "basic":
         return (
-          <BasicInfoStep form={form} onComplete={handleBasicStepComplete} />
+          <BasicInfoStep
+            form={form}
+            onComplete={() => handleStepComplete("basic", "media")}
+          />
         );
       case "media":
         return (
-          <MediaAssetsStep form={form} onComplete={handleMediaStepComplete} />
+          <MediaAssetsStep
+            form={form}
+            onComplete={() => handleStepComplete("media", "structure")}
+          />
         );
       case "structure":
         return (
@@ -603,12 +608,15 @@ export function AdminCourseForm() {
             onAddModule={handleAddModule}
             onRemoveModule={removeModule}
             onAddLesson={handleAddLesson}
-            onComplete={handleStructureStepComplete}
+            onComplete={() => handleStepComplete("structure", "pricing")}
           />
         );
       case "pricing":
         return (
-          <PricingStep form={form} onComplete={handlePricingStepComplete} />
+          <PricingStep
+            form={form}
+            onComplete={() => handleStepComplete("pricing", "review")}
+          />
         );
       case "review":
         return (
@@ -616,6 +624,7 @@ export function AdminCourseForm() {
             form={form}
             onSubmit={handleSubmit}
             isSubmitting={formProgress.isSubmitting}
+            completedSteps={formProgress.completedSteps}
           />
         );
       default:
@@ -682,20 +691,13 @@ function BasicInfoStep({
   form: any;
   onComplete: () => void;
 }) {
-  const watchedFields = form.watch(["title", "description", "difficultyLevel"]);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const pricingType = form.watch("pricingType");
 
   useEffect(() => {
-    const [title, description, difficultyLevel] = watchedFields;
-    const shouldComplete = title && description && difficultyLevel;
-
-    if (shouldComplete && !isCompleted) {
-      setIsCompleted(true);
-      onComplete();
-    } else if (!shouldComplete && isCompleted) {
-      setIsCompleted(false);
+    if (pricingType === "free") {
+      form.setValue("price", 0);
     }
-  }, [watchedFields, onComplete, isCompleted]);
+  }, [pricingType, form]);
 
   return (
     <Card>
@@ -925,6 +927,7 @@ function BasicInfoStep({
                     step="0.01"
                     placeholder="0.00"
                     {...field}
+                    disabled={pricingType === "free"}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
@@ -961,6 +964,11 @@ function BasicInfoStep({
               </FormItem>
             )}
           />
+        </div>
+        <div className="flex justify-end">
+          <Button type="button" onClick={onComplete}>
+            Continue to Media Assets
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -1112,7 +1120,10 @@ function ModuleEditor({
   onRemove: () => void;
   onAddLesson: () => void;
 }) {
-  const lessons = form.watch(`modules.${moduleIndex}.lessons`) || [];
+  const { fields: lessonFields, remove: removeLesson } = useFieldArray({
+    control: form.control,
+    name: `modules.${moduleIndex}.lessons`,
+  });
 
   return (
     <AccordionItem
@@ -1128,7 +1139,7 @@ function ModuleEditor({
                 `Module ${moduleIndex + 1}`}
             </p>
             <p className="text-sm text-gray-500">
-              {lessons.length} lesson{lessons.length !== 1 ? "s" : ""}
+              {lessonFields.length} lesson{lessonFields.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -1204,22 +1215,13 @@ function ModuleEditor({
               </Button>
             </div>
 
-            {lessons.map((lesson: any, lessonIndex: number) => (
+            {lessonFields.map((lesson, lessonIndex) => (
               <LessonEditor
-                key={lessonIndex}
+                key={lesson.id}
                 form={form}
                 moduleIndex={moduleIndex}
                 lessonIndex={lessonIndex}
-                onRemove={() => {
-                  const currentLessons = form.getValues(
-                    `modules.${moduleIndex}.lessons`,
-                  );
-                  currentLessons.splice(lessonIndex, 1);
-                  form.setValue(
-                    `modules.${moduleIndex}.lessons`,
-                    currentLessons,
-                  );
-                }}
+                onRemove={() => removeLesson(lessonIndex)}
               />
             ))}
           </div>
@@ -1371,7 +1373,7 @@ function LessonEditor({
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name={`modules.${moduleIndex}.lessons.${lessonIndex}.videoId`}
+              name={`modules.${moduleIndex}.lessons.${lessonIndex}.content`}
               render={({ field }) => (
                 <FormItem>
                   <FileUpload
@@ -1406,7 +1408,7 @@ function LessonEditor({
         {contentType === "text" && (
           <FormField
             control={form.control}
-            name={`modules.${moduleIndex}.lessons.${lessonIndex}.textContent`}
+            name={`modules.${moduleIndex}.lessons.${lessonIndex}.content`}
             render={({ field }) => (
               <FormItem>
                 <Label>Text Content</Label>
@@ -1490,6 +1492,14 @@ function PricingStep({
   form: any;
   onComplete: () => void;
 }) {
+  const pricingType = form.watch("pricingType");
+
+  useEffect(() => {
+    if (pricingType === "free") {
+      form.setValue("price", 0);
+    }
+  }, [pricingType, form]);
+
   return (
     <Card>
       <CardHeader>
@@ -1505,14 +1515,15 @@ function PricingStep({
             name="price"
             render={({ field }) => (
               <FormItem>
-                <Label>Course Price</Label>
+                <Label>Price</Label>
                 <FormControl>
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="99.99"
+                    placeholder="0.00"
                     {...field}
+                    disabled={pricingType === "free"}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
@@ -1535,10 +1546,11 @@ function PricingStep({
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="79.99"
+                    placeholder="0.00"
                     {...field}
+                    disabled={pricingType === "free"}
                     onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
+                      field.onChange(parseFloat(e.target.value) || undefined)
                     }
                   />
                 </FormControl>
@@ -1625,10 +1637,12 @@ function ReviewStep({
   form,
   onSubmit,
   isSubmitting,
+  completedSteps,
 }: {
   form: any;
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
+  completedSteps: FormStep[];
 }) {
   const formData = form.watch();
 
@@ -1686,19 +1700,19 @@ function ReviewStep({
           <div className="space-y-2">
             <ValidationItem
               label="Basic Information"
-              isValid={!!(formData.title && formData.shortDescription)}
+              isValid={completedSteps.includes("basic")}
             />
             <ValidationItem
-              label="Course Thumbnail"
-              isValid={!!formData.thumbnailId}
+              label="Media Assets"
+              isValid={completedSteps.includes("media")}
             />
             <ValidationItem
-              label="At Least One Module"
-              isValid={formData.modules?.length > 0}
+              label="Course Structure"
+              isValid={completedSteps.includes("structure")}
             />
             <ValidationItem
               label="Pricing Information"
-              isValid={formData.price >= 0}
+              isValid={completedSteps.includes("pricing")}
             />
           </div>
         </div>
