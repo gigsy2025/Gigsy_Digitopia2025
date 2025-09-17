@@ -412,7 +412,12 @@ export function AdminCourseForm() {
       } else {
         toast.error("Please complete all required fields before proceeding.");
         // Trigger validation to show error messages
-        form.trigger();
+        form.trigger().catch((err) => {
+          console.error(
+            "[AdminCourseForm] Validation error on step completion:",
+            err,
+          );
+        });
       }
     },
     [form, updateStepCompletion, handleStepChange],
