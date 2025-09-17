@@ -765,87 +765,105 @@ export const getDifficultyLevels = query({
 });
 
 /**
- * Get a course by ID (alias for getById for frontend compatibility)
+ * Get a course by ID, including its modules and lessons.
+ * This is the primary query for the course details page.
  */
-export const getCourseById = query({
+export const getCourseDetails = query({
   args: { courseId: v.id("courses") },
   returns: v.union(
     v.object({
       _id: v.id("courses"),
-      _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
       shortDescription: v.optional(v.string()),
-      category: v.optional(v.string()),
-      difficulty: v.optional(v.string()),
-      status: v.optional(v.string()),
-      estimatedDuration: v.optional(v.number()),
-      pricing: v.optional(
+      author: v.object({
+        _id: v.id("users"),
+        name: v.string(),
+        avatarUrl: v.optional(v.string()),
+      }),
+      modules: v.array(
         v.object({
-          isFree: v.boolean(),
-          price: v.optional(v.number()),
-          currency: v.optional(v.string()),
-          discountPercentage: v.optional(v.number()),
-          originalPrice: v.optional(v.number()),
-          paymentType: v.optional(v.string()),
+          _id: v.id("modules"),
+          title: v.string(),
+          description: v.optional(v.string()),
+          lessons: v.array(
+            v.object({
+              _id: v.id("lessons"),
+              title: v.string(),
+              estimatedDuration: v.optional(v.number()),
+            }),
+          ),
         }),
       ),
-      authorId: v.id("users"),
-      // Additional fields for frontend compatibility
-      id: v.string(),
-      rating: v.optional(v.number()),
-      reviewCount: v.optional(v.number()),
-      enrollmentCount: v.optional(v.number()),
-      featured: v.optional(v.boolean()),
-      trending: v.optional(v.boolean()),
-      isNew: v.optional(v.boolean()),
-      learningObjectives: v.optional(v.array(v.string())),
-      modules: v.optional(
-        v.array(
-          v.object({
-            id: v.string(),
-            title: v.string(),
-            description: v.optional(v.string()),
-            estimatedDuration: v.optional(v.number()),
-            lessonCount: v.optional(v.number()),
-          }),
-        ),
-      ),
-      author: v.optional(
-        v.object({
-          name: v.string(),
-          title: v.optional(v.string()),
-          bio: v.optional(v.string()),
-          avatar: v.optional(v.string()),
-        }),
-      ),
-      userProgress: v.optional(v.number()),
     }),
     v.null(),
   ),
   handler: async (ctx, args) => {
     const course = await ctx.db.get(args.courseId);
-    if (!course) return null;
+    if (!course) {
+      return null;
+    }
 
-    // Transform course data for frontend compatibility
+    const author = await ctx.db.get(course.authorId);
+    if (!author) {
+      throw new ConvexError("Course author not found");
+    }
+
+    let authorAvatarUrl: string | null = null;
+    if (author.avatarUrl) {
+      if (author.avatarUrl.startsWith("https://")) {
+        authorAvatarUrl = author.avatarUrl;
+      } else {
+        try {
+          authorAvatarUrl = await ctx.storage.getUrl(
+            author.avatarUrl as Id<"_storage">,
+          );
+        } catch (e) {
+          console.error(
+            `[Courses Service] Failed to get avatar URL for storage ID: ${author.avatarUrl}`,
+            e,
+          );
+          // Silently fail, returning null for the avatar
+        }
+      }
+    }
+
+    const modules = await ctx.db
+      .query("modules")
+      .withIndex("by_course_order", (q) => q.eq("courseId", args.courseId))
+      .collect();
+
+    const modulesWithLessons = await Promise.all(
+      modules.map(async (module) => {
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_module_order", (q) => q.eq("moduleId", module._id))
+          .collect();
+
+        return {
+          _id: module._id,
+          title: module.title,
+          description: module.description,
+          lessons: lessons.map((lesson) => ({
+            _id: lesson._id,
+            title: lesson.title,
+            estimatedDuration: lesson.estimatedDuration,
+          })),
+        };
+      }),
+    );
+
     return {
-      ...course,
-      id: course._id,
-      rating: undefined, // Would be calculated from reviews
-      reviewCount: 0, // Would be calculated from reviews
-      enrollmentCount: 0, // Would be calculated from enrollments
-      featured: false, // These would come from additional fields in schema
-      trending: false,
-      isNew: Date.now() - course._creationTime < 30 * 24 * 60 * 60 * 1000, // 30 days
-      learningObjectives: [], // These would come from additional fields in schema
-      modules: [], // These would come from additional fields in schema
+      _id: course._id,
+      title: course.title,
+      description: course.description,
+      shortDescription: course.shortDescription,
       author: {
-        name: "Instructor", // This would come from a user lookup
-        title: "Course Instructor",
-        bio: "Expert instructor",
-        avatar: undefined,
+        _id: author._id,
+        name: author.name,
+        avatarUrl: authorAvatarUrl ?? undefined,
       },
-      userProgress: undefined, // This would come from user enrollment data
+      modules: modulesWithLessons,
     };
   },
 });

@@ -419,6 +419,81 @@ export const getLearningAnalytics = query({
   },
 });
 
+/**
+ * CONVEX LESSONS SERVICE
+ *
+ * Service for managing and retrieving individual lesson data.
+ *
+ * @author Principal Engineer
+ * @version 1.0.0
+ * @since 2025-09-16
+ */
+
+/**
+ * Get a single lesson by its ID, including its content and associated quiz questions.
+ *
+ * PERFORMANCE: This query is optimized to fetch a lesson and its related quiz data efficiently.
+ *
+ * @param lessonId - The ID of the lesson to retrieve.
+ * @returns A promise resolving to the lesson details with quiz, or null if not found.
+ * @throws {ConvexError} When the lesson is not found.
+ */
+export const getLessonById = query({
+  args: { lessonId: v.id("lessons") },
+  returns: v.union(
+    v.object({
+      lesson: v.any(), // Using v.any() for the lesson doc for now
+      quiz: v.optional(
+        v.array(
+          v.object({
+            _id: v.id("quizzes"),
+            question: v.string(),
+            options: v.array(
+              v.object({
+                _id: v.id("quizOptions"),
+                text: v.string(),
+              }),
+            ),
+          }),
+        ),
+      ),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const lesson = await ctx.db.get(args.lessonId);
+
+    if (!lesson) {
+      return null;
+    }
+
+    // Fetch associated quizzes and their options
+    const quizzes = await ctx.db
+      .query("quizzes")
+      .withIndex("by_lesson", (q) => q.eq("lessonId", args.lessonId))
+      .collect();
+
+    const quizWithWithOptions = await Promise.all(
+      quizzes.map(async (quiz) => {
+        const options = await ctx.db
+          .query("quizOptions")
+          .withIndex("by_quiz", (q) => q.eq("quizId", quiz._id))
+          .collect();
+        return {
+          _id: quiz._id,
+          question: quiz.question,
+          options: options.map((o) => ({ _id: o._id, text: o.text })),
+        };
+      }),
+    );
+
+    return {
+      lesson,
+      quiz: quizWithWithOptions,
+    };
+  },
+});
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================

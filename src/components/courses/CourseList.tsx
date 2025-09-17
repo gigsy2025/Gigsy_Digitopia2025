@@ -25,6 +25,7 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import Link from "next/link";
 
 // Enhance props to accept the detailed course data from our new query
 type DetailedCourseList = FunctionReturnType<
@@ -306,7 +307,6 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
   onColumnsChange,
   onPageChange,
   onCourseEnroll,
-  onCourseView,
   onRetry,
   onClearFilters,
 }) => {
@@ -328,13 +328,26 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
     onColumnsChange?.(newColumns);
   };
 
-  // Memoized course cards
-  const courseCards = useMemo(() => {
-    if (!courses?.courses) return [];
+  // Loading skeletons
+  const loadingSkeletons = useMemo(() => {
+    return Array.from({ length: itemsPerPage }, (_, index) => (
+      <CourseCardSkeleton key={`skeleton-${index}`} />
+    ));
+  }, [itemsPerPage]);
 
-    // Transform the detailed data into the CourseSummary shape expected by CourseCard
-    const transformedCourses: CourseSummary[] = courses.courses.map(
-      (course: DetailedCourseList["courses"][number]): CourseSummary => {
+  const courseItems = useMemo(() => {
+    if (loading) {
+      return loadingSkeletons;
+    }
+    if (!courses?.courses || courses.courses.length === 0) {
+      return (
+        <div className="col-span-full">
+          <EmptyState onAction={onClearFilters} />
+        </div>
+      );
+    }
+    return courses.courses.map(
+      (course: DetailedCourseList["courses"][number]) => {
         const author: CourseAuthor = course.author
           ? {
               id: course.author._id,
@@ -349,10 +362,10 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
         const media: CourseMediaAssets = {
           thumbnailUrl: course.thumbnailUrl,
           bannerUrl: course.bannerUrl,
-          introVideoUrl: undefined, // Not provided by the current query
+          introVideoUrl: undefined,
         };
 
-        return {
+        const courseSummary: CourseSummary = {
           id: course._id,
           title: course.title,
           shortDescription: course.description || "",
@@ -360,8 +373,8 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
           category: course.category ?? "creative",
           difficulty: course.difficultyLevel ?? "beginner",
           status: course.status ?? "draft",
-          modulesCount: 0, // Not provided by the current query
-          lessonsCount: 0, // Not provided by the current query
+          modulesCount: 0,
+          lessonsCount: 0,
           media,
           pricing: {
             isFree: course.price === undefined || course.price === 0,
@@ -369,48 +382,51 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
           },
           stats: {
             enrollmentCount: course.enrollmentCount ?? 0,
-            completionRate: 0, // Not provided
-            averageCompletionTime: 0, // Not provided
+            completionRate: 0,
+            averageCompletionTime: 0,
             averageRating: course.averageRating ?? 0,
-            ratingCount: 0, // Not provided
-            viewCount: 0, // Not provided
-            recentEnrollments: 0, // Not provided
+            ratingCount: 0,
+            viewCount: 0,
+            recentEnrollments: 0,
           },
-          skills: [], // Not provided
-          tags: [], // Not provided
+          skills: [],
+          tags: [],
           estimatedDuration: course.estimatedDuration ?? 0,
           createdAt: course._creationTime,
-          updatedAt: course._creationTime, // Not provided, fallback to creationTime
+          updatedAt: course._creationTime,
         };
+
+        return (
+          <Link
+            href={`/app/courses/${courseSummary.id}`}
+            key={courseSummary.id}
+            className="block rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          >
+            <CourseCard
+              course={courseSummary}
+              variant={localLayout === "list" ? "compact" : "default"}
+              showProgress={showProgress}
+              showEnrollButton={showEnrollButton}
+              onEnroll={
+                onCourseEnroll
+                  ? () => onCourseEnroll(courseSummary.id)
+                  : undefined
+              }
+            />
+          </Link>
+        );
       },
     );
-
-    return transformedCourses.map((course) => (
-      <CourseCard
-        key={course.id}
-        course={course}
-        variant={localLayout === "list" ? "compact" : "default"}
-        showProgress={showProgress}
-        showEnrollButton={showEnrollButton}
-        onEnroll={onCourseEnroll ? () => onCourseEnroll(course.id) : undefined}
-        onView={onCourseView ? () => onCourseView(course.id) : undefined}
-      />
-    ));
   }, [
+    loading,
     courses,
     localLayout,
     showProgress,
     showEnrollButton,
     onCourseEnroll,
-    onCourseView,
+    onClearFilters,
+    loadingSkeletons,
   ]);
-
-  // Loading skeletons
-  const loadingSkeletons = useMemo(() => {
-    return Array.from({ length: itemsPerPage }, (_, index) => (
-      <CourseCardSkeleton key={`skeleton-${index}`} />
-    ));
-  }, [itemsPerPage]);
 
   // Handle error state
   if (error) {
@@ -453,15 +469,7 @@ const CourseList: React.FC<EnhancedCourseListProps> = ({
           }),
         )}
       >
-        {loading ? (
-          loadingSkeletons
-        ) : courses.courses && courses.courses.length > 0 ? (
-          courseCards
-        ) : (
-          <div className="col-span-full">
-            <EmptyState onAction={onClearFilters} />
-          </div>
-        )}
+        {courseItems}
       </div>
 
       {/* Loading indicator for additional content */}

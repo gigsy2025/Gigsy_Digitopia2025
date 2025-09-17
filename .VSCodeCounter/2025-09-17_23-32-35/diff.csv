@@ -1,0 +1,28 @@
+"filename", "language", "JavaScript", "TypeScript", "JSON", "YAML", "TypeScript JSX", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\courses.ts", "TypeScript", 0, 95, 0, 0, 0, 2, 10, 107
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\coursesMutations.ts", "TypeScript", 0, 1, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\lessons.ts", "TypeScript", 0, 56, 0, 0, 0, 19, 8, 83
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\next.config.js", "JavaScript", 12, 0, 0, 0, 0, 0, 0, 12
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 32, 0, 0, 2, 34
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\modules\[moduleId]\lessons\[lessonId]\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 171, 16, 17, 204
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\modules\[moduleId]\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 130, 15, 15, 160
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\page.tsx", "TypeScript JSX", 0, 0, 0, 0, -169, -15, -8, -192
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\page.tsx", "TypeScript JSX", 0, 0, 0, 0, -14, 0, 1, -13
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\admin\AdminCourseForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 143, 12, 6, 161
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\courses\CourseList.tsx", "TypeScript JSX", 0, 0, 0, 0, 76, 0, 4, 80
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\EnhancedCourseVideoPlayer.tsx", "TypeScript JSX", 0, 0, 0, 0, -31, 0, 0, -31
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\EnhancedCourseVideoPlayer_backup.tsx", "TypeScript JSX", 0, 0, 0, 0, -5, 1, 0, -4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\KiboVideoPlayer.tsx", "TypeScript JSX", 0, 0, 0, 0, 32, 7, 3, 42
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\shared\FileUpload.tsx", "TypeScript JSX", 0, 0, 0, 0, 89, 3, 2, 94
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\radio-group.tsx", "TypeScript JSX", 0, 0, 0, 0, 39, 0, 6, 45
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\data\courseTransforms.ts", "TypeScript", 0, 18, 0, 0, 0, 2, 3, 23
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\caching.ts", "TypeScript", 0, 14, 0, 0, 0, 1, 2, 17
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\image-optimization.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\index.ts", "TypeScript", 0, -7, 0, 0, 0, -2, -4, -13
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\video-optimization.ts", "TypeScript", 0, 16, 0, 0, 0, 0, 0, 16
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\validation\stepValidator.ts", "TypeScript", 0, 67, 0, 0, 0, 38, 10, 115
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\video-player-utils.ts", "TypeScript", 0, 7, 0, 0, 0, 5, 3, 15
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\course.ts", "TypeScript", 0, 43, 0, 0, 0, 12, 6, 61
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\courses.ts", "TypeScript", 0, 4, 0, 0, 0, 1, 1, 6
+"Total", "-", 12, 319, 1, 32, 461, 117, 87, 1029
