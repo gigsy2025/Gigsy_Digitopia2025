@@ -258,6 +258,7 @@ export const createCourse = mutation({
       introVideoId: args.introVideoId,
       isPublic: args.isPublic ?? false,
       enrollmentCount: 0,
+      language: "en", // Default language
       // completionCount: 0, // Not in schema
       averageRating: 0,
       totalRatings: 0,

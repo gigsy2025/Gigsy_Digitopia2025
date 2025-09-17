@@ -5,7 +5,12 @@ import { cva } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { CourseListProps } from "@/types/courses";
+import type {
+  CourseListProps as OriginalCourseListProps,
+  CourseSummary,
+  CourseAuthor,
+  CourseMediaAssets,
+} from "@/types/courses";
 import CourseCard from "./CourseCard";
 import {
   Grid3X3,
@@ -17,6 +22,20 @@ import {
   AlertCircle,
   BookOpen,
 } from "lucide-react";
+import type { FunctionReturnType } from "convex/server";
+import type { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+
+// Enhance props to accept the detailed course data from our new query
+type DetailedCourseList = FunctionReturnType<
+  typeof api.courses.listWithDetails
+>;
+
+interface EnhancedCourseListProps
+  extends Omit<OriginalCourseListProps, "courses"> {
+  courses: DetailedCourseList;
+  totalResults: number;
+}
 
 // Course list layout variants
 const courseListVariants = cva("w-full", {
@@ -268,7 +287,7 @@ const ErrorState: React.FC<{
   </div>
 );
 
-const CourseList: React.FC<CourseListProps> = ({
+const CourseList: React.FC<EnhancedCourseListProps> = ({
   courses,
   loading = false,
   error,
@@ -281,6 +300,7 @@ const CourseList: React.FC<CourseListProps> = ({
   currentPage = 1,
   totalPages = 1,
   itemsPerPage = 12,
+  totalResults = 0,
   className,
   onLayoutChange,
   onColumnsChange,
@@ -310,17 +330,70 @@ const CourseList: React.FC<CourseListProps> = ({
 
   // Memoized course cards
   const courseCards = useMemo(() => {
-    if (!courses) return [];
+    if (!courses?.courses) return [];
 
-    return courses.map((course) => (
+    // Transform the detailed data into the CourseSummary shape expected by CourseCard
+    const transformedCourses: CourseSummary[] = courses.courses.map(
+      (course: DetailedCourseList["courses"][number]): CourseSummary => {
+        const author: CourseAuthor = course.author
+          ? {
+              id: course.author._id,
+              name: course.author.name || "Unknown Author",
+              avatarUrl: course.author.avatarUrl,
+            }
+          : {
+              id: "unknown-author-id" as Id<"users">,
+              name: "Unknown Author",
+            };
+
+        const media: CourseMediaAssets = {
+          thumbnailUrl: course.thumbnailUrl,
+          bannerUrl: course.bannerUrl,
+          introVideoUrl: undefined, // Not provided by the current query
+        };
+
+        return {
+          id: course._id,
+          title: course.title,
+          shortDescription: course.description || "",
+          author,
+          category: course.category ?? "creative",
+          difficulty: course.difficultyLevel ?? "beginner",
+          status: course.status ?? "draft",
+          modulesCount: 0, // Not provided by the current query
+          lessonsCount: 0, // Not provided by the current query
+          media,
+          pricing: {
+            isFree: course.price === undefined || course.price === 0,
+            price: course.price,
+          },
+          stats: {
+            enrollmentCount: course.enrollmentCount ?? 0,
+            completionRate: 0, // Not provided
+            averageCompletionTime: 0, // Not provided
+            averageRating: course.averageRating ?? 0,
+            ratingCount: 0, // Not provided
+            viewCount: 0, // Not provided
+            recentEnrollments: 0, // Not provided
+          },
+          skills: [], // Not provided
+          tags: [], // Not provided
+          estimatedDuration: course.estimatedDuration ?? 0,
+          createdAt: course._creationTime,
+          updatedAt: course._creationTime, // Not provided, fallback to creationTime
+        };
+      },
+    );
+
+    return transformedCourses.map((course) => (
       <CourseCard
         key={course.id}
         course={course}
         variant={localLayout === "list" ? "compact" : "default"}
         showProgress={showProgress}
         showEnrollButton={showEnrollButton}
-        onEnroll={onCourseEnroll}
-        onView={onCourseView}
+        onEnroll={onCourseEnroll ? () => onCourseEnroll(course.id) : undefined}
+        onView={onCourseView ? () => onCourseView(course.id) : undefined}
       />
     ));
   }, [
@@ -354,12 +427,11 @@ const CourseList: React.FC<CourseListProps> = ({
       {showLayoutControls && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {courses && (
+            {courses?.courses && (
               <span>
                 Showing {(currentPage - 1) * itemsPerPage + 1}-
-                {Math.min(currentPage * itemsPerPage, courses.length)}
-                {totalPages > 1 &&
-                  ` of ${(totalPages - 1) * itemsPerPage + courses.length}`}
+                {Math.min(currentPage * itemsPerPage, courses.courses.length)}
+                {totalPages > 1 && ` of ${totalResults}`}
               </span>
             )}
           </div>
@@ -383,7 +455,7 @@ const CourseList: React.FC<CourseListProps> = ({
       >
         {loading ? (
           loadingSkeletons
-        ) : courses && courses.length > 0 ? (
+        ) : courses.courses && courses.courses.length > 0 ? (
           courseCards
         ) : (
           <div className="col-span-full">
@@ -393,7 +465,7 @@ const CourseList: React.FC<CourseListProps> = ({
       </div>
 
       {/* Loading indicator for additional content */}
-      {loading && courses && courses.length > 0 && (
+      {loading && courses.courses && courses.courses.length > 0 && (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
           <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">

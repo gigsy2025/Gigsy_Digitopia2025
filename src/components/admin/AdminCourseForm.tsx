@@ -147,6 +147,7 @@ const PRICING_TYPES = ["free", "one-time", "subscription"] as const;
 const CONTENT_TYPES = ["text", "video", "file"] as const;
 
 const COURSE_LANGUAGES = [
+  "ar",
   "en",
   "es",
   "fr",
@@ -458,6 +459,8 @@ export function AdminCourseForm() {
         "[AdminCourseForm] Form values changed, changed field:",
         name,
       );
+      console.log("[AdminCourseForm] Current step:", formProgress.currentStep);
+      console.log(`Form Data:`, form.getValues());
       // When form values change, re-validate any steps that were marked as complete
       formProgress.completedSteps.forEach((step) => {
         const isValid = validateStep(values as CourseFormData, step);

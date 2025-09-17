@@ -13,7 +13,7 @@ import { ConvexError } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { Id, Doc } from "./_generated/dataModel";
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -375,7 +375,14 @@ export const getPublished = query({
     isDone: v.boolean(),
     continueCursor: v.union(v.string(), v.null()),
   }),
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args: {
+      paginationOpts: { numItems: number; cursor: string | null };
+      category?: string;
+      difficulty?: string;
+    },
+  ) => {
     let query = ctx.db
       .query("courses")
       .filter((q) => q.eq(q.field("status"), "published"));
@@ -393,9 +400,197 @@ export const getPublished = query({
   },
 });
 
-// =============================================================================
-// COURSE MUTATIONS
-// =============================================================================
+/**
+ * Get courses with detailed information including author and media URLs
+ */
+export const listWithDetails = query({
+  args: {
+    searchTerm: v.optional(v.string()),
+    categories: v.optional(v.array(v.string())),
+    difficulties: v.optional(v.array(v.string())),
+    statuses: v.optional(v.array(v.string())),
+    sortBy: v.optional(v.string()),
+    offset: v.optional(v.number()),
+    limit: v.optional(v.number()),
+    authorIds: v.optional(v.array(v.id("users"))),
+    priceRange: v.optional(v.array(v.number())),
+    isNew: v.optional(v.boolean()),
+    minRating: v.optional(v.number()),
+    maxDuration: v.optional(v.number()),
+  },
+  returns: v.object({
+    courses: v.array(
+      v.object({
+        _id: v.id("courses"),
+        _creationTime: v.number(),
+        title: v.string(),
+        description: v.string(),
+        shortDescription: v.optional(v.string()),
+        category: v.optional(v.string()),
+        difficultyLevel: v.optional(v.string()),
+        status: v.optional(v.string()),
+        estimatedDuration: v.optional(v.number()),
+        price: v.optional(v.number()),
+        thumbnailUrl: v.optional(v.string()),
+        bannerUrl: v.optional(v.string()),
+        author: v.optional(
+          v.object({
+            _id: v.id("users"),
+            name: v.string(),
+            avatarUrl: v.optional(v.string()),
+          }),
+        ),
+        enrollmentCount: v.optional(v.number()),
+        averageRating: v.optional(v.number()),
+      }),
+    ),
+    total: v.number(),
+    hasMore: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("courses");
+
+    // Apply filters
+    if (args.categories && args.categories.length > 0) {
+      query = query.filter((q) =>
+        q.or(...args.categories!.map((cat) => q.eq(q.field("category"), cat))),
+      );
+    }
+
+    if (args.difficulties && args.difficulties.length > 0) {
+      query = query.filter((q) =>
+        q.or(
+          ...args.difficulties!.map((diff) =>
+            q.eq(q.field("difficultyLevel"), diff),
+          ),
+        ),
+      );
+    }
+
+    if (args.statuses && args.statuses.length > 0) {
+      query = query.filter((q) =>
+        q.or(
+          ...args.statuses!.map((status) => q.eq(q.field("status"), status)),
+        ),
+      );
+    } else {
+      query = query.filter((q) =>
+        q.or(
+          q.eq(q.field("status"), "published"),
+          q.eq(q.field("status"), "draft"),
+        ),
+      );
+    }
+
+    if (args.authorIds && args.authorIds.length > 0) {
+      query = query.filter((q) =>
+        q.or(...args.authorIds!.map((id) => q.eq(q.field("authorId"), id))),
+      );
+    }
+
+    // Apply search term
+    if (args.searchTerm) {
+      // This would be better with a search index
+      // For now, basic filtering
+    }
+
+    // Apply sorting
+    let orderedQuery;
+    if (args.sortBy === "title") {
+      orderedQuery = query.order("asc");
+    } else {
+      orderedQuery = query.order("desc"); // Default to newest first
+    }
+
+    const allResults = await orderedQuery.collect();
+    const total = allResults.length;
+
+    const limit = args.limit ?? 12;
+    const offset = args.offset ?? 0;
+    const paginatedCourses = allResults.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+
+    // Batch fetch authors
+    const authorIds = paginatedCourses
+      .map((c) => c.authorId)
+      .filter((id): id is Id<"users"> => id !== undefined);
+    const uniqueAuthorIds = [...new Set(authorIds)];
+    const authors = await Promise.all(
+      uniqueAuthorIds.map((id) => ctx.db.get(id)),
+    );
+    const authorMap = new Map(
+      authors
+        .filter((a): a is Doc<"users"> => a !== null)
+        .map((a) => [a._id, a]),
+    );
+
+    // Batch fetch media URLs
+    const coursesWithDetails = await Promise.all(
+      paginatedCourses.map(async (course) => {
+        const author = authorMap.get(course.authorId);
+
+        const [thumbnailUrl, bannerUrl] = await Promise.all([
+          course.thumbnailId
+            ? ctx.storage.getUrl(course.thumbnailId)
+            : Promise.resolve(null),
+          course.bannerId
+            ? ctx.storage.getUrl(course.bannerId)
+            : Promise.resolve(null),
+        ]);
+
+        // Handle author avatar URL separately to avoid crashes on invalid IDs
+        let authorAvatarUrl: string | null = null;
+        if (author?.avatarUrl) {
+          if (author.avatarUrl.startsWith("https://")) {
+            authorAvatarUrl = author.avatarUrl;
+          } else {
+            try {
+              authorAvatarUrl = await ctx.storage.getUrl(
+                author.avatarUrl as Id<"_storage">,
+              );
+            } catch (e) {
+              console.error(
+                `[Courses Service] Failed to get avatar URL for storage ID: ${author.avatarUrl}`,
+                e,
+              );
+              // Silently fail, returning null for the avatar
+            }
+          }
+        }
+
+        return {
+          _id: course._id,
+          _creationTime: course._creationTime,
+          title: course.title,
+          description: course.description,
+          price: course.price ?? undefined,
+          shortDescription: course.shortDescription ?? undefined,
+          category: course.category ?? undefined,
+          difficultyLevel: course.difficultyLevel ?? undefined,
+          status: course.status ?? undefined,
+          estimatedDuration: course.estimatedDuration ?? undefined,
+          enrollmentCount: course.enrollmentCount ?? undefined,
+          averageRating: course.averageRating ?? undefined,
+          thumbnailUrl: thumbnailUrl ?? undefined,
+          bannerUrl: bannerUrl ?? undefined,
+          author: author
+            ? {
+                _id: author._id,
+                name: author.name,
+                avatarUrl: authorAvatarUrl ?? undefined,
+              }
+            : undefined,
+        };
+      }),
+    );
+
+    return {
+      courses: coursesWithDetails,
+      total,
+      hasMore,
+    };
+  },
+});
 
 /**
  * Create a new course
@@ -566,116 +761,6 @@ export const getDifficultyLevels = query({
   returns: v.array(v.string()),
   handler: async () => {
     return ["beginner", "intermediate", "advanced", "expert"];
-  },
-});
-
-/**
- * Search courses with filters and pagination (frontend-compatible function)
- */
-export const searchCourses = query({
-  args: {
-    searchTerm: v.optional(v.string()),
-    categories: v.optional(v.array(v.string())),
-    difficulties: v.optional(v.array(v.string())),
-    statuses: v.optional(v.array(v.string())),
-    sortBy: v.optional(v.string()),
-    offset: v.optional(v.number()),
-    limit: v.optional(v.number()),
-  },
-  returns: v.object({
-    courses: v.array(
-      v.object({
-        _id: v.id("courses"),
-        _creationTime: v.number(),
-        title: v.string(),
-        description: v.string(),
-        shortDescription: v.optional(v.string()),
-        category: v.optional(v.string()),
-        difficulty: v.optional(v.string()),
-        status: v.optional(v.string()),
-        estimatedDuration: v.optional(v.number()),
-        pricing: v.optional(
-          v.object({
-            isFree: v.boolean(),
-            price: v.optional(v.number()),
-            currency: v.optional(v.string()),
-            discountPercentage: v.optional(v.number()),
-            originalPrice: v.optional(v.number()),
-            paymentType: v.optional(v.string()),
-          }),
-        ),
-        authorId: v.id("users"),
-      }),
-    ),
-    total: v.number(),
-    hasMore: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    let query = ctx.db.query("courses");
-
-    // Apply filters
-    if (args.categories && args.categories.length > 0) {
-      query = query.filter((q) =>
-        q.or(...args.categories!.map((cat) => q.eq(q.field("category"), cat))),
-      );
-    }
-
-    if (args.difficulties && args.difficulties.length > 0) {
-      query = query.filter((q) =>
-        q.or(
-          ...args.difficulties!.map((diff) =>
-            q.eq(q.field("difficulty"), diff),
-          ),
-        ),
-      );
-    }
-
-    if (args.statuses && args.statuses.length > 0) {
-      query = query.filter((q) =>
-        q.or(
-          ...args.statuses!.map((status) => q.eq(q.field("status"), status)),
-        ),
-      );
-    } else {
-      // Default to published courses only
-      query = query.filter((q) => q.eq(q.field("status"), "published"));
-    }
-
-    // Apply search term if provided
-    if (args.searchTerm) {
-      const searchTerm = args.searchTerm.toLowerCase();
-      query = query.filter((q) =>
-        q.or(
-          q.eq(q.field("title"), searchTerm),
-          q.eq(q.field("description"), searchTerm),
-        ),
-      );
-    }
-
-    // Apply sorting
-    let orderedQuery;
-    if (args.sortBy === "title") {
-      orderedQuery = query.order("asc");
-    } else if (args.sortBy === "date") {
-      orderedQuery = query.order("desc");
-    } else {
-      orderedQuery = query.order("desc"); // Default to newest first
-    }
-
-    // Get paginated results
-    const limit = args.limit ?? 12;
-    const offset = args.offset ?? 0;
-
-    const allResults = await orderedQuery.collect();
-    const total = allResults.length;
-    const courses = allResults.slice(offset, offset + limit);
-    const hasMore = offset + limit < total;
-
-    return {
-      courses,
-      total,
-      hasMore,
-    };
   },
 });
 

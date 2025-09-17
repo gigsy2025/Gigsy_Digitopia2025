@@ -157,6 +157,9 @@ export interface CourseFilters {
   /** Filter by instructor */
   instructorId?: string;
 
+  /** Filter by author IDs */
+  authorIds?: Id<"users">[];
+
   /** Current page number */
   page?: number;
 
@@ -391,13 +394,16 @@ export interface CoursePricingEnhanced extends CoursePricing {
   };
 
   /** Multi-currency support */
-  pricing?: {
-    [key in "EGP" | "USD" | "EUR"]?: {
-      amount: number;
-      currency: string;
-      symbol: string;
-    };
-  };
+  pricing?: Partial<
+    Record<
+      "EGP" | "USD" | "EUR",
+      {
+        amount: number;
+        currency: string;
+        symbol: string;
+      }
+    >
+  >;
 
   /** Discount campaigns */
   campaigns?: Array<{

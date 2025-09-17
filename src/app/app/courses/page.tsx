@@ -19,7 +19,7 @@
  * - Image lazy loading with Next.js optimization
  * - Virtualized lists for 1000+ courses
  *
- * @author GitHub Copilot
+ * @author Mostafa Yaser
  * @version 1.0.0
  * @since 2024-01-15
  */
@@ -122,52 +122,35 @@ const CourseCatalogPage: React.FC = () => {
   const searchParams = useSearchParams();
 
   // Initialize filters from URL parameters
-  const [filters, setFilters] = useState<CourseFiltersType>(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    return {
-      searchTerm: params.get("search") ?? DEFAULT_FILTERS.searchTerm,
-      categories:
-        (params.get("categories")?.split(",") as CourseCategoryType[]) ||
-        undefined,
-      difficulties:
-        (params.get("difficulties")?.split(",") as CourseDifficultyLevel[]) ||
-        undefined,
-      sortBy: (params.get("sort") as SortOption) || DEFAULT_FILTERS.sortBy,
-      priceRange:
-        params.get("priceMin") && params.get("priceMax")
-          ? [Number(params.get("priceMin")), Number(params.get("priceMax"))]
-          : undefined,
-      minRating: params.get("rating")
-        ? Number(params.get("rating"))
-        : undefined,
-      maxDuration: params.get("duration")
-        ? Number(params.get("duration"))
-        : undefined,
-      isNew: params.get("new") === "true" || undefined,
-      isFeatured: params.get("featured") === "true" || undefined,
-      instructorId: params.get("instructor") ?? undefined,
-      page: Number(params.get("page")) || DEFAULT_FILTERS.page,
-      limit: Number(params.get("limit")) || DEFAULT_FILTERS.limit,
-    };
-  });
+  const [filters, setFilters] = useState<CourseFiltersType>(DEFAULT_FILTERS);
 
   const [layout, setLayout] = useState<"grid" | "list" | "masonry">("grid");
   const [columns, setColumns] = useState<1 | 2 | 3 | 4 | "auto">(3);
 
   // Transform filters for Convex compatibility (page -> offset)
   const convexFilters = useMemo(() => {
-    const { page, limit, ...otherFilters } = filters;
+    const { page, limit, priceRange, ...otherFilters } = filters;
     const offset = page && limit ? (page - 1) * limit : 0;
+
+    let priceRangeArray: number[] | undefined;
+    if (priceRange) {
+      if (Array.isArray(priceRange)) {
+        priceRangeArray = priceRange;
+      } else if (typeof priceRange === "object" && "min" in priceRange) {
+        priceRangeArray = [priceRange.min, priceRange.max];
+      }
+    }
 
     return {
       ...otherFilters,
       offset,
       limit,
+      priceRange: priceRangeArray,
     };
   }, [filters]);
 
   // Query courses from Convex
-  const coursesData = useQuery(api.courses.searchCourses, convexFilters);
+  const coursesData = useQuery(api.courses.listWithDetails, convexFilters);
   const coursesLoading = coursesData === undefined;
 
   // Extract and transform courses data
@@ -447,25 +430,29 @@ const CourseCatalogPage: React.FC = () => {
 
         {/* Course List */}
         <div className="lg:col-span-3">
-          <CourseList
-            courses={courses}
-            loading={coursesLoading}
-            layout={layout}
-            columns={columns}
-            showLayoutControls={true}
-            showPagination={true}
-            showProgress={false}
-            showEnrollButton={true}
-            currentPage={filters.page ?? 1}
-            totalPages={totalPages}
-            itemsPerPage={filters.limit ?? DEFAULT_FILTERS.limit!}
-            onLayoutChange={setLayout}
-            onColumnsChange={setColumns}
-            onPageChange={handlePageChange}
-            onCourseEnroll={handleCourseEnroll}
-            onCourseView={handleCourseView}
-            onClearFilters={handleClearFilters}
-          />
+          {coursesData && (
+            <CourseList
+              courses={coursesData}
+              loading={coursesLoading}
+              error={undefined} // Pass undefined for error, as useQuery handles it
+              layout={layout}
+              columns={columns}
+              showLayoutControls={true}
+              showPagination={true}
+              showProgress={false}
+              showEnrollButton={true}
+              currentPage={filters.page ?? 1}
+              totalPages={totalPages}
+              itemsPerPage={filters.limit ?? DEFAULT_FILTERS.limit!}
+              totalResults={totalResults}
+              onLayoutChange={setLayout}
+              onColumnsChange={setColumns}
+              onPageChange={handlePageChange}
+              onCourseEnroll={handleCourseEnroll}
+              onCourseView={handleCourseView}
+              onClearFilters={handleClearFilters}
+            />
+          )}
         </div>
       </div>
     </div>

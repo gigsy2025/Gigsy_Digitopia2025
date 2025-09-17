@@ -9,6 +9,18 @@ import { withBetterStack } from "@logtail/next";
 /** @type {import("next").NextConfig} */
 const config = {
   output: "standalone",
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "harmless-spoonbill-103.convex.cloud",
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+    ],
+  },
 };
 
 // First wrap with BetterStack/Logtail, then with Sentry
