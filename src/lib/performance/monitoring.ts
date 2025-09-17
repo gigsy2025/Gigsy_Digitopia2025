@@ -127,8 +127,8 @@ export class PerformanceMonitor {
   private config: PerformanceConfig;
   private metricsBuffer: PerformanceMetric[] = [];
   private sessionId: string;
-  private observers: Map<string, PerformanceObserver> = new Map();
-  private customMetrics: Map<string, number> = new Map();
+  private observers = new Map<string, PerformanceObserver>();
+  private customMetrics = new Map<string, number>();
 
   private constructor(config: PerformanceConfig = DEFAULT_PERFORMANCE_CONFIG) {
     this.config = config;
@@ -447,7 +447,7 @@ export class PerformanceMonitor {
   /**
    * Mark custom event
    */
-  public mark(name: string, value: number = 1): void {
+  public mark(name: string, value = 1): void {
     this.addMetric({
       name: `mark.${name}`,
       type: "custom",
