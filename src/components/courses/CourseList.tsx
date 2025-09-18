@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type {
   CourseListProps as OriginalCourseListProps,
-  CourseSummary,
   CourseAuthor,
   CourseMediaAssets,
+  CourseSummary,
 } from "@/types/courses";
 import CourseCard from "./CourseCard";
 import {

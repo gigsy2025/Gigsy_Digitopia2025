@@ -20,17 +20,14 @@
 
 "use client";
 
-import React, { useState, useCallback } from "react";
-import type { CourseDetail } from "@/types/courses";
+import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -39,22 +36,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { formatPrice } from "@/lib/utils";
 
-import {
-  ArrowLeft,
-  Play,
-  Clock,
-  Users,
-  Star,
-  Download,
-  Share2,
-  Heart,
-  CheckCircle,
-  Globe,
-  Award,
-  BookOpen,
-} from "lucide-react";
+import { ArrowLeft, Share2, Heart, BookOpen } from "lucide-react";
 
 type CourseDetailsProps = {
   params: Promise<{ courseId: string }>;
@@ -66,29 +49,12 @@ type CourseDetailsProps = {
 const CourseDetailPage: React.FC<CourseDetailsProps> = (props) => {
   const params = React.use(props.params);
   const router = useRouter();
-  const [isEnrolling, setIsEnrolling] = useState(false);
 
   const course = useQuery(api.courses.getCourseDetails, {
     courseId: params.courseId as Id<"courses">,
   });
 
-  const enrollInCourse = useMutation(api.courses.enrollInCourse);
-
   const isLoading = course === undefined;
-
-  const handleEnroll = useCallback(async () => {
-    if (!course || isEnrolling) return;
-
-    setIsEnrolling(true);
-    try {
-      await enrollInCourse({ courseId: course._id });
-      router.push(`/app/courses/${course._id}/learn`);
-    } catch (error) {
-      console.error("Enrollment failed:", error);
-    } finally {
-      setIsEnrolling(false);
-    }
-  }, [course, isEnrolling, enrollInCourse, router]);
 
   const handleBack = () => {
     router.back();
@@ -127,20 +93,6 @@ const CourseDetailPage: React.FC<CourseDetailsProps> = (props) => {
       </div>
     );
   }
-
-  const totalLessons =
-    course.modules?.reduce((acc, mod) => acc + (mod.lessons?.length ?? 0), 0) ??
-    0;
-  const totalDuration =
-    course.modules?.reduce(
-      (acc, mod) =>
-        acc +
-        (mod.lessons?.reduce(
-          (lessonAcc, lesson) => lessonAcc + (lesson.estimatedDuration ?? 0),
-          0,
-        ) ?? 0),
-      0,
-    ) ?? 0;
 
   return (
     <div className="space-y-8">

@@ -47,10 +47,8 @@ import type { Id } from "convex/_generated/dataModel";
 import type { CourseLesson } from "@/types/courses";
 import {
   useVideoPlayer,
-  useVideoProgress,
   useVideoAnalytics,
   useVideoControls,
-  useVideoTime,
   useAutoSave,
   formatTime,
   generateSessionId,
@@ -69,14 +67,6 @@ interface EnhancedCourseVideoPlayerProps {
   onProgressUpdate?: (progress: number) => void;
   onComplete?: () => void;
   className?: string;
-}
-
-interface VideoAnalytics {
-  totalPlayTime: number;
-  seekCount: number;
-  pauseCount: number;
-  resumeCount: number;
-  completionRate: number;
 }
 
 // =============================================================================
@@ -121,7 +111,6 @@ export function EnhancedCourseVideoPlayer({
   className,
 }: EnhancedCourseVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaControllerRef = useRef<HTMLElement>(null);
 
   // State management
   const [watchProgress, setWatchProgress] = useState({
@@ -155,33 +144,18 @@ export function EnhancedCourseVideoPlayer({
   // Get video source with fallback handling
   const videoSrc = fileUrl ?? getVideoSource(lesson);
 
-  // Analytics state
-  const [analytics, setAnalytics] = useState<VideoAnalytics>({
-    totalPlayTime: 0,
-    seekCount: 0,
-    pauseCount: 0,
-    resumeCount: 0,
-    completionRate: 0,
-  });
-
   // Custom hooks for video functionality
   const { state: videoState } = useVideoPlayer(
     videoRef as React.RefObject<HTMLVideoElement>,
   );
-  const { currentTime, duration, isPlaying } = videoState;
-  const {
-    play,
-    pause,
-    seek,
-    setVolume,
-    setPlaybackRate,
-    skipForward,
-    skipBackward,
-  } = useVideoControls(videoRef as React.RefObject<HTMLVideoElement>);
+  const { currentTime, duration } = videoState;
+  const { play, seek } = useVideoControls(
+    videoRef as React.RefObject<HTMLVideoElement>,
+  );
 
   const { trackEvent } = useVideoAnalytics(lesson.id.toString());
 
-  const { handleProgressUpdate: handleAutoSave, lastSaveTime } = useAutoSave(
+  const { handleProgressUpdate: handleAutoSave } = useAutoSave(
     lesson.id.toString(),
   );
 
@@ -236,7 +210,46 @@ export function EnhancedCourseVideoPlayer({
 
         // Mark as complete if watched 95% or more
         if (percentage >= 95 && !watchProgress.isCompleted) {
-          await handleCompletion();
+          // Handle lesson completion inline to avoid circular dependency
+          try {
+            await markLessonComplete({
+              lessonId: lesson.id,
+              courseId,
+              moduleId,
+            });
+
+            await trackVideoAnalytics({
+              lessonId: lesson.id,
+              eventType: "lesson_completed",
+              data: {
+                courseId,
+                moduleId,
+                sessionId,
+                eventData: {
+                  totalWatchTime: watchProgress.watchedDuration,
+                  completionRate: 100,
+                  currentTime,
+                  duration,
+                  sessionId,
+                  timestamp: Date.now(),
+                  createdAt: Date.now(),
+                },
+              },
+            });
+
+            setWatchProgress((prev) => ({ ...prev, isCompleted: true }));
+            setShowCompletionBadge(true);
+            onComplete?.();
+
+            toast.success("🎉 Lesson Completed!", {
+              description: "Great job! You've finished this lesson.",
+            });
+
+            // Hide completion badge after 3 seconds
+            setTimeout(() => setShowCompletionBadge(false), 3000);
+          } catch (completionError) {
+            console.error("Failed to mark lesson complete:", completionError);
+          }
         }
       } catch (error) {
         console.error("Failed to save progress:", error);
@@ -248,64 +261,15 @@ export function EnhancedCourseVideoPlayer({
       moduleId,
       lastProgressUpdate,
       watchProgress.isCompleted,
+      watchProgress.watchedDuration,
       updateLessonProgress,
       trackVideoAnalytics,
+      markLessonComplete,
       sessionId,
       onProgressUpdate,
+      onComplete,
     ],
   );
-
-  // Handle lesson completion
-  const handleCompletion = useCallback(async () => {
-    try {
-      await markLessonComplete({
-        lessonId: lesson.id,
-        courseId,
-        moduleId,
-      });
-
-      await trackVideoAnalytics({
-        lessonId: lesson.id,
-        eventType: "lesson_completed",
-        data: {
-          courseId,
-          moduleId,
-          sessionId,
-          eventData: {
-            totalWatchTime: watchProgress.watchedDuration,
-            completionRate: 100,
-            currentTime,
-            duration,
-            sessionId,
-            timestamp: Date.now(),
-            createdAt: Date.now(),
-          },
-        },
-      });
-
-      setWatchProgress((prev) => ({ ...prev, isCompleted: true }));
-      setShowCompletionBadge(true);
-      onComplete?.();
-
-      toast.success("🎉 Lesson Completed!", {
-        description: "Great job! You've finished this lesson.",
-      });
-
-      // Hide completion badge after 3 seconds
-      setTimeout(() => setShowCompletionBadge(false), 3000);
-    } catch (error) {
-      console.error("Failed to mark lesson complete:", error);
-    }
-  }, [
-    lesson.id,
-    courseId,
-    moduleId,
-    markLessonComplete,
-    trackVideoAnalytics,
-    sessionId,
-    watchProgress.watchedDuration,
-    onComplete,
-  ]);
 
   // Video event handlers
   const handlePlay = useCallback(() => {
@@ -349,9 +313,50 @@ export function EnhancedCourseVideoPlayer({
   const handleEnded = useCallback(() => {
     setIsTracking(false);
     if (!watchProgress.isCompleted) {
-      handleCompletion().catch((error) => {
-        console.error("Failed to complete lesson:", error);
-      });
+      // Handle lesson completion inline
+      const completeLesson = async () => {
+        try {
+          await markLessonComplete({
+            lessonId: lesson.id,
+            courseId,
+            moduleId,
+          });
+
+          await trackVideoAnalytics({
+            lessonId: lesson.id,
+            eventType: "lesson_completed",
+            data: {
+              courseId,
+              moduleId,
+              sessionId,
+              eventData: {
+                totalWatchTime: watchProgress.watchedDuration,
+                completionRate: 100,
+                currentTime,
+                duration,
+                sessionId,
+                timestamp: Date.now(),
+                createdAt: Date.now(),
+              },
+            },
+          });
+
+          setWatchProgress((prev) => ({ ...prev, isCompleted: true }));
+          setShowCompletionBadge(true);
+          onComplete?.();
+
+          toast.success("🎉 Lesson Completed!", {
+            description: "Great job! You've finished this lesson.",
+          });
+
+          // Hide completion badge after 3 seconds
+          setTimeout(() => setShowCompletionBadge(false), 3000);
+        } catch (error) {
+          console.error("Failed to complete lesson:", error);
+        }
+      };
+
+      void completeLesson();
     }
     trackEvent("video_ended", {
       lessonId: lesson.id,
@@ -361,11 +366,17 @@ export function EnhancedCourseVideoPlayer({
     });
   }, [
     lesson.id,
+    courseId,
+    moduleId,
     watchProgress.isCompleted,
-    handleCompletion,
-    trackEvent,
-    currentTime,
+    watchProgress.watchedDuration,
+    markLessonComplete,
+    trackVideoAnalytics,
     sessionId,
+    currentTime,
+    duration,
+    onComplete,
+    trackEvent,
   ]);
 
   const handleError = useCallback(() => {

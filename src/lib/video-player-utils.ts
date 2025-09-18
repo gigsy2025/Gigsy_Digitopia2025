@@ -11,7 +11,6 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import type { Id } from "convex/_generated/dataModel";
 
 // =============================================================================
 // TYPES
@@ -88,7 +87,7 @@ export function generateSessionId(): string {
 /**
  * Throttle function to limit API calls
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: never[]) => unknown>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -212,8 +211,8 @@ export function useVideoProgress(
   const [lastSaveTime, setLastSaveTime] = useState(0);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const saveProgress = useCallback(
-    throttle(async (progress: number) => {
+  const throttledSaveProgress = useCallback(
+    async (progress: number) => {
       if (onProgressSave) {
         try {
           await onProgressSave(progress);
@@ -223,22 +222,25 @@ export function useVideoProgress(
           toast.error("Failed to save progress");
         }
       }
-    }, 5000),
+    },
     [onProgressSave],
   );
+
+  const saveProgress = useRef(throttle(throttledSaveProgress, 5000));
 
   const handleProgressUpdate = useCallback(
     (currentTime: number, duration: number) => {
       const progress = calculateProgress(currentTime, duration);
-      saveProgress(progress);
+      saveProgress.current(progress);
     },
     [saveProgress],
   );
 
   useEffect(() => {
+    const currentInterval = saveIntervalRef.current;
     return () => {
-      if (saveIntervalRef.current) {
-        clearTimeout(saveIntervalRef.current);
+      if (currentInterval) {
+        clearTimeout(currentInterval);
       }
     };
   }, []);
@@ -264,7 +266,7 @@ export function useVideoAnalytics(videoId: string) {
   });
 
   const trackEvent = useCallback(
-    (eventType: string, data?: any) => {
+    (eventType: string, data?: Record<string, unknown>) => {
       console.log(`Video Analytics: ${eventType}`, { videoId, data });
 
       // Update analytics based on event type
@@ -508,7 +510,7 @@ export function useVideoResume(
 /**
  * Generate video player props with common defaults
  */
-export function getVideoPlayerProps(overrides: any = {}) {
+export function getVideoPlayerProps(overrides: Record<string, unknown> = {}) {
   return {
     crossOrigin: "" as const,
     preload: "metadata" as const,

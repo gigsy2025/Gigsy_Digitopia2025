@@ -16,6 +16,26 @@
 import React from "react";
 
 /**
+ * Network Information interface for connection details
+ */
+interface NetworkInformation {
+  effectiveType?: "2g" | "3g" | "4g" | "slow-2g";
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+  addEventListener?: (type: string, listener: EventListener) => void;
+}
+
+/**
+ * Extended Navigator interface with connection properties
+ */
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation;
+  mozConnection?: NetworkInformation;
+  webkitConnection?: NetworkInformation;
+}
+
+/**
  * Video optimization configuration
  */
 export interface VideoOptimizationConfig {
@@ -122,14 +142,13 @@ export class VideoOptimizer {
     if (typeof navigator === "undefined") return;
 
     // Use Network Information API if available
+    const nav = navigator as NavigatorWithConnection;
     const connection =
-      (navigator as any).connection ||
-      (navigator as any).mozConnection ||
-      (navigator as any).webkitConnection;
+      nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
 
     if (connection) {
       const effectiveType = connection.effectiveType;
-      const downlink = connection.downlink || 1;
+      const downlink = connection.downlink ?? 1;
 
       if (
         effectiveType === "slow-2g" ||
@@ -147,9 +166,11 @@ export class VideoOptimizer {
       }
 
       // Listen for connection changes
-      connection.addEventListener("change", () => {
-        this.detectConnectionQuality();
-      });
+      if (connection.addEventListener) {
+        connection.addEventListener("change", () => {
+          this.detectConnectionQuality();
+        });
+      }
     } else {
       // Fallback: Estimate based on loading performance
       this.estimateConnectionQuality().catch((err) => {
@@ -395,11 +416,11 @@ export class VideoOptimizer {
    * Clear expired cache entries
    */
   public clearExpiredCache(): void {
-    const now = Date.now();
-    const expiredThreshold = this.config.metadataCacheDuration * 1000;
+    // TODO: Implement timestamp-based cache expiration
+    // const now = Date.now();
+    // const expiredThreshold = this.config.metadataCacheDuration * 1000;
 
-    // Implementation would track cache timestamps
-    // For now, clear all cache periodically
+    // For now, clear all cache periodically based on size
     if (this.metadataCache.size > 100) {
       this.metadataCache.clear();
     }

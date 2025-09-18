@@ -430,7 +430,7 @@ export function KiboVideoPlayerExamples() {
   ];
 
   const ActiveComponent =
-    examples.find((ex) => ex.id === activeExample)?.component ||
+    examples.find((ex) => ex.id === activeExample)?.component ??
     BasicVideoExample;
 
   return (

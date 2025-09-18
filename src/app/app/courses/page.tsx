@@ -27,7 +27,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 
@@ -35,7 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { CourseFilters, CourseList } from "@/components/courses";
-import type { CourseFiltersType, SortOption } from "@/types/courses";
+import type { CourseFiltersType } from "@/types/courses";
 import { transformConvexCourses } from "@/lib/data/courseTransforms";
 
 // Inline type definitions for immediate resolution
@@ -50,12 +50,6 @@ type CourseCategoryType =
   | "technology"
   | "soft-skills"
   | "languages";
-
-type CourseDifficultyLevel =
-  | "beginner"
-  | "intermediate"
-  | "advanced"
-  | "expert";
 import {
   BookOpen,
   TrendingUp,
@@ -119,7 +113,6 @@ const CourseCatalogPage: React.FC = () => {
   console.info("Is Admin:", isAdmin);
   // alert("Is Admin:" + isAdmin);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<CourseFiltersType>(DEFAULT_FILTERS);

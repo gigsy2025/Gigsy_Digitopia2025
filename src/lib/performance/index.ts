@@ -9,6 +9,12 @@
  * @since 2025-01-14
  */
 
+// Import types for internal use
+import type { ImageOptimizationConfig } from "./image-optimization";
+import type { VideoOptimizationConfig } from "./video-optimization";
+import type { PerformanceConfig } from "./monitoring";
+import type { CacheConfig } from "./caching";
+
 // Image optimization exports
 export {
   ImageOptimizer,
@@ -62,10 +68,10 @@ export {
  * Initialize all performance optimizations
  */
 export function initializePerformanceOptimizations(config?: {
-  image?: any;
-  video?: any;
-  performance?: any;
-  cache?: any;
+  image?: ImageOptimizationConfig;
+  video?: VideoOptimizationConfig;
+  performance?: PerformanceConfig;
+  cache?: CacheConfig;
 }) {
   // TODO: Fix type imports and class references
   console.log("Performance optimizations initialized", config);

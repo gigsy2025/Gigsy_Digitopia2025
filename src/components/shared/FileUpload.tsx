@@ -63,7 +63,7 @@ interface FileUploadProps {
   value?: Id<"_storage">;
 
   /** Upload completion callback */
-  onUpload: (storageId: Id<"_storage">) => void;
+  onUpload: (storageId: Id<"_storage"> | undefined) => void;
 
   /** Upload error callback */
   onError?: (error: string) => void;
@@ -197,11 +197,11 @@ function formatFileSize(bytes: number): string {
 function getFileIcon(fileName: string) {
   const extension = fileName.split(".").pop()?.toLowerCase();
 
-  if (["jpg", "jpeg", "png", "webp", "gif"].includes(extension || "")) {
+  if (["jpg", "jpeg", "png", "webp", "gif"].includes(extension ?? "")) {
     return FileImage;
   }
 
-  if (["mp4", "webm", "mov", "avi"].includes(extension || "")) {
+  if (["mp4", "webm", "mov", "avi"].includes(extension ?? "")) {
     return FileVideo;
   }
 
@@ -255,10 +255,10 @@ export function FileUpload({
 
   // Get configuration for this category
   const config = FILE_CONFIG[category];
-  const fileAccept = accept || config.accept;
-  const fileSizeLimit = maxSize || config.maxSize;
-  const uploadLabel = label || config.label;
-  const uploadDescription = description || config.description;
+  const fileAccept = accept ?? config.accept;
+  const fileSizeLimit = maxSize ?? config.maxSize;
+  const uploadLabel = label ?? config.label;
+  const uploadDescription = description ?? config.description;
 
   // Sync upload state with existing file metadata
   useEffect(() => {
@@ -348,7 +348,10 @@ export function FileUpload({
           throw new Error(`Upload failed: ${uploadResponse.statusText}`);
         }
 
-        const { storageId } = await uploadResponse.json();
+        const responseData = (await uploadResponse.json()) as {
+          storageId: Id<"_storage">;
+        };
+        const { storageId } = responseData;
         console.log(`[FileUpload] File uploaded. Storage ID:`, storageId);
 
         // Extract video metadata if applicable
@@ -387,7 +390,7 @@ export function FileUpload({
           progress: 100,
         }));
 
-        onUpload(storageId as Id<"_storage">);
+        onUpload(storageId);
         toast.success(`${uploadLabel} uploaded successfully`);
         console.log(`[FileUpload] Upload complete for:`, file.name);
       } catch (error) {
@@ -447,7 +450,7 @@ export function FileUpload({
       fileSize: null,
     });
     // Clear the form value by calling onUpload with undefined
-    onUpload(undefined as any);
+    onUpload(undefined);
     console.log(`[FileUpload] File cleared and form value reset.`);
   }, [onUpload]);
 
@@ -508,14 +511,14 @@ export function FileUpload({
             <div className="space-y-2">
               <Check className="mx-auto h-6 w-6 text-green-600" />
               <p className="text-sm font-medium">
-                {uploadState.fileName ||
-                  fileMetadata?.originalName ||
+                {uploadState.fileName ??
+                  fileMetadata?.originalName ??
                   "Uploaded file"}
               </p>
               <p className="text-xs text-gray-500">
-                {(uploadState.fileSize || fileMetadata?.fileSize) &&
+                {(uploadState.fileSize ?? fileMetadata?.fileSize) &&
                   formatFileSize(
-                    uploadState.fileSize || fileMetadata?.fileSize || 0,
+                    uploadState.fileSize ?? fileMetadata?.fileSize ?? 0,
                   )}
               </p>
               <Button
@@ -603,16 +606,17 @@ export function FileUpload({
               <div className="space-y-4">
                 <div className="flex flex-col items-center space-y-3">
                   {showPreview && uploadState.previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={uploadState.previewUrl}
-                      alt="Preview"
+                      alt="File preview"
                       className="h-24 w-24 rounded-lg object-cover"
                     />
                   ) : (
                     React.createElement(
                       getFileIcon(
-                        uploadState.fileName ||
-                          fileMetadata?.originalName ||
+                        uploadState.fileName ??
+                          fileMetadata?.originalName ??
                           "unknown",
                       ),
                       {
@@ -625,14 +629,14 @@ export function FileUpload({
 
                 <div className="space-y-1">
                   <p className="font-medium">
-                    {uploadState.fileName ||
-                      fileMetadata?.originalName ||
+                    {uploadState.fileName ??
+                      fileMetadata?.originalName ??
                       "Uploaded file"}
                   </p>
-                  {(uploadState.fileSize || fileMetadata?.fileSize) && (
+                  {(uploadState.fileSize ?? fileMetadata?.fileSize) && (
                     <p className="text-sm text-gray-500">
                       {formatFileSize(
-                        uploadState.fileSize || fileMetadata?.fileSize || 0,
+                        uploadState.fileSize ?? fileMetadata?.fileSize ?? 0,
                       )}
                     </p>
                   )}

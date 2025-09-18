@@ -34,7 +34,6 @@ import React, {
 import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -50,7 +49,6 @@ import {
   Settings,
   Download,
   Share2,
-  RotateCcw,
   Loader2,
   AlertCircle,
   ExternalLink,
@@ -206,7 +204,7 @@ function YouTubePlayer({
       try {
         // Only parse if data is a string
         if (typeof event.data === "string") {
-          const parsedData = JSON.parse(event.data);
+          const parsedData = JSON.parse(event.data) as unknown;
           // Validate the parsed data has the expected structure
           if (
             typeof parsedData === "object" &&
@@ -726,7 +724,7 @@ export const KiboVideoPlayer = forwardRef<
       aspectRatio = "16:9",
       onPlay,
       onPause,
-      onEnded,
+      onEnded: _onEnded,
       onTimeUpdate,
       onError,
       ...props
@@ -838,10 +836,14 @@ export const KiboVideoPlayer = forwardRef<
 
     const handleToggleFullscreen = useCallback(() => {
       if (!document.fullscreenElement) {
-        containerRef.current?.requestFullscreen();
+        containerRef.current?.requestFullscreen().catch(() => {
+          toast.error("Failed to enter fullscreen");
+        });
         setState((prev) => ({ ...prev, isFullscreen: true }));
       } else {
-        document.exitFullscreen();
+        document.exitFullscreen().catch(() => {
+          toast.error("Failed to exit fullscreen");
+        });
         setState((prev) => ({ ...prev, isFullscreen: false }));
       }
     }, []);
@@ -857,20 +859,27 @@ export const KiboVideoPlayer = forwardRef<
       if (videoSource === "convex" && fileUrl) {
         const link = document.createElement("a");
         link.href = fileUrl;
-        link.download = title || "video";
+        link.download = title ?? "video";
         link.click();
       }
     }, [videoSource, fileUrl, title]);
 
     const handleShare = useCallback(() => {
       if (navigator.share && src) {
-        navigator.share({
-          title: title || "Video",
-          text: description,
-          url: src,
-        });
+        navigator
+          .share({
+            title: title ?? "Video",
+            text: description,
+            url: src,
+          })
+          .catch((error) => {
+            console.error("Error sharing:", error);
+            toast.error("Failed to share");
+          });
       } else {
-        navigator.clipboard.writeText(src || window.location.href);
+        navigator.clipboard.writeText(src || window.location.href).catch(() => {
+          toast.error("Failed to copy link");
+        });
         toast.success("Link copied to clipboard");
       }
     }, [src, title, description]);
@@ -908,7 +917,11 @@ export const KiboVideoPlayer = forwardRef<
         switch (event.code) {
           case "Space":
             event.preventDefault();
-            state.isPlaying ? handlePause() : handlePlay();
+            if (state.isPlaying) {
+              handlePause();
+            } else {
+              void handlePlay();
+            }
             break;
           case "ArrowLeft":
             event.preventDefault();
@@ -986,7 +999,7 @@ export const KiboVideoPlayer = forwardRef<
       }
 
       if (videoSource === "convex") {
-        const videoUrl = fileUrl || src;
+        const videoUrl = fileUrl ?? src;
         if (!videoUrl) {
           return (
             <div className="flex h-full items-center justify-center bg-black">
@@ -1060,7 +1073,7 @@ export const KiboVideoPlayer = forwardRef<
             )}
 
             {/* Video Info Overlay */}
-            {(title || description) && (
+            {(title ?? description) && (
               <div className="absolute top-4 left-4 text-white">
                 {title && (
                   <h3 className="mb-1 text-lg font-semibold drop-shadow-md">

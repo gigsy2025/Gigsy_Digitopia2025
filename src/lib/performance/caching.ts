@@ -13,7 +13,7 @@
  * @since 2025-01-14
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * Cache configuration options
@@ -51,9 +51,9 @@ export const DEFAULT_CACHE_CONFIG: CacheConfig = {
 /**
  * Cache entry metadata
  */
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   key: string;
-  value: T;
+  value: T | Uint8Array | string;
   timestamp: number;
   ttl: number;
   accessCount: number;
@@ -131,7 +131,7 @@ export class CacheManager {
     const now = Date.now();
     const ttl = options?.ttl ?? this.config.defaultTtl;
 
-    let processedValue = value;
+    let processedValue: T | Uint8Array | string = value;
     let compressed = false;
     let size = this.estimateSize(value);
 
@@ -176,7 +176,7 @@ export class CacheManager {
    */
   public async get<T>(key: string): Promise<T | null> {
     const fullKey = this.config.keyPrefix + key;
-    const entry = this.cache.get(fullKey);
+    const entry = this.cache.get(fullKey) as CacheEntry<T> | undefined;
 
     if (!entry) {
       this.metrics.misses++;
@@ -213,16 +213,18 @@ export class CacheManager {
   /**
    * Process get result with decompression
    */
-  private async processGetResult<T>(entry: CacheEntry): Promise<T> {
+  private async processGetResult<T>(entry: CacheEntry<T>): Promise<T> {
     if (entry.compressed) {
       try {
-        return await this.decompress(entry.value);
+        return await this.decompress<T>(entry.value);
       } catch (error) {
         console.warn("Decompression failed:", error);
-        return entry.value;
+        // If decompression fails, cast to T as fallback
+        return entry.value as T;
       }
     }
-    return entry.value;
+    // If not compressed, the value should be of type T
+    return entry.value as T;
   }
 
   /**
@@ -235,7 +237,7 @@ export class CacheManager {
   /**
    * Estimate object size in bytes
    */
-  private estimateSize(obj: any): number {
+  private estimateSize(obj: unknown): number {
     const str = JSON.stringify(obj);
     return new Blob([str]).size;
   }
@@ -243,7 +245,7 @@ export class CacheManager {
   /**
    * Compress data using built-in compression
    */
-  private async compress<T>(data: T): Promise<any> {
+  private async compress<T>(data: T): Promise<Uint8Array | string> {
     if (typeof CompressionStream !== "undefined") {
       const stream = new CompressionStream("gzip");
       const writer = stream.writable.getWriter();
@@ -279,7 +281,7 @@ export class CacheManager {
   /**
    * Decompress data
    */
-  private async decompress<T>(data: any): Promise<T> {
+  private async decompress<T>(data: unknown): Promise<T> {
     if (
       typeof DecompressionStream !== "undefined" &&
       data instanceof Uint8Array
@@ -311,15 +313,15 @@ export class CacheManager {
         }, new Uint8Array(0)),
       );
 
-      return JSON.parse(decompressed);
+      return JSON.parse(decompressed) as T;
     }
 
     // Fallback: base64 decoding
     if (typeof data === "string") {
-      return JSON.parse(atob(data));
+      return JSON.parse(atob(data)) as T;
     }
 
-    return data;
+    return data as T;
   }
 
   /**
@@ -430,7 +432,7 @@ export class CacheManager {
       switch (this.config.storageBackend) {
         case "localStorage":
           const stored = localStorage.getItem(key);
-          return stored ? JSON.parse(stored) : null;
+          return stored ? (JSON.parse(stored) as CacheEntry<T>) : null;
         case "indexedDB":
           // IndexedDB implementation would go here
           return null;
@@ -573,8 +575,11 @@ export function useCachedData<T>(
   }, [key, fetcher, options, cacheManager]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData().catch(() => {
+      /* Handle fetch error */
+      console.error("Failed to fetch data:", error);
+    });
+  }, [fetchData, error]);
 
   return {
     data,
@@ -596,15 +601,19 @@ export function useCachedQuery<T>(
 
   if (options?.suspense) {
     // Implement suspense-compatible version
-    throw cacheManager.get(key).then((cached) => {
+    const promise = cacheManager.get<T>(key).then((cached) => {
       if (cached !== null && !options?.refreshCache) {
         return cached;
       }
       return queryFn().then((data) => {
-        cacheManager.set(key, data, options);
+        void cacheManager.set(key, data, options);
         return data;
       });
     });
+    // This is the correct pattern for React Suspense.
+    // We throw the promise to make the component suspend.
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    throw promise;
   }
 
   return useCachedData(key, queryFn, options);
@@ -613,7 +622,7 @@ export function useCachedQuery<T>(
 /**
  * Higher-order function for caching function results
  */
-export function withCache<TArgs extends any[], TReturn>(
+export function withCache<TArgs extends unknown[], TReturn>(
   fn: (...args: TArgs) => Promise<TReturn>,
   keyGenerator: (...args: TArgs) => string,
   options?: CacheQueryOptions,

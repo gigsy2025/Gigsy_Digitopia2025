@@ -28,20 +28,17 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  type UseFormReturn,
+  type FieldArrayWithId,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "convex/_generated/api";
-import {
-  CourseCreateEnhancedSchema,
-  ModuleCreateSchema,
-  LessonCreateSchema,
-  type CourseCreateEnhanced,
-  type ModuleCreate,
-  type LessonCreate,
-} from "@/types/courses";
 
 // ShadCN UI Components
 import {
@@ -59,7 +56,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -85,26 +81,20 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
 
 // Icons
 import {
   Plus,
-  Save,
   Eye,
   Trash2,
   GripVertical,
-  Upload,
   Play,
   FileText,
   Image,
-  Video,
   AlertCircle,
   CheckCircle,
   Clock,
-  Users,
   DollarSign,
-  Globe,
   Shield,
   Loader2,
 } from "lucide-react";
@@ -114,31 +104,101 @@ import { FileUpload } from "@/components/shared/FileUpload";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Id } from "convex/_generated/dataModel";
-import { validateStep, validateAll } from "@/lib/validation/stepValidator";
-import type {
-  CourseFormData,
-  FormStep,
-  FormProgress,
-  ModuleFormData,
-  LessonFormData,
-} from "@/types/course";
+
+// =============================================================================
+// TYPE DEFINITIONS
+// =============================================================================
+
+type FormStep = "basic" | "media" | "structure" | "pricing" | "review";
+
+interface FormProgress {
+  currentStep: FormStep;
+  completedSteps: FormStep[];
+  isSubmitting: boolean;
+  isDraft: boolean;
+  lastSaved?: Date;
+}
+
+interface CourseFormData {
+  title: string;
+  description: string;
+  shortDescription?: string;
+  category?: string;
+  level?: string;
+  difficultyLevel: "beginner" | "intermediate" | "advanced";
+  pricingType: "free" | "one-time" | "subscription";
+  price?: number;
+  discountPrice?: number;
+  currency?: string;
+  estimatedDuration?: number;
+  tags: string[];
+  skills: string[];
+  thumbnailId?: string;
+  bannerId?: string;
+  introVideoId?: string;
+  isPublic?: boolean;
+  enrollmentLimit?: number;
+  language?: string;
+  modules: ModuleFormData[];
+}
+
+interface ModuleFormData {
+  title: string;
+  description?: string;
+  thumbnailId?: string;
+  estimatedDuration?: number;
+  isRequired?: boolean;
+  lessons: LessonFormData[];
+  isExpanded?: boolean;
+}
+
+interface LessonFormData {
+  title: string;
+  description?: string;
+  contentType: "text" | "video" | "file";
+  content: string;
+  thumbnailId?: string;
+  estimatedDuration?: number;
+  isRequired?: boolean;
+  isFree?: boolean;
+  isExpanded?: boolean;
+}
+
+// Validation functions
+const validateStep = (data: CourseFormData, step: FormStep): boolean => {
+  switch (step) {
+    case "basic":
+      return !!(data.title && data.description && data.difficultyLevel);
+    case "media":
+      return true; // Media is optional
+    case "structure":
+      return (
+        data.modules.length > 0 &&
+        data.modules.every(
+          (module) =>
+            module.title &&
+            module.lessons.length > 0 &&
+            module.lessons.every((lesson) => lesson.title && lesson.content),
+        )
+      );
+    case "pricing":
+      return !!(
+        data.pricingType &&
+        (data.pricingType === "free" || data.price !== undefined)
+      );
+    default:
+      return false;
+  }
+};
+
+const validateAll = (data: CourseFormData): boolean => {
+  const steps: FormStep[] = ["basic", "media", "structure", "pricing"];
+  return steps.every((step) => validateStep(data, step));
+};
 
 // =============================================================================
 // FORM CONFIGURATION
 // =============================================================================
-
-const COURSE_CATEGORIES = [
-  "development",
-  "design",
-  "marketing",
-  "writing",
-  "data",
-  "business",
-  "creative",
-  "technology",
-  "soft-skills",
-  "languages",
-] as const;
 
 const COURSE_LEVELS = ["beginner", "intermediate", "advanced"] as const;
 
@@ -221,6 +281,7 @@ function StepNavigation({
     {
       key: "media",
       label: "Media Assets",
+      // eslint-disable-next-line jsx-a11y/alt-text
       icon: <Image className="h-4 w-4" aria-hidden="true" />,
     },
     {
@@ -476,7 +537,12 @@ export function AdminCourseForm() {
       });
     });
     return () => subscription.unsubscribe();
-  }, [form, formProgress.completedSteps, updateStepCompletion]);
+  }, [
+    form,
+    formProgress.completedSteps,
+    formProgress.currentStep,
+    updateStepCompletion,
+  ]);
 
   // Handle form submission
   const handleSubmit = useCallback(
@@ -696,7 +762,7 @@ function BasicInfoStep({
   form,
   onComplete,
 }: {
-  form: any;
+  form: UseFormReturn<CourseFormData>;
   onComplete: () => void;
 }) {
   const pricingType = form.watch("pricingType");
@@ -854,7 +920,7 @@ function BasicInfoStep({
                 <FormControl>
                   <Input
                     placeholder="javascript, react, frontend (comma separated)"
-                    value={field.value?.join(", ") || ""}
+                    value={field.value?.join(", ") ?? ""}
                     onChange={(e) => {
                       const tags = e.target.value
                         .split(",")
@@ -881,7 +947,7 @@ function BasicInfoStep({
                 <FormControl>
                   <Input
                     placeholder="javascript, react, frontend (comma separated)"
-                    value={field.value?.join(", ") || ""}
+                    value={field.value?.join(", ") ?? ""}
                     onChange={(e) => {
                       const skills = e.target.value
                         .split(",")
@@ -987,14 +1053,15 @@ function MediaAssetsStep({
   form,
   onComplete,
 }: {
-  form: any;
+  form: UseFormReturn<CourseFormData>;
   onComplete: () => void;
 }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Image className="h-5 w-5" />
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          <Image className="h-5 w-5" aria-hidden="true" />
           <span>Media Assets</span>
         </CardTitle>
       </CardHeader>
@@ -1007,7 +1074,7 @@ function MediaAssetsStep({
               <FormItem>
                 <FileUpload
                   category="course-thumbnail"
-                  value={field.value}
+                  value={field.value as Id<"_storage"> | undefined}
                   onUpload={field.onChange}
                   label="Course Thumbnail"
                   required
@@ -1023,7 +1090,7 @@ function MediaAssetsStep({
               <FormItem>
                 <FileUpload
                   category="course-banner"
-                  value={field.value}
+                  value={field.value as Id<"_storage"> | undefined}
                   onUpload={field.onChange}
                   label="Course Banner"
                 />
@@ -1039,7 +1106,7 @@ function MediaAssetsStep({
             <FormItem>
               <FileUpload
                 category="course-intro-video"
-                value={field.value}
+                value={field.value as Id<"_storage"> | undefined}
                 onUpload={field.onChange}
                 label="Introduction Video"
                 description="Upload a compelling introduction video to showcase your course"
@@ -1066,8 +1133,8 @@ function CourseStructureStep({
   onAddLesson,
   onComplete,
 }: {
-  form: any;
-  moduleFields: any[];
+  form: UseFormReturn<CourseFormData>;
+  moduleFields: FieldArrayWithId<CourseFormData, "modules", "id">[];
   onAddModule: () => void;
   onRemoveModule: (index: number) => void;
   onAddLesson: (moduleIndex: number) => void;
@@ -1123,7 +1190,7 @@ function ModuleEditor({
   onRemove,
   onAddLesson,
 }: {
-  form: any;
+  form: UseFormReturn<CourseFormData>;
   moduleIndex: number;
   onRemove: () => void;
   onAddLesson: () => void;
@@ -1180,7 +1247,7 @@ function ModuleEditor({
                 <FormItem>
                   <FileUpload
                     category="module-thumbnail"
-                    value={field.value}
+                    value={field.value as Id<"_storage"> | undefined}
                     onUpload={field.onChange}
                     variant="compact"
                     label="Module Thumbnail"
@@ -1288,7 +1355,7 @@ function LessonEditor({
   lessonIndex,
   onRemove,
 }: {
-  form: any;
+  form: UseFormReturn<CourseFormData>;
   moduleIndex: number;
   lessonIndex: number;
   onRemove: () => void;
@@ -1386,7 +1453,7 @@ function LessonEditor({
                 <FormItem>
                   <FileUpload
                     category="lesson-video"
-                    value={field.value}
+                    value={field.value as Id<"_storage"> | undefined}
                     onUpload={field.onChange}
                     variant="compact"
                     label="Lesson Video"
@@ -1402,7 +1469,7 @@ function LessonEditor({
                 <FormItem>
                   <FileUpload
                     category="lesson-thumbnail"
-                    value={field.value}
+                    value={field.value as Id<"_storage"> | undefined}
                     onUpload={field.onChange}
                     variant="compact"
                     label="Video Thumbnail"
@@ -1497,7 +1564,7 @@ function PricingStep({
   form,
   onComplete,
 }: {
-  form: any;
+  form: UseFormReturn<CourseFormData>;
   onComplete: () => void;
 }) {
   const pricingType = form.watch("pricingType");
@@ -1647,8 +1714,8 @@ function ReviewStep({
   isSubmitting,
   completedSteps,
 }: {
-  form: any;
-  onSubmit: (data: any) => void;
+  form: UseFormReturn<CourseFormData>;
+  onSubmit: (data: CourseFormData) => void;
   isSubmitting: boolean;
   completedSteps: FormStep[];
 }) {
@@ -1693,10 +1760,10 @@ function ReviewStep({
               <span className="font-medium">Total Lessons:</span>
               <span>
                 {formData.modules?.reduce(
-                  (total: number, module: any) =>
-                    total + (module.lessons?.length || 0),
+                  (total: number, module: ModuleFormData) =>
+                    total + (module.lessons?.length ?? 0),
                   0,
-                ) || 0}
+                ) ?? 0}
               </span>
             </div>
           </div>

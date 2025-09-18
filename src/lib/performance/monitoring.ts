@@ -16,6 +16,61 @@
 import React from "react";
 
 /**
+ * Performance Layout Shift Timing interface (not in standard TypeScript)
+ */
+interface PerformanceLayoutShiftTiming extends PerformanceEntry {
+  value: number;
+  hadRecentInput?: boolean;
+  sources?: Array<{
+    node?: Element;
+    currentRect?: DOMRectReadOnly;
+    previousRect?: DOMRectReadOnly;
+  }>;
+}
+
+/**
+ * Performance Event Timing interface (partially available in TypeScript)
+ */
+interface PerformanceEventTiming extends PerformanceEntry {
+  processingStart: number;
+  processingEnd: number;
+  cancelable?: boolean;
+  target?: EventTarget | null;
+}
+
+/**
+ * Network Information interface for connection details
+ */
+interface NetworkInformation {
+  effectiveType?: "2g" | "3g" | "4g" | "slow-2g";
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+}
+
+/**
+ * Extended Navigator interface with connection properties
+ */
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation;
+  mozConnection?: NetworkInformation;
+  webkitConnection?: NetworkInformation;
+}
+
+/**
+ * Core Web Vitals metric result
+ */
+interface CoreWebVitalResult {
+  value: number;
+  rating: "good" | "needs-improvement" | "poor";
+}
+
+/**
+ * Core Web Vitals collection
+ */
+type CoreWebVitals = Record<string, CoreWebVitalResult>;
+
+/**
  * Performance metric types
  */
 export type MetricType =
@@ -40,7 +95,7 @@ export interface PerformanceMetric {
   connectionType?: string;
   userId?: string;
   sessionId: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -261,7 +316,7 @@ export class PerformanceMonitor {
 
     const observer = new PerformanceObserver((list) => {
       list.getEntries().forEach((entry) => {
-        const layoutShiftEntry = entry as any; // PerformanceLayoutShiftTiming not in TypeScript
+        const layoutShiftEntry = entry as PerformanceLayoutShiftTiming;
 
         if (!layoutShiftEntry.hadRecentInput) {
           cumulativeLayoutShift += layoutShiftEntry.value;
@@ -287,7 +342,7 @@ export class PerformanceMonitor {
 
     const observer = new PerformanceObserver((list) => {
       list.getEntries().forEach((entry) => {
-        const firstInputEntry = entry as any; // PerformanceFirstInputTiming not in TypeScript
+        const firstInputEntry = entry as PerformanceEventTiming;
 
         this.addMetric({
           name: "first-input.delay",
@@ -331,9 +386,9 @@ export class PerformanceMonitor {
     if (Math.random() > this.config.sampleRate) return;
 
     const fullMetric: PerformanceMetric = {
-      name: metric.name || "unknown",
-      type: metric.type || "custom",
-      value: metric.value || 0,
+      name: metric.name ?? "unknown",
+      type: metric.type ?? "custom",
+      value: metric.value ?? 0,
       timestamp: Date.now(),
       url: window.location.href,
       userAgent: navigator.userAgent,
@@ -347,7 +402,10 @@ export class PerformanceMonitor {
 
     // Check buffer size
     if (this.metricsBuffer.length >= this.config.bufferSize) {
-      this.flushMetrics();
+      this.flushMetrics().catch(() => {
+        // Handle flush error
+        console.error("Failed to flush performance metrics");
+      });
     }
   }
 
@@ -355,11 +413,10 @@ export class PerformanceMonitor {
    * Get connection type
    */
   private getConnectionType(): string {
+    const nav = navigator as NavigatorWithConnection;
     const connection =
-      (navigator as any).connection ||
-      (navigator as any).mozConnection ||
-      (navigator as any).webkitConnection;
-    return connection?.effectiveType || "unknown";
+      nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
+    return connection?.effectiveType ?? "unknown";
   }
 
   /**
@@ -368,13 +425,19 @@ export class PerformanceMonitor {
   private startBufferFlush(): void {
     setInterval(() => {
       if (this.metricsBuffer.length > 0) {
-        this.flushMetrics();
+        this.flushMetrics().catch(() => {
+          // Handle flush error
+          console.error("Failed to flush performance metrics");
+        });
       }
     }, this.config.sendInterval);
 
     // Flush on page unload
     window.addEventListener("beforeunload", () => {
-      this.flushMetrics();
+      this.flushMetrics().catch(() => {
+        // Handle flush error
+        console.error("Failed to flush performance metrics");
+      });
     });
   }
 
@@ -458,11 +521,8 @@ export class PerformanceMonitor {
   /**
    * Get Core Web Vitals
    */
-  public getCoreWebVitals(): Record<
-    string,
-    { value: number; rating: "good" | "needs-improvement" | "poor" }
-  > {
-    const result: Record<string, any> = {};
+  public getCoreWebVitals(): CoreWebVitals {
+    const result: CoreWebVitals = {};
 
     this.metricsBuffer.forEach((metric) => {
       if (metric.name === "largest-contentful-paint") {
@@ -534,7 +594,7 @@ export class PerformanceMonitor {
    */
   public getSummary(): {
     metrics: PerformanceMetric[];
-    vitals: Record<string, any>;
+    vitals: CoreWebVitals;
     budget: { passed: boolean; violations: string[] };
     sessionId: string;
   } {
@@ -552,7 +612,10 @@ export class PerformanceMonitor {
   public cleanup(): void {
     this.observers.forEach((observer) => observer.disconnect());
     this.observers.clear();
-    this.flushMetrics();
+    this.flushMetrics().catch(() => {
+      // Handle flush error
+      console.error("Failed to flush performance metrics during cleanup");
+    });
   }
 }
 
@@ -584,11 +647,10 @@ export function usePerformanceMonitor(config?: Partial<PerformanceConfig>) {
 /**
  * Performance timing decorator
  */
-export function withPerformanceTracking<T extends (...args: any[]) => any>(
-  name: string,
-  fn: T,
-): T {
-  return ((...args: any[]) => {
+export function withPerformanceTracking<
+  T extends (...args: unknown[]) => unknown,
+>(name: string, fn: T): T {
+  return ((...args: unknown[]) => {
     const monitor = PerformanceMonitor.getInstance();
     const stopTiming = monitor.startTiming(name);
 
