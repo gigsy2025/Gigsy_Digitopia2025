@@ -773,6 +773,7 @@ export const getCourseDetails = query({
   returns: v.union(
     v.object({
       _id: v.id("courses"),
+      _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
       shortDescription: v.optional(v.string()),
@@ -855,6 +856,7 @@ export const getCourseDetails = query({
 
     return {
       _id: course._id,
+      _creationTime: course._creationTime,
       title: course.title,
       description: course.description,
       shortDescription: course.shortDescription,

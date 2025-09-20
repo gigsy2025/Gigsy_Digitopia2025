@@ -245,12 +245,29 @@ export function FileUpload({
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Helper function to check if a value is a valid storage ID
+  const isValidStorageId = (
+    value: string | undefined,
+  ): value is Id<"_storage"> => {
+    // Storage IDs in Convex are typically short alphanumeric strings
+    // If the value is too long or contains spaces/special chars, it's likely not a storage ID
+    if (
+      !value ||
+      value.length > 50 ||
+      /\s/.test(value) ||
+      value.includes("\n")
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   // Convex mutations and queries
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveFileMetadata = useMutation(api.files.saveFileMetadata);
   const fileMetadata = useQuery(
     api.files.getFileMetadata,
-    value ? { storageId: value } : "skip",
+    value && isValidStorageId(value) ? { storageId: value } : "skip",
   );
 
   // Get configuration for this category
@@ -262,7 +279,7 @@ export function FileUpload({
 
   // Sync upload state with existing file metadata
   useEffect(() => {
-    if (value && fileMetadata) {
+    if (value && isValidStorageId(value) && fileMetadata) {
       console.log(
         `[FileUpload] Loaded file metadata for value:`,
         value,
@@ -276,9 +293,11 @@ export function FileUpload({
         fileName: fileMetadata.originalName,
         fileSize: fileMetadata.fileSize,
       });
-    } else if (!value) {
-      // Reset state when no value is provided
-      console.log(`[FileUpload] No value provided, resetting upload state.`);
+    } else if (!value || !isValidStorageId(value)) {
+      // Reset state when no value is provided or value is invalid
+      console.log(
+        `[FileUpload] No valid storage ID provided, resetting upload state.`,
+      );
       setUploadState({
         isUploading: false,
         progress: 0,
@@ -507,7 +526,8 @@ export function FileUpload({
                 Cancel
               </Button>
             </div>
-          ) : uploadState.fileName || (value && fileMetadata) ? (
+          ) : uploadState.fileName ||
+            (value && isValidStorageId(value) && fileMetadata) ? (
             <div className="space-y-2">
               <Check className="mx-auto h-6 w-6 text-green-600" />
               <p className="text-sm font-medium">
@@ -602,7 +622,8 @@ export function FileUpload({
                   Cancel Upload
                 </Button>
               </div>
-            ) : uploadState.fileName || (value && fileMetadata) ? (
+            ) : uploadState.fileName ||
+              (value && isValidStorageId(value) && fileMetadata) ? (
               <div className="space-y-4">
                 <div className="flex flex-col items-center space-y-3">
                   {showPreview && uploadState.previewUrl ? (

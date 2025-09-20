@@ -1,0 +1,132 @@
+Date : 2025-09-20 21:29:43
+Directory : c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy
+Total : 67 files,  5887 codes, 886 comments, 788 blanks, all 7561 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |         33 |      3,566 |        391 |        434 |      4,391 |
+| TypeScript     |         14 |      1,802 |        495 |        246 |      2,543 |
+| Markdown       |         20 |        519 |          0 |        108 |        627 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                                       | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                          |         67 |      5,887 |        886 |        788 |      7,561 |
+| . (Files)                                                                                                                                  |          2 |        519 |          0 |        108 |        627 |
+| .github                                                                                                                                    |         18 |          0 |          0 |          0 |          0 |
+| .github\instructions                                                                                                                       |         18 |          0 |          0 |          0 |          0 |
+| .github\instructions (Files)                                                                                                               |          9 |     -2,888 |         -2 |       -565 |     -3,455 |
+| .github\instructions\draft                                                                                                                 |          9 |      2,888 |          2 |        565 |      3,455 |
+| src                                                                                                                                        |         47 |      5,368 |        886 |        680 |      6,934 |
+| src\app                                                                                                                                    |          9 |        415 |        124 |         70 |        609 |
+| src\app\app                                                                                                                                |          9 |        415 |        124 |         70 |        609 |
+| src\app\app\courses                                                                                                                        |          9 |        415 |        124 |         70 |        609 |
+| src\app\app\courses (Files)                                                                                                                |          2 |         -7 |          0 |         -3 |        -10 |
+| src\app\app\courses\[courseId]                                                                                                             |          7 |        422 |        124 |         73 |        619 |
+| src\app\app\courses\[courseId] (Files)                                                                                                     |          4 |         56 |         37 |         17 |        110 |
+| src\app\app\courses\[courseId]\lessons                                                                                                     |          2 |        335 |         77 |         50 |        462 |
+| src\app\app\courses\[courseId]\lessons\[lessonId]                                                                                          |          2 |        335 |         77 |         50 |        462 |
+| src\app\app\courses\[courseId]\modules                                                                                                     |          1 |         31 |         10 |          6 |         47 |
+| src\app\app\courses\[courseId]\modules\[moduleId]                                                                                          |          1 |         31 |         10 |          6 |         47 |
+| src\app\app\courses\[courseId]\modules\[moduleId]\lessons                                                                                  |          1 |         31 |         10 |          6 |         47 |
+| src\app\app\courses\[courseId]\modules\[moduleId]\lessons\[lessonId]                                                                       |          1 |         31 |         10 |          6 |         47 |
+| src\components                                                                                                                             |         25 |      3,155 |        272 |        365 |      3,792 |
+| src\components\admin                                                                                                                       |          1 |         62 |          9 |          8 |         79 |
+| src\components\course                                                                                                                      |          8 |      1,571 |        129 |        186 |      1,886 |
+| src\components\course (Files)                                                                                                              |          5 |      1,139 |         89 |        100 |      1,328 |
+| src\components\course\__tests__                                                                                                            |          3 |        432 |         40 |         86 |        558 |
+| src\components\kibo                                                                                                                        |          3 |       -532 |        -64 |        -79 |       -675 |
+| src\components\lesson                                                                                                                      |          7 |      1,547 |        135 |        198 |      1,880 |
+| src\components\lesson (Files)                                                                                                              |          6 |      1,428 |        124 |        171 |      1,723 |
+| src\components\lesson\__tests__                                                                                                            |          1 |        119 |         11 |         27 |        157 |
+| src\components\shared                                                                                                                      |          1 |         20 |          4 |          1 |         25 |
+| src\components\ui                                                                                                                          |          5 |        487 |         59 |         51 |        597 |
+| src\components\ui (Files)                                                                                                                  |          4 |        439 |         59 |         47 |        545 |
+| src\components\ui\kibo-ui                                                                                                                  |          1 |         48 |          0 |          4 |         52 |
+| src\components\ui\kibo-ui\avatar-stack                                                                                                     |          1 |         48 |          0 |          4 |         52 |
+| src\hooks                                                                                                                                  |          1 |        265 |         42 |         50 |        357 |
+| src\lib                                                                                                                                    |          5 |         53 |         37 |         10 |        100 |
+| src\lib (Files)                                                                                                                            |          1 |          1 |          0 |          1 |          2 |
+| src\lib\performance                                                                                                                        |          4 |         52 |         37 |          9 |         98 |
+| src\schemas                                                                                                                                |          1 |        263 |         26 |         20 |        309 |
+| src\types                                                                                                                                  |          1 |        200 |          3 |         13 |        216 |
+| src\utils                                                                                                                                  |          5 |      1,017 |        382 |        152 |      1,551 |
++--------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                                                   | language       | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\Jotai.instructions.md                                        | Markdown       |         -5 |          0 |         -2 |         -7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\containerization-docker-best-practices.instructions.md       | Markdown       |       -604 |         -1 |        -77 |       -682 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\Jotai.instructions.md                                  | Markdown       |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\containerization-docker-best-practices.instructions.md | Markdown       |        604 |          1 |         77 |        682 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\github-actions-ci-cd-best-practices.instructions.md    | Markdown       |        551 |          1 |         56 |        608 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\jest.instructions.md                                   | Markdown       |        494 |          0 |        124 |        618 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\markdown.instructions.md                               | Markdown       |         41 |          0 |         12 |         53 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\memory-bank.instructions.md                            | Markdown       |        232 |          0 |         67 |        299 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\sentry.instructions.md                                 | Markdown       |        261 |          0 |         73 |        334 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\tailwind.instructions.md                               | Markdown       |        451 |          0 |         89 |        540 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\draft\zod.instructions.md                                    | Markdown       |        249 |          0 |         65 |        314 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\github-actions-ci-cd-best-practices.instructions.md          | Markdown       |       -551 |         -1 |        -56 |       -608 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\jest.instructions.md                                         | Markdown       |       -494 |          0 |       -124 |       -618 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\markdown.instructions.md                                     | Markdown       |        -41 |          0 |        -12 |        -53 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\memory-bank.instructions.md                                  | Markdown       |       -232 |          0 |        -67 |       -299 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\sentry.instructions.md                                       | Markdown       |       -261 |          0 |        -73 |       -334 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\tailwind.instructions.md                                     | Markdown       |       -451 |          0 |        -89 |       -540 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.github\instructions\zod.instructions.md                                          | Markdown       |       -249 |          0 |        -65 |       -314 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\LMS_QA_CHECKLIST.md                                                               | Markdown       |        200 |          0 |         43 |        243 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\LMS_README.md                                                                     | Markdown       |        319 |          0 |         65 |        384 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\CourseCatalogWrapper.tsx                                      | TypeScript JSX |        273 |         28 |         28 |        329 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\CourseDetailsWrapper.tsx                           | TypeScript JSX |        157 |         10 |         18 |        185 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\lessons\[lessonId]\LessonClientWrapper.tsx         | TypeScript JSX |        103 |         38 |         15 |        156 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\lessons\[lessonId]\page.tsx                        | TypeScript JSX |        232 |         39 |         35 |        306 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\modules\[moduleId]\lessons\[lessonId]\page.tsx     | TypeScript JSX |         31 |         10 |          6 |         47 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\page-fixed.tsx                                     | TypeScript JSX |         23 |         15 |          6 |         44 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\page-new.tsx                                       | TypeScript JSX |         70 |         20 |         11 |        101 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\page.tsx                                           | TypeScript JSX |       -194 |         -8 |        -18 |       -220 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\page.tsx                                                      | TypeScript JSX |       -280 |        -28 |        -31 |       -339 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\admin\AdminCourseForm.tsx                                          | TypeScript JSX |         62 |          9 |          8 |         79 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseHero.stories.tsx                                      | TypeScript JSX |        112 |          9 |          8 |        129 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseHero.tsx                                              | TypeScript JSX |        272 |         25 |         23 |        320 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseSummaryCard.tsx                                       | TypeScript JSX |        206 |         19 |         20 |        245 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\ModuleList.stories.tsx                                      | TypeScript JSX |        246 |          9 |         15 |        270 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\ModuleList.tsx                                              | TypeScript JSX |        303 |         27 |         34 |        364 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\CourseHero.test.tsx                               | TypeScript JSX |         89 |          7 |         20 |        116 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\ModuleList.test.tsx                               | TypeScript JSX |        130 |         10 |         31 |        171 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\integration.test.tsx                              | TypeScript JSX |        213 |         23 |         35 |        271 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\EnhancedCourseVideoPlayer.tsx                                 | TypeScript JSX |          8 |          1 |          2 |         11 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\EnhancedCourseVideoPlayer_backup.tsx                          | TypeScript JSX |       -553 |        -65 |        -81 |       -699 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\kibo\KiboVideoPlayer.tsx                                           | TypeScript JSX |         13 |          0 |          0 |         13 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\Comments.tsx                                                | TypeScript JSX |        296 |         25 |         34 |        355 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonPlayer.stories.tsx                                    | TypeScript JSX |        194 |         10 |         15 |        219 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonPlayer.tsx                                            | TypeScript JSX |        412 |         29 |         59 |        500 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonSidebar.tsx                                           | TypeScript JSX |        324 |         27 |         28 |        379 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonViewer.tsx                                            | TypeScript JSX |        198 |         28 |         34 |        260 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\__tests__\LessonPlayer.test.tsx                             | TypeScript JSX |        119 |         11 |         27 |        157 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\index.ts                                                    | TypeScript     |          4 |          5 |          1 |         10 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\shared\FileUpload.tsx                                              | TypeScript JSX |         20 |          4 |          1 |         25 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\AvatarStackWrapper.tsx                                          | TypeScript JSX |        154 |         32 |         21 |        207 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\ProgressRadial.tsx                                              | TypeScript JSX |        249 |         21 |         19 |        289 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\kibo-ui\avatar-stack\index.tsx                                  | TypeScript JSX |         48 |          0 |          4 |         52 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\slider.tsx                                                      | TypeScript JSX |         37 |          6 |          7 |         50 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\textarea.tsx                                                    | TypeScript JSX |         -1 |          0 |          0 |         -1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useProgress.ts                                                          | TypeScript     |        265 |         42 |         50 |        357 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\caching.ts                                                    | TypeScript     |          3 |          6 |          0 |          9 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\index.ts                                                      | TypeScript     |          4 |          1 |          1 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\monitoring.ts                                                 | TypeScript     |         34 |         22 |          6 |         62 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\performance\video-optimization.ts                                         | TypeScript     |         11 |          8 |          2 |         21 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\video-player-utils.ts                                                     | TypeScript     |          1 |          0 |          1 |          2 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\schemas\course.ts                                                             | TypeScript     |        263 |         26 |         20 |        309 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\course.ts                                                               | TypeScript     |        200 |          3 |         13 |        216 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers-client.ts                                                      | TypeScript     |         83 |         28 |          9 |        120 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers-server.ts                                                      | TypeScript     |        311 |         78 |         41 |        430 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers.ts                                                             | TypeScript     |        401 |        113 |         55 |        569 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\format.ts                                                               | TypeScript     |        110 |         94 |         23 |        227 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\time.ts                                                                 | TypeScript     |        112 |         69 |         24 |        205 |
+| Total                                                                                                                                      |                |      5,887 |        886 |        788 |      7,561 |
++--------------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

@@ -30,6 +30,8 @@ const CourseStatusSchema = v.union(
   v.literal("draft"),
   v.literal("published"),
   v.literal("archived"),
+  v.literal("coming_soon"),
+  v.literal("private"),
 );
 
 const DifficultyLevelSchema = v.union(

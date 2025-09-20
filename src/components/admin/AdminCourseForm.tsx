@@ -125,7 +125,7 @@ interface CourseFormData {
   shortDescription?: string;
   category?: string;
   level?: string;
-  difficultyLevel: "beginner" | "intermediate" | "advanced";
+  difficultyLevel: "beginner" | "intermediate" | "advanced" | "expert";
   pricingType: "free" | "one-time" | "subscription";
   price?: number;
   discountPrice?: number;
@@ -370,7 +370,7 @@ export function AdminCourseForm() {
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
     shortDescription: z.string().optional(),
-    difficultyLevel: z.enum(["beginner", "intermediate", "advanced"]),
+    difficultyLevel: z.enum(["beginner", "intermediate", "advanced", "expert"]),
     pricingType: z.enum(["free", "one-time", "subscription"]),
     price: z.number().min(0).optional(),
     estimatedDuration: z.number().min(0).optional(),
@@ -1363,6 +1363,13 @@ function LessonEditor({
   const contentType = form.watch(
     `modules.${moduleIndex}.lessons.${lessonIndex}.contentType`,
   );
+
+  // Clear content field when content type changes to prevent validation errors
+  React.useEffect(() => {
+    // Clear the content field when switching content types to prevent
+    // FileUpload from receiving invalid data (text instead of storage ID)
+    form.setValue(`modules.${moduleIndex}.lessons.${lessonIndex}.content`, "");
+  }, [contentType, form, moduleIndex, lessonIndex]);
 
   return (
     <Card>
