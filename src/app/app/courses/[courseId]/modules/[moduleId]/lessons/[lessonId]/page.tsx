@@ -45,7 +45,15 @@ export default function LessonDetailPage(props: LessonDetailPageProps) {
     lessonId: params.lessonId as Id<"lessons">,
   });
 
+  const videoStorageId = lesson?.lesson?.content as Id<"_storage"> | undefined;
+
+  const videoUrl = useQuery(
+    api.files.getFileUrl,
+    videoStorageId ? { storageId: videoStorageId } : "skip",
+  );
+
   const isLoading = lesson === undefined;
+  const isVideoLoading = !!videoStorageId && videoUrl === undefined;
 
   const handleBack = () => {
     router.back();
@@ -72,6 +80,9 @@ export default function LessonDetailPage(props: LessonDetailPageProps) {
       </div>
     );
   }
+
+  console.log("Lesson Data:", lesson);
+  console.log("Video URL:", videoUrl);
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -103,6 +114,19 @@ export default function LessonDetailPage(props: LessonDetailPageProps) {
           </div>
         )}
       </div>
+
+      {/* Video Player Section */}
+      {videoStorageId && (
+        <Card>
+          <CardContent className="p-2">
+            {isVideoLoading ? (
+              <Skeleton className="aspect-video w-full" />
+            ) : videoUrl ? (
+              <VideoPlayer src={videoUrl} />
+            ) : null}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lesson Content */}
       <Card>
@@ -159,6 +183,22 @@ export default function LessonDetailPage(props: LessonDetailPageProps) {
 }
 
 /**
+ * Video Player Component
+ *
+ * Renders a responsive HTML5 video player with controls, optimized for performance.
+ *
+ * @param src - The URL of the video to play.
+ * @returns A responsive video player component.
+ */
+const VideoPlayer = ({ src }: { src: string }) => {
+  return (
+    <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+      <video src={src} controls preload="metadata" className="h-full w-full" />
+    </div>
+  );
+};
+
+/**
  * Loading skeleton for the lesson detail page.
  */
 const LessonDetailSkeleton: React.FC = () => (
@@ -172,6 +212,13 @@ const LessonDetailSkeleton: React.FC = () => (
       <Skeleton className="h-12 w-3/4" />
       <Skeleton className="h-5 w-48" />
     </div>
+
+    {/* Video Skeleton */}
+    <Card>
+      <CardContent className="p-2">
+        <Skeleton className="aspect-video w-full" />
+      </CardContent>
+    </Card>
 
     <Card>
       <CardContent className="space-y-4 p-6">
