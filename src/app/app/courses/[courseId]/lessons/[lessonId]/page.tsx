@@ -116,7 +116,7 @@ const LessonNavigation: React.FC<{
       {lesson.previousLesson && (
         <Button variant="outline" size="sm" asChild>
           <Link
-            href={`/app/courses/${lesson.courseId}/lessons/${lesson.previousLesson.id}`}
+            href={`/app/courses/${lesson.courseId}/modules/${lesson.previousLesson.moduleId}/lessons/${lesson.previousLesson.id}`}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Previous</span>
@@ -128,7 +128,7 @@ const LessonNavigation: React.FC<{
       {lesson.nextLesson && (
         <Button size="sm" asChild>
           <Link
-            href={`/app/courses/${lesson.courseId}/lessons/${lesson.nextLesson.id}`}
+            href={`/app/courses/${lesson.courseId}/modules/${lesson.nextLesson.moduleId}/lessons/${lesson.nextLesson.id}`}
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="ml-2 h-4 w-4" />
@@ -256,7 +256,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
     // Preconnect to next lesson for better performance
     const nextLessonUrl = lesson.nextLesson
-      ? `/app/courses/${courseId}/lessons/${lesson.nextLesson.id}`
+      ? `/app/courses/${courseId}/modules/${lesson.nextLesson.moduleId}/lessons/${lesson.nextLesson.id}`
       : null;
 
     return (

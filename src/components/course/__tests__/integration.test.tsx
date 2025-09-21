@@ -113,10 +113,10 @@ describe("Course Navigation Integration", () => {
     const lessonLink = screen.getByText("Getting Started");
     fireEvent.click(lessonLink);
 
-    // Should navigate to lesson page
+    // Should navigate to lesson page with hierarchical route
     expect(lessonLink.closest("a")).toHaveAttribute(
       "href",
-      "/app/courses/course-1/lessons/lesson-1",
+      "/app/courses/course-1/modules/module-1/lessons/lesson-1",
     );
   });
 
@@ -232,7 +232,7 @@ describe("Course Navigation Integration", () => {
     const nextLesson = screen.getByText("Next Steps");
     expect(nextLesson.closest("a")).toHaveAttribute(
       "href",
-      "/app/courses/course-1/lessons/lesson-2",
+      "/app/courses/course-1/modules/module-1/lessons/lesson-2",
     );
   });
 

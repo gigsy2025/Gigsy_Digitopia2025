@@ -52,6 +52,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
   } = useProgress({
     lessonId: lesson.id,
     courseId: lesson.courseId,
+    moduleId: lesson.moduleId,
     userId,
     onComplete,
   });

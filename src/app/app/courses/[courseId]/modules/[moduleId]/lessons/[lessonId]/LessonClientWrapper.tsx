@@ -87,7 +87,7 @@ export const LessonContent: React.FC<LessonContentProps> = ({
   }
 
   // Check for text content (contentHtml or content)
-  const hasTextContent = lesson.contentHtml || (lesson.content && !hasVideo);
+  const hasTextContent = lesson.contentHtml ?? (lesson.content && !hasVideo);
 
   if (hasTextContent) {
     return (

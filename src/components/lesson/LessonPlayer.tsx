@@ -96,6 +96,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
   } = useProgress({
     lessonId: lesson.id,
     courseId: lesson.courseId,
+    moduleId: lesson.moduleId,
     userId,
     onComplete,
   });

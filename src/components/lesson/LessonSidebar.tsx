@@ -181,7 +181,7 @@ const ModuleNavigation: React.FC<{
                   return (
                     <Link
                       key={lesson.id}
-                      href={`/app/courses/${courseId}/lessons/${lesson.id}`}
+                      href={`/app/courses/${courseId}/modules/${module.id}/lessons/${lesson.id}`}
                       className={cn(
                         "flex items-center gap-3 border-b p-3 text-sm transition-colors last:border-b-0",
                         isCurrent
@@ -269,7 +269,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
             {lesson.previousLesson && (
               <Button size="sm" variant="ghost" asChild>
                 <Link
-                  href={`/app/courses/${lesson.courseId}/lessons/${lesson.previousLesson.id}`}
+                  href={`/app/courses/${lesson.courseId}/modules/${lesson.moduleId}/lessons/${lesson.previousLesson.id}`}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Link>
@@ -278,7 +278,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
             {lesson.nextLesson && (
               <Button size="sm" variant="ghost" asChild>
                 <Link
-                  href={`/app/courses/${lesson.courseId}/lessons/${lesson.nextLesson.id}`}
+                  href={`/app/courses/${lesson.courseId}/modules/${lesson.moduleId}/lessons/${lesson.nextLesson.id}`}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -324,7 +324,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
               className="w-full justify-start"
             >
               <Link
-                href={`/app/courses/${lesson.courseId}/lessons/${lesson.previousLesson.id}`}
+                href={`/app/courses/${lesson.courseId}/modules/${lesson.moduleId}/lessons/${lesson.previousLesson.id}`}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous: {lesson.previousLesson.title}
@@ -340,7 +340,7 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
               className="w-full justify-start"
             >
               <Link
-                href={`/app/courses/${lesson.courseId}/lessons/${lesson.nextLesson.id}`}
+                href={`/app/courses/${lesson.courseId}/modules/${lesson.moduleId}/lessons/${lesson.nextLesson.id}`}
               >
                 Next: {lesson.nextLesson.title}
                 <ChevronRight className="ml-2 h-4 w-4" />

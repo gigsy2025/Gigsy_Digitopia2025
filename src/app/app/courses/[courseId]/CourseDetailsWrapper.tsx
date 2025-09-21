@@ -27,7 +27,6 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
 
   const convexProgress = useQuery(api.lessons.getCourseProgress, {
     courseId: courseId as Id<"courses">,
-    userId: undefined, // Mock user ID - in real app, get from auth context
   });
 
   // Transform Convex data to legacy format
@@ -43,11 +42,26 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
     return <div>Course not found</div>;
   }
 
-  const isEnrolled = Boolean(convexProgress);
-  const completionPercentage = Array.isArray(convexProgress)
-    ? convexProgress.reduce((sum, p) => sum + (p.percentage || 0), 0) /
-      convexProgress.length
-    : 0;
+  const isEnrolled = Boolean(convexProgress && convexProgress.length > 0);
+
+  // Extract progress data from the array of lesson progress records
+  const completedLessons = convexProgress
+    ? convexProgress.filter((p) => p.isCompleted).map((p) => p.lessonId)
+    : [];
+
+  // Find the most recently accessed lesson as current lesson
+  const currentLessonId =
+    convexProgress && convexProgress.length > 0
+      ? convexProgress.sort((a, b) => b.lastWatchedAt - a.lastWatchedAt)[0]
+          ?.lessonId
+      : undefined;
+
+  // Calculate overall completion percentage
+  const completionPercentage =
+    convexProgress && convexProgress.length > 0
+      ? convexProgress.reduce((sum, p) => sum + (p.percentage || 0), 0) /
+        convexProgress.length
+      : 0;
 
   return (
     <div className="bg-background min-h-screen">
@@ -85,8 +99,8 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
               <ModuleList
                 modules={course.modules}
                 courseId={courseId}
-                currentLessonId={convexProgress?.currentLessonId}
-                completedLessons={convexProgress?.completedLessons ?? []}
+                currentLessonId={currentLessonId}
+                completedLessons={completedLessons}
                 isEnrolled={isEnrolled}
               />
             </section>
@@ -160,7 +174,32 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
 
                     <Separator />
 
-                    <Button className="w-full" size="lg">
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={() => {
+                        // Navigate to first incomplete lesson or first lesson
+                        const firstIncompleteLesson = course.modules
+                          .flatMap((module) =>
+                            module.lessons.map((lesson) => ({
+                              ...lesson,
+                              moduleId: module.id,
+                            })),
+                          )
+                          .find(
+                            (lesson) => !completedLessons.includes(lesson.id),
+                          );
+
+                        const targetLesson = firstIncompleteLesson || {
+                          ...course.modules[0]?.lessons[0],
+                          moduleId: course.modules[0]?.id,
+                        };
+
+                        if (targetLesson) {
+                          window.location.href = `/app/courses/${courseId}/modules/${targetLesson.moduleId}/lessons/${targetLesson.id}`;
+                        }
+                      }}
+                    >
                       <Play className="mr-2 h-4 w-4" />
                       Continue Learning
                     </Button>
@@ -176,7 +215,17 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
                       </p>
                     </div>
 
-                    <Button className="w-full" size="lg">
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={() => {
+                        // Navigate to first lesson for enrollment
+                        const firstLesson = course.modules[0]?.lessons[0];
+                        if (firstLesson) {
+                          window.location.href = `/app/courses/${courseId}/modules/${course.modules[0].id}/lessons/${firstLesson.id}`;
+                        }
+                      }}
+                    >
                       {course.price ? "Enroll Now" : "Start Learning"}
                     </Button>
 

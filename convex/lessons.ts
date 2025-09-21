@@ -4,9 +4,10 @@
  * Convex functions for tracking lesson progress, completion status,
  * and learning analytics. Supports detailed progress tracking with
  * video watch time, completion percentage, and learning streaks.
+ * Enhanced with comprehensive debugging logging.
  *
  * @author Principal Engineer
- * @version 1.0.0
+ * @version 1.1.0
  * @since 2025-09-16
  */
 
@@ -15,6 +16,28 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { getUserId } from "./users";
 import type { Id } from "./_generated/dataModel";
+
+// Enhanced debugging logger for Convex functions
+const createConvexLogger = (functionName: string) => ({
+  info: (message: string, data?: Record<string, unknown>) => {
+    console.log(
+      `🔵 [Convex:${functionName}] ${message}`,
+      data ? JSON.stringify(data, null, 2) : "",
+    );
+  },
+  warn: (message: string, data?: Record<string, unknown>) => {
+    console.warn(
+      `🟡 [Convex:${functionName}] ${message}`,
+      data ? JSON.stringify(data, null, 2) : "",
+    );
+  },
+  error: (message: string, error?: Error) => {
+    console.error(`🔴 [Convex:${functionName}] ${message}`, error);
+  },
+  debug: (message: string, data?: Record<string, unknown>) => {
+    console.debug(`🟣 [Convex:${functionName}] ${message}`, data);
+  },
+});
 
 // =============================================================================
 // PROGRESS TRACKING MUTATIONS
@@ -32,6 +55,10 @@ export const updateProgress = mutation({
     watchedDuration: v.number(),
     totalDuration: v.number(),
     percentage: v.number(),
+    currentPosition: v.optional(v.number()),
+    seekEvents: v.optional(v.number()),
+    pauseEvents: v.optional(v.number()),
+    playbackSpeed: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getUserId(ctx);
@@ -56,31 +83,58 @@ export const updateProgress = mutation({
       )
       .unique();
 
-    const progressData = {
-      userId,
-      lessonId: args.lessonId,
-      courseId: args.courseId,
-      moduleId: args.moduleId,
-      watchedDuration: args.watchedDuration,
-      totalDuration: args.totalDuration,
-      percentage: args.percentage,
-      lastWatchedAt: Date.now(),
-      isCompleted: args.percentage >= 95,
-    };
+    const now = Date.now();
+    const currentPosition = args.currentPosition ?? args.watchedDuration;
 
     if (existingProgress) {
-      // Update existing progress
+      // Update existing progress with enhanced tracking
       await ctx.db.patch(existingProgress._id, {
-        ...progressData,
-        updatedAt: Date.now(),
+        watchedDuration: Math.max(
+          existingProgress.watchedDuration,
+          args.watchedDuration,
+        ),
+        totalDuration: args.totalDuration,
+        percentage: args.percentage,
+        maxWatchedPosition: Math.max(
+          existingProgress.maxWatchedPosition,
+          currentPosition,
+        ),
+        sessionDuration:
+          existingProgress.sessionDuration +
+          Math.max(0, now - existingProgress.sessionStartedAt),
+        seekEvents: existingProgress.seekEvents + (args.seekEvents ?? 0),
+        pauseCount: existingProgress.pauseCount + (args.pauseEvents ?? 0),
+        playbackSpeed: args.playbackSpeed ?? existingProgress.playbackSpeed,
+        lastWatchedAt: now,
+        sessionStartedAt: now,
+        isCompleted: args.percentage >= 95,
+        completedAt: args.percentage >= 95 ? now : existingProgress.completedAt,
+        updatedAt: now,
       });
       return existingProgress._id;
     } else {
-      // Create new progress record
+      // Create new progress record with all required fields
       return await ctx.db.insert("lessonProgress", {
-        ...progressData,
-        updatedAt: Date.now(),
-        createdBy: userId,
+        userId,
+        lessonId: args.lessonId,
+        courseId: args.courseId,
+        moduleId: args.moduleId,
+        watchedDuration: args.watchedDuration,
+        totalDuration: args.totalDuration,
+        percentage: args.percentage,
+        isCompleted: args.percentage >= 95,
+        maxWatchedPosition: currentPosition,
+        watchCount: 1,
+        sessionDuration: 0,
+        seekEvents: args.seekEvents ?? 0,
+        pauseCount: args.pauseEvents ?? 0,
+        playbackSpeed: args.playbackSpeed ?? 1.0,
+        firstWatchedAt: now,
+        lastWatchedAt: now,
+        completedAt: args.percentage >= 95 ? now : undefined,
+        sessionStartedAt: now,
+        updatedAt: now,
+        createdBy: userId.toString(), // Convert Id<"users"> to string
       });
     }
   },
@@ -110,22 +164,16 @@ export const markComplete = mutation({
       )
       .unique();
 
-    const completionData = {
-      userId,
-      lessonId: args.lessonId,
-      courseId: args.courseId,
-      moduleId: args.moduleId,
-      percentage: 100,
-      isCompleted: true,
-      completedAt: Date.now(),
-      lastWatchedAt: Date.now(),
-    };
+    const now = Date.now();
 
     if (existingProgress) {
-      // Update existing progress
+      // Update existing progress to completed
       await ctx.db.patch(existingProgress._id, {
-        ...completionData,
-        updatedAt: Date.now(),
+        percentage: 100,
+        isCompleted: true,
+        completedAt: now,
+        lastWatchedAt: now,
+        updatedAt: now,
       });
 
       // Update analytics
@@ -133,13 +181,28 @@ export const markComplete = mutation({
 
       return existingProgress._id;
     } else {
-      // Create new progress record
+      // Create new progress record with completion
       const progressId = await ctx.db.insert("lessonProgress", {
-        ...completionData,
+        userId,
+        lessonId: args.lessonId,
+        courseId: args.courseId,
+        moduleId: args.moduleId,
         watchedDuration: 0,
         totalDuration: 0,
-        updatedAt: Date.now(),
-        createdBy: userId,
+        percentage: 100,
+        isCompleted: true,
+        maxWatchedPosition: 0,
+        watchCount: 1,
+        sessionDuration: 0,
+        seekEvents: 0,
+        pauseCount: 0,
+        playbackSpeed: 1.0,
+        firstWatchedAt: now,
+        lastWatchedAt: now,
+        completedAt: now,
+        sessionStartedAt: now,
+        updatedAt: now,
+        createdBy: userId.toString(), // Convert Id<"users"> to string
       });
 
       // Update analytics
@@ -197,17 +260,50 @@ export const getProgress = query({
     lessonId: v.id("lessons"),
   },
   handler: async (ctx, args) => {
+    const logger = createConvexLogger("getProgress");
+
+    logger.info("📋 Progress query requested", {
+      lessonId: args.lessonId,
+      timestamp: new Date().toISOString(),
+    });
+
     const userId = await getUserId(ctx);
+    logger.info("🔑 User authentication check", {
+      userId: userId ? "authenticated" : "not-authenticated",
+      userIdValue: userId,
+    });
+
     if (!userId) {
+      logger.warn("⚠️ No authenticated user, returning null", {
+        reason: "User not authenticated",
+        lessonId: args.lessonId,
+      });
       return null;
     }
 
-    return await ctx.db
+    logger.debug("🔍 Querying progress from database", {
+      userId,
+      lessonId: args.lessonId,
+      indexUsed: "by_user_lesson",
+    });
+
+    const progress = await ctx.db
       .query("lessonProgress")
       .withIndex("by_user_lesson", (q) =>
         q.eq("userId", userId).eq("lessonId", args.lessonId),
       )
       .unique();
+
+    logger.info("📊 Progress query result", {
+      hasProgress: !!progress,
+      progressId: progress?._id,
+      percentage: progress?.percentage,
+      watchedDuration: progress?.watchedDuration,
+      isCompleted: progress?.isCompleted,
+      lastWatchedAt: progress?.lastWatchedAt,
+    });
+
+    return progress;
   },
 });
 
@@ -503,35 +599,79 @@ async function updateCompletionAnalytics(
   userId: Id<"users">,
   _courseId: string,
 ) {
-  // This could be expanded to update user analytics, achievements, etc.
-  // For now, it's a placeholder for future enhancements
+  const logger = createConvexLogger("updateCompletionAnalytics");
 
-  // Example: Update user's completion count in profile
-  const user = await ctx.db.get(userId);
-  if (user) {
-    // Access completion count safely with optional chaining and nullish coalescing
-    const currentCompletions = user.profile?.lessonsCompleted ?? 0;
+  logger.info("🗊 Updating completion analytics", {
+    userId,
+    courseId: _courseId,
+    timestamp: new Date().toISOString(),
+  });
 
-    // Ensure we have a valid profile structure
-    const updatedProfile = {
-      bio: user.profile?.bio,
-      headline: user.profile?.headline,
-      location: user.profile?.location,
-      skills: user.profile?.skills ?? [],
-      experienceLevel: user.profile?.experienceLevel ?? ("beginner" as const),
-      education: user.profile?.education ?? [],
-      workExperience: user.profile?.workExperience ?? [],
-      portfolio: user.profile?.portfolio,
-      lessonsCompleted: currentCompletions + 1,
-      lastActivityAt: Date.now(),
-      completeness: user.profile?.completeness,
-      lastUpdated: Date.now(),
-      version: user.profile?.version,
-    };
+  try {
+    // Example: Update user's completion count in profile
+    const user = await ctx.db.get(userId);
 
-    await ctx.db.patch(userId, {
-      profile: updatedProfile,
-      updatedAt: Date.now(),
+    logger.debug("👤 User profile lookup", {
+      userId,
+      hasUser: !!user,
+      hasProfile: !!user?.profile,
+      currentCompletions: user?.profile?.lessonsCompleted ?? 0,
     });
+
+    if (user) {
+      // Access completion count safely with optional chaining and nullish coalescing
+      const currentCompletions = user.profile?.lessonsCompleted ?? 0;
+      const newCompletions = currentCompletions + 1;
+
+      // Ensure we have a valid profile structure
+      const updatedProfile = {
+        bio: user.profile?.bio,
+        headline: user.profile?.headline,
+        location: user.profile?.location,
+        skills: user.profile?.skills ?? [],
+        experienceLevel: user.profile?.experienceLevel ?? ("beginner" as const),
+        education: user.profile?.education ?? [],
+        workExperience: user.profile?.workExperience ?? [],
+        portfolio: user.profile?.portfolio,
+        lessonsCompleted: newCompletions,
+        lastActivityAt: Date.now(),
+        completeness: user.profile?.completeness,
+        lastUpdated: Date.now(),
+        version: user.profile?.version,
+      };
+
+      logger.info("📋 Updating user profile with completion", {
+        userId,
+        previousCompletions: currentCompletions,
+        newCompletions,
+        profileUpdateData: {
+          lessonsCompleted: newCompletions,
+          lastActivityAt: updatedProfile.lastActivityAt,
+          lastUpdated: updatedProfile.lastUpdated,
+        },
+      });
+
+      await ctx.db.patch(userId, {
+        profile: updatedProfile,
+        updatedAt: Date.now(),
+      });
+
+      logger.info("✅ User profile analytics updated successfully", {
+        userId,
+        newLessonsCompleted: newCompletions,
+      });
+    } else {
+      logger.warn("⚠️ User not found for analytics update", {
+        userId,
+        reason: "User document does not exist",
+      });
+    }
+  } catch (error) {
+    logger.error("❌ Failed to update completion analytics", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      userId,
+      courseId: _courseId,
+    });
+    // Don't throw - analytics failure shouldn't block progress tracking
   }
 }

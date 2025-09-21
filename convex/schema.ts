@@ -640,14 +640,26 @@ const schema = defineSchema({
     moduleId: v.id("modules"),
 
     // Progress details
-    watchedDuration: v.number(), // Seconds watched
+    watchedDuration: v.number(), // Seconds watched (cumulative, handles seeking)
     totalDuration: v.number(), // Total lesson duration
     percentage: v.number(), // Completion percentage (0-100)
     isCompleted: v.boolean(), // Whether lesson is marked complete
 
+    // Enhanced tracking
+    maxWatchedPosition: v.number(), // Furthest point reached (prevents gaming)
+    watchCount: v.number(), // Number of times lesson was started
+    sessionDuration: v.number(), // Time spent in current session
+
+    // Behavioral insights
+    seekEvents: v.number(), // Number of seek/skip events
+    pauseCount: v.number(), // Number of pause events
+    playbackSpeed: v.optional(v.number()), // Last used playback speed
+
     // Timestamps
+    firstWatchedAt: v.number(), // When user first started this lesson
     lastWatchedAt: v.number(), // Last activity timestamp
     completedAt: v.optional(v.number()), // Completion timestamp
+    sessionStartedAt: v.number(), // Current session start time
 
     // Standard System Fields
     updatedAt: v.number(),
@@ -657,9 +669,11 @@ const schema = defineSchema({
     .index("by_lesson", ["lessonId"])
     .index("by_course", ["courseId"])
     .index("by_module", ["moduleId"])
-    .index("by_user_lesson", ["userId", "lessonId"])
+    .index("by_user_lesson", ["userId", "lessonId"]) // Primary lookup - ensure uniqueness
     .index("by_user_course", ["userId", "courseId"])
-    .index("by_user_module", ["userId", "moduleId"]),
+    .index("by_user_module", ["userId", "moduleId"])
+    .index("by_completion_status", ["isCompleted", "completedAt"]) // Analytics queries
+    .index("by_recent_activity", ["lastWatchedAt"]), // Recent activity tracking
 
   // --- Quiz System Tables ---
 

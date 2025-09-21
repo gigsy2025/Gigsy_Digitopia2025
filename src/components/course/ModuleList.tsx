@@ -76,7 +76,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
   const hasContent = Boolean(lesson.contentHtml);
   const isLocked = lesson.isLocked && !isEnrolled && !lesson.isFree;
   const canView =
-    canAccess && (isEnrolled || lesson.isFree || !lesson.isLocked);
+    canAccess && (isEnrolled ?? lesson.isFree ?? !lesson.isLocked);
 
   const handleClick = () => {
     if (canView) {
@@ -84,27 +84,24 @@ const LessonCard: React.FC<LessonCardProps> = ({
     }
   };
 
-  const ContentWrapper = canView ? Link : "div";
-  const contentProps = canView
-    ? { href: `/app/courses/${courseId}/lessons/${lesson.id}` }
-    : {};
+  // Enhanced routing with hierarchical structure: /courses/[courseId]/modules/[moduleId]/lessons/[lessonId]
+  const lessonHref = `/app/courses/${courseId}/modules/${moduleId}/lessons/${lesson.id}`;
 
-  return (
-    <ContentWrapper {...contentProps}>
+  return canView ? (
+    <Link href={lessonHref}>
       <div
         className={cn(
           "group flex items-center gap-4 rounded-lg border p-4 transition-all duration-200",
           "hover:bg-muted/50 hover:shadow-sm",
           isActive && "border-primary bg-primary/5 shadow-sm",
-          !canView && "cursor-not-allowed opacity-60",
-          canView && "cursor-pointer",
+          "cursor-pointer",
         )}
         onClick={handleClick}
-        role={canView ? "button" : undefined}
-        tabIndex={canView ? 0 : -1}
+        role="button"
+        tabIndex={0}
         aria-current={isActive ? "page" : undefined}
         onKeyDown={(e) => {
-          if (canView && (e.key === "Enter" || e.key === " ")) {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             handleClick();
           }
@@ -138,7 +135,6 @@ const LessonCard: React.FC<LessonCardProps> = ({
               className={cn(
                 "leading-tight font-medium",
                 isActive && "text-primary",
-                !canView && "text-muted-foreground",
               )}
             >
               {lesson.title}
@@ -191,7 +187,43 @@ const LessonCard: React.FC<LessonCardProps> = ({
           {lesson.sequenceIndex + 1}
         </div>
       </div>
-    </ContentWrapper>
+    </Link>
+  ) : (
+    <div
+      className={cn(
+        "group flex items-center gap-4 rounded-lg border p-4 transition-all duration-200",
+        "cursor-not-allowed opacity-60",
+      )}
+      role="button"
+      tabIndex={-1}
+    >
+      {/* Same content as above for locked lessons */}
+      <div className="flex-shrink-0">
+        <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+          <Lock className="text-muted-foreground h-4 w-4" />
+        </div>
+      </div>
+
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-muted-foreground leading-tight font-medium">
+            {lesson.title}
+          </h4>
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+            {lesson.durationSeconds && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>{formatDuration(lesson.durationSeconds, "short")}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="text-muted-foreground flex-shrink-0 text-sm font-medium">
+        {lesson.sequenceIndex + 1}
+      </div>
+    </div>
   );
 };
 

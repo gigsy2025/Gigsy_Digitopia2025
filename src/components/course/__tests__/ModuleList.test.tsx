@@ -23,6 +23,7 @@ const mockModules: Module[] = [
     id: "module-1",
     title: "Getting Started",
     description: "Introduction to the course",
+    sequenceIndex: 0,
     lessons: [
       {
         id: "lesson-1",
@@ -46,6 +47,7 @@ const mockModules: Module[] = [
     id: "module-2",
     title: "Advanced Topics",
     description: "Deep dive into advanced concepts",
+    sequenceIndex: 1,
     lessons: [
       {
         id: "lesson-3",
@@ -124,7 +126,7 @@ describe("ModuleList", () => {
     });
     expect(lessonLink).toHaveAttribute(
       "href",
-      "/app/courses/course-1/lessons/lesson-1",
+      "/app/courses/course-1/modules/module-1/lessons/lesson-1",
     );
   });
 
