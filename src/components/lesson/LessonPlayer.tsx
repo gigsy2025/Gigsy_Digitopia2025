@@ -39,6 +39,7 @@ interface LessonPlayerProps {
   onComplete?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  watchedPercentage?: number;
 }
 
 interface VideoPlayerState {
@@ -65,6 +66,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
   onComplete,
   onError,
   className,
+  watchedPercentage: initialWatchedPercentage,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,6 +101,8 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
     userId,
     onComplete,
   });
+  const displayWatchedPercentage =
+    initialWatchedPercentage ?? watchedPercentage;
 
   // Video event handlers
   const handleTimeUpdate = useCallback(() => {
@@ -395,6 +399,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
         onPause={() => setState((prev) => ({ ...prev, isPlaying: false }))}
         preload="metadata"
         playsInline
+        data-testid="lesson-video"
       />
 
       {/* Loading Overlay */}
@@ -449,6 +454,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
               size="sm"
               onClick={togglePlay}
               className="h-10 w-10 p-0 text-white hover:bg-white/20"
+            title={state.isPlaying ? "Pause" : "Play"}
             >
               {state.isPlaying ? (
                 <Pause className="h-5 w-5" />
@@ -526,10 +532,10 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({
       </div>
 
       {/* Progress Indicator */}
-      {watchedPercentage > 0 && (
+      {displayWatchedPercentage > 0 && (
         <div className="absolute top-4 right-4">
           <div className="rounded-full bg-black/50 px-2 py-1 text-xs text-white">
-            {Math.round(watchedPercentage)}% watched
+            {Math.round(displayWatchedPercentage)}% watched
           </div>
         </div>
       )}

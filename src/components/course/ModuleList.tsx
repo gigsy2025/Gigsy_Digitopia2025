@@ -113,11 +113,17 @@ const LessonCard: React.FC<LessonCardProps> = ({
         {/* Status Icon */}
         <div className="flex-shrink-0">
           {isLocked ? (
-            <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+            <div
+              className="bg-muted flex h-8 w-8 items-center justify-center rounded-full"
+              data-testid="lock-icon"
+            >
               <Lock className="text-muted-foreground h-4 w-4" />
             </div>
           ) : isCompleted ? (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900"
+              data-testid="check-circle"
+            >
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
           ) : hasVideo ? (
@@ -225,6 +231,22 @@ export const ModuleList: React.FC<ModuleListProps> = ({
   );
 
   const defaultValue = currentModule?.id;
+
+  if (modules.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center",
+          className,
+        )}
+      >
+        <h3 className="text-xl font-semibold">No modules available</h3>
+        <p className="text-muted-foreground mt-2 text-sm">
+          Course content will be added soon.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-4", className)}>
