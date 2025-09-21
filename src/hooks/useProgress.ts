@@ -33,7 +33,7 @@ const createProgressLogger = (context: string) => ({
       data ? JSON.stringify(data, null, 2) : "",
     );
   },
-  error: (message: string, error?: Error | unknown) => {
+  error: (message: string, error?: unknown) => {
     console.error(`🔴 [ProgressTracker:${context}] ${message}`, error);
   },
   debug: (message: string, data?: Record<string, unknown>) => {
@@ -53,7 +53,7 @@ interface UseProgressOptions {
   userId: string;
   onProgressUpdate?: (progress: LessonProgress) => void;
   onComplete?: () => void;
-  syncInterval?: number; // How often to sync with server (ms)
+  syncInterval?: number; // How often to sync with server (ms) - default 15 seconds
 }
 
 interface ProgressState {
@@ -76,7 +76,7 @@ export function useProgress({
   userId,
   onProgressUpdate,
   onComplete,
-  syncInterval = 5000,
+  syncInterval = 15000, // Default to 15 seconds - less aggressive
 }: UseProgressOptions) {
   const logger = createProgressLogger("useProgress");
 
@@ -90,7 +90,7 @@ export function useProgress({
       syncInterval,
       timestamp: new Date().toISOString(),
     });
-  }, [lessonId, courseId, moduleId, userId, syncInterval, logger]);
+  }, [lessonId, courseId, moduleId, userId, syncInterval]);
 
   // Convex mutations and queries
   const updateProgressMutation = useMutation(api.lessons.updateProgress);
@@ -113,7 +113,7 @@ export function useProgress({
       queryData: progressQuery,
       lessonId,
     });
-  }, [progressQuery, lessonId, logger]);
+  }, [progressQuery, lessonId]);
   const [state, setState] = useState<ProgressState>({
     progressSeconds: 0,
     completed: false,
@@ -146,7 +146,8 @@ export function useProgress({
           lastWatchedAt: progressQuery.lastWatchedAt,
         });
 
-        setState({
+        setState((prev) => ({
+          ...prev,
           progressSeconds: progressQuery.watchedDuration ?? 0,
           completed: progressQuery.isCompleted ?? false,
           watchedPercentage: progressQuery.percentage ?? 0,
@@ -154,7 +155,7 @@ export function useProgress({
           isDirty: false,
           isLoading: false,
           error: null,
-        });
+        }));
 
         lastProgressRef.current = {
           lessonId,
@@ -183,7 +184,7 @@ export function useProgress({
     } else {
       logger.debug("⌛ Progress query still loading...", { lessonId });
     }
-  }, [progressQuery, lessonId, userId, logger]);
+  }, [progressQuery, lessonId, userId]);
 
   const syncOptionsRef = useRef<{
     seekEvents?: number;
@@ -191,6 +192,9 @@ export function useProgress({
     playbackSpeed?: number;
     totalDuration?: number;
   }>({});
+
+  // Track last sync time to prevent excessive syncing
+  const lastSyncTimeRef = useRef<number>(0);
 
   // Sync progress to server using Convex mutations
   const syncProgress = useCallback(
@@ -205,6 +209,7 @@ export function useProgress({
           watchedPercentage: state.watchedPercentage,
           completed: state.completed,
         },
+        timestamp: new Date().toISOString(),
       });
 
       if (!shouldSync) {
@@ -301,18 +306,32 @@ export function useProgress({
       state.completed,
       updateProgressMutation,
       onProgressUpdate,
-      logger,
       userId,
     ],
   );
 
   // Throttled sync function
-  const throttledSync = useCallback(
-    throttle(() => {
+  const throttledSync = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastSync = now - lastSyncTimeRef.current;
+    const minSyncInterval = Math.max(syncInterval, 10000); // Minimum 10 seconds
+
+    if (timeSinceLastSync >= minSyncInterval) {
+      lastSyncTimeRef.current = now;
+      logger.debug("⏰ Throttled sync executing", {
+        timeSinceLastSync,
+        minSyncInterval,
+        now,
+      });
       void syncProgress();
-    }, syncInterval),
-    [syncProgress, syncInterval],
-  );
+    } else {
+      logger.debug("⏰ Throttled sync skipped", {
+        timeSinceLastSync,
+        minSyncInterval,
+        timeRemaining: minSyncInterval - timeSinceLastSync,
+      });
+    }
+  }, [syncProgress, syncInterval]);
 
   // Update progress with optimistic updates
   const updateProgress = useCallback(
@@ -448,20 +467,8 @@ export function useProgress({
     };
   }, [state.isDirty, syncProgress]);
 
-  // Periodic sync for long sessions
-  useEffect(() => {
-    if (state.isDirty) {
-      syncTimeoutRef.current = setTimeout(() => {
-        void syncProgress();
-      }, syncInterval);
-    }
-
-    return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-    };
-  }, [state.isDirty, syncProgress, syncInterval]);
+  // Note: Removed periodic sync to prevent excessive syncing
+  // The throttled sync in updateProgress handles regular syncing
 
   return {
     // Current state
@@ -480,6 +487,17 @@ export function useProgress({
 
     // Last synced progress from server
     lastSyncedProgress: lastProgressRef.current,
+
+    // Debug info (development only)
+    ...(process.env.NODE_ENV === "development" && {
+      _debug: {
+        lastSyncTime: lastSyncTimeRef.current,
+        syncInterval,
+        timeSinceLastSync: Date.now() - lastSyncTimeRef.current,
+        canSyncNow:
+          Date.now() - lastSyncTimeRef.current >= Math.max(syncInterval, 10000),
+      },
+    }),
   };
 }
 

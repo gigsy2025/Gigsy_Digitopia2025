@@ -14,6 +14,7 @@
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProgress } from "@/hooks/useProgress";
 import type { LessonWithNavigation } from "@/types/course";
 
 // Dynamically import heavy components with ssr: false
@@ -43,6 +44,15 @@ const LessonViewer = dynamic(
   },
 );
 
+// Import debug panel dynamically for development
+const ProgressDebugPanel = dynamic(
+  () => import("@/components/debug/ProgressDebugPanel"),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
 /**
  * Lesson Player Skeleton
  */
@@ -64,6 +74,14 @@ export const LessonContent: React.FC<LessonContentProps> = ({
   lesson,
   userId,
 }) => {
+  // Initialize progress tracking for debug panel
+  const progressHook = useProgress({
+    lessonId: lesson.id,
+    courseId: lesson.courseId,
+    moduleId: lesson.moduleId,
+    userId,
+  });
+
   // Determine content type and render appropriate component
   // Check for video content (either legacy videoUrl or new content structure)
   const hasVideo =
@@ -73,41 +91,46 @@ export const LessonContent: React.FC<LessonContentProps> = ({
         lesson.content.startsWith("blob:") ||
         lesson.content.includes("video")));
 
-  if (hasVideo) {
-    return (
-      <Suspense fallback={<LessonPlayerSkeleton />}>
-        <LessonPlayer
-          lesson={lesson}
-          userId={userId}
-          autoPlay={false}
-          className="w-full"
-        />
-      </Suspense>
-    );
-  }
-
-  // Check for text content (contentHtml or content)
-  const hasTextContent = lesson.contentHtml ?? (lesson.content && !hasVideo);
-
-  if (hasTextContent) {
-    return (
-      <Suspense
-        fallback={<div className="py-8 text-center">Loading content...</div>}
-      >
-        <LessonViewer lesson={lesson} userId={userId} className="w-full" />
-      </Suspense>
-    );
-  }
-
-  // No content available
   return (
-    <div className="bg-muted/50 flex h-64 flex-col items-center justify-center rounded-lg border">
-      <div className="text-muted-foreground text-lg font-medium">
-        No content available
-      </div>
-      <div className="text-muted-foreground text-sm">
-        This lesson is currently being prepared.
-      </div>
+    <div className="space-y-6">
+      {/* Debug Panel - Development Only */}
+      {process.env.NODE_ENV === "development" && (
+        <Suspense fallback={null}>
+          <ProgressDebugPanel
+            {...progressHook}
+            lessonId={lesson.id}
+            userId={userId}
+          />
+        </Suspense>
+      )}
+
+      {/* Main Content */}
+      {hasVideo ? (
+        <Suspense fallback={<LessonPlayerSkeleton />}>
+          <LessonPlayer
+            lesson={lesson}
+            userId={userId}
+            autoPlay={false}
+            className="w-full"
+          />
+        </Suspense>
+      ) : (lesson.contentHtml ?? (lesson.content && !hasVideo)) ? (
+        <Suspense
+          fallback={<div className="py-8 text-center">Loading content...</div>}
+        >
+          <LessonViewer lesson={lesson} userId={userId} className="w-full" />
+        </Suspense>
+      ) : (
+        // No content available
+        <div className="bg-muted/50 flex h-64 flex-col items-center justify-center rounded-lg border">
+          <div className="text-muted-foreground text-lg font-medium">
+            No content available
+          </div>
+          <div className="text-muted-foreground text-sm">
+            This lesson is currently being prepared.
+          </div>
+        </div>
+      )}
     </div>
   );
 };
