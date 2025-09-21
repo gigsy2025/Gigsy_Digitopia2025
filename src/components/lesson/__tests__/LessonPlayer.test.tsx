@@ -77,7 +77,7 @@ describe('LessonPlayer', () => {
   it('renders video player for lessons with video URL', () => {
     render(<LessonPlayer lesson={mockLesson} userId="user-1" />);
     
-    const video = screen.getByRole('application');
+    const video = screen.getByTestId('lesson-video');
     expect(video).toBeInTheDocument();
   });
 
@@ -105,7 +105,7 @@ describe('LessonPlayer', () => {
       />
     );
 
-    const video = screen.getByRole('application');
+    const video = screen.getByTestId('lesson-video');
     
     // Simulate timeupdate event
     fireEvent.timeUpdate(video);
@@ -122,7 +122,7 @@ describe('LessonPlayer', () => {
   it('handles video errors gracefully', () => {
     render(<LessonPlayer lesson={mockLesson} userId="user-1" />);
     
-    const video = screen.getByRole('application');
+    const video = screen.getByTestId('lesson-video');
     
     // Simulate error
     fireEvent.error(video);
@@ -132,18 +132,13 @@ describe('LessonPlayer', () => {
   });
 
   it('shows progress indicator when available', () => {
-    // Mock the hook to return progress
-    jest.doMock('@/hooks/useProgress', () => ({
-      useProgress: () => ({
-        updateProgress: jest.fn(),
-        markCompleted: jest.fn(),
-        progressSeconds: 60,
-        completed: false,
-        watchedPercentage: 10,
-      }),
-    }));
-
-    render(<LessonPlayer lesson={mockLesson} userId="user-1" />);
+    render(
+      <LessonPlayer
+        lesson={mockLesson}
+        userId="user-1"
+        watchedPercentage={10}
+      />,
+    );
     
     expect(screen.getByText('10% watched')).toBeInTheDocument();
   });
@@ -151,7 +146,7 @@ describe('LessonPlayer', () => {
   it('enables autoplay when specified', () => {
     render(<LessonPlayer lesson={mockLesson} userId="user-1" autoPlay={true} />);
     
-    const video = screen.getByRole('application');
+    const video = screen.getByTestId('lesson-video');
     expect(video).toHaveAttribute('autoPlay');
   });
 });
