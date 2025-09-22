@@ -93,10 +93,6 @@ export function validateStep(
       return CourseStructureSchema.safeParse(formData).success;
     case "pricing":
       return PricingSchema.safeParse(formData).success;
-    case "review":
-      // Review step is valid if all other steps are valid.
-      // This is handled by validateAll.
-      return true;
     default:
       return false;
   }

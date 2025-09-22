@@ -20,6 +20,7 @@ import type * as files from "../files.js";
 import type * as index from "../index.js";
 import type * as lessons from "../lessons.js";
 import type * as messages from "../messages.js";
+import type * as progressBatch from "../progressBatch.js";
 import type * as schema_fixed from "../schema_fixed.js";
 import type * as skills from "../skills.js";
 import type * as skillsTest from "../skillsTest.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   index: typeof index;
   lessons: typeof lessons;
   messages: typeof messages;
+  progressBatch: typeof progressBatch;
   schema_fixed: typeof schema_fixed;
   skills: typeof skills;
   skillsTest: typeof skillsTest;

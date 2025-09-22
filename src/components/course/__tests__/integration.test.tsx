@@ -47,6 +47,7 @@ const mockModules: Module[] = [
   {
     id: "module-1",
     title: "Introduction",
+    sequenceIndex: 0,
     lessons: [
       {
         id: "lesson-1",

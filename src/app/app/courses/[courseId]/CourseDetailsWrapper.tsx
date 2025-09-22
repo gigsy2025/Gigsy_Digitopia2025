@@ -187,7 +187,10 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
                             })),
                           )
                           .find(
-                            (lesson) => !completedLessons.includes(lesson.id),
+                            (lesson) =>
+                              !completedLessons.includes(
+                                lesson.id as Id<"lessons">,
+                              ),
                           );
 
                         const targetLesson = firstIncompleteLesson || {
@@ -221,7 +224,7 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
                       onClick={() => {
                         // Navigate to first lesson for enrollment
                         const firstLesson = course.modules[0]?.lessons[0];
-                        if (firstLesson) {
+                        if (firstLesson && course.modules[0]) {
                           window.location.href = `/app/courses/${courseId}/modules/${course.modules[0].id}/lessons/${firstLesson.id}`;
                         }
                       }}

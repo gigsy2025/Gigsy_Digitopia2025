@@ -198,103 +198,123 @@ export function useProgress({
 
   // Sync progress to server using Convex mutations
   const syncProgress = useCallback(
-    async (force = false) => {
-      const shouldSync = state.isDirty || force;
-      logger.debug("🔄 Sync attempt", {
-        isDirty: state.isDirty,
-        force,
-        shouldSync,
-        currentState: {
-          progressSeconds: state.progressSeconds,
-          watchedPercentage: state.watchedPercentage,
-          completed: state.completed,
-        },
-        timestamp: new Date().toISOString(),
-      });
+    async (force = false, isRealTimeUpdate = false) => {
+      // if (isRealTimeUpdate){
 
-      if (!shouldSync) {
-        logger.debug("⏭️ Skipping sync - no changes to save");
-        return;
-      }
-
-      try {
-        const progressData = {
-          lessonId: lessonId as Id<"lessons">,
-          courseId: courseId as Id<"courses">,
-          moduleId: moduleId as Id<"modules">,
-          watchedDuration: state.progressSeconds,
-          totalDuration: syncOptionsRef.current.totalDuration ?? 0,
-          percentage: state.watchedPercentage,
-          currentPosition: state.progressSeconds,
-          seekEvents: syncOptionsRef.current.seekEvents ?? 0,
-          pauseEvents: syncOptionsRef.current.pauseEvents ?? 0,
-          playbackSpeed: syncOptionsRef.current.playbackSpeed ?? 1.0,
-        };
-
-        logger.info("🚀 Syncing progress to Convex", {
-          progressData,
-          mutationName: "api.lessons.updateProgress",
+        const shouldSync = state.isDirty || force;
+        logger.debug("🔄 Sync attempt", {
+          isDirty: state.isDirty,
+          force,
+          shouldSync,
+          currentState: {
+            progressSeconds: state.progressSeconds,
+            watchedPercentage: state.watchedPercentage,
+            completed: state.completed,
+          },
           timestamp: new Date().toISOString(),
         });
 
-        // Use Convex mutation directly
-        const result = await updateProgressMutation(progressData);
+        if (!shouldSync) {
+          logger.debug("⏭️ Skipping sync - no changes to save");
+          return;
+        }
 
-        logger.info("✅ Progress sync successful", {
-          result,
-          syncedAt: new Date().toISOString(),
-          progressData: {
-            watchedDuration: progressData.watchedDuration,
-            percentage: progressData.percentage,
-            totalDuration: progressData.totalDuration,
-          },
-        });
-
-        setState((prev) => ({
-          ...prev,
-          lastSyncedAt: Date.now(),
-          isDirty: false,
-          error: null,
-        }));
-
-        // Reset sync options
-        syncOptionsRef.current = {};
-
-        // Create updated progress object for callback
-        const updatedProgress: LessonProgress = {
-          lessonId,
-          userId,
-          completed: state.completed,
-          isCompleted: state.completed,
-          watchedDuration: state.progressSeconds,
-          totalDuration: progressData.totalDuration,
-          progressPercentage: state.watchedPercentage,
-          progressSeconds: state.progressSeconds,
-          watchedPercentage: state.watchedPercentage,
-          lastWatchedAt: new Date().toISOString(),
-          completedAt: state.completed ? new Date().toISOString() : undefined,
-        };
-
-        lastProgressRef.current = updatedProgress;
-        onProgressUpdate?.(updatedProgress);
-      } catch (error) {
-        logger.error("❌ Progress sync failed", {
-          error: error instanceof Error ? error.message : "Unknown error",
-          errorObject: error,
-          progressData: {
-            lessonId,
-            courseId,
-            moduleId,
+        try {
+          const progressData = {
+            lessonId: lessonId as Id<"lessons">,
+            courseId: courseId as Id<"courses">,
+            moduleId: moduleId as Id<"modules">,
             watchedDuration: state.progressSeconds,
+            totalDuration: syncOptionsRef.current.totalDuration ?? 0,
             percentage: state.watchedPercentage,
-          },
-        });
+            currentPosition: state.progressSeconds,
+            seekEvents: syncOptionsRef.current.seekEvents ?? 0,
+            pauseEvents: syncOptionsRef.current.pauseEvents ?? 0,
+            playbackSpeed: syncOptionsRef.current.playbackSpeed ?? 1.0,
+          };
 
-        setState((prev) => ({
-          ...prev,
-          error: error instanceof Error ? error.message : "Sync failed",
-        }));
-      }
+          logger.info("🚀 Syncing progress to Convex", {
+            progressData,
+            mutationName: "api.lessons.updateProgress",
+            timestamp: new Date().toISOString(),
+          });
+
+          // Use Convex mutation directly
+          const result = await updateProgressMutation(progressData);
+
+          logger.info("✅ Progress sync successful", {
+            result,
+            syncedAt: new Date().toISOString(),
+            progressData: {
+              watchedDuration: progressData.watchedDuration,
+              percentage: progressData.percentage,
+              totalDuration: progressData.totalDuration,
+            },
+          });
+
+          setState((prev) => ({
+            ...prev,
+            lastSyncedAt: Date.now(),
+            isDirty: false,
+            error: null,
+          }));
+
+          // Reset sync options
+          syncOptionsRef.current = {};
+
+          // Create updated progress object for callback
+          const updatedProgress: LessonProgress = {
+            lessonId,
+            userId,
+            completed: state.completed,
+            isCompleted: state.completed,
+            watchedDuration: state.progressSeconds,
+            totalDuration: progressData.totalDuration,
+            progressPercentage: state.watchedPercentage,
+            progressSeconds: state.progressSeconds,
+            watchedPercentage: state.watchedPercentage,
+            lastWatchedAt: new Date().toISOString(),
+            completedAt: state.completed ? new Date().toISOString() : undefined,
+          };
+
+          lastProgressRef.current = updatedProgress;
+          onProgressUpdate?.(updatedProgress);
+        } catch (error) {
+          logger.error("❌ Progress sync failed", {
+            error: error instanceof Error ? error.message : "Unknown error",
+            errorObject: error,
+            progressData: {
+              lessonId,
+              courseId,
+              moduleId,
+              watchedDuration: state.progressSeconds,
+              percentage: state.watchedPercentage,
+            },
+          });
+
+          setState((prev) => ({
+            ...prev,
+            error: error instanceof Error ? error.message : "Sync failed",
+          }));
+        }
+      // }else if (!isRealTimeUpdate){
+      //   const now = Date.now();
+      //   lastProgressRef.current = now;
+      //
+      //   console.log("Not a real time update");
+      //   console.log("Force:", force);
+      //   console.log("State:", state);
+      //   console.log("State is dirty:", state.isDirty);
+      //   console.log("Last Sync Time Ref:", lastSyncTimeRef);
+      //   const lastSync = lastSyncTimeRef.current;
+      //   console.log("Current Sync Time Ref:", lastSync);
+      //   const timeSinceLastSync = now - lastSync;
+      //
+      //
+      //
+      //
+      //
+      // }
     },
     [
       lessonId,
@@ -462,7 +482,8 @@ export function useProgress({
     return () => {
       if (state.isDirty) {
         // Best effort sync on unmount
-        void syncProgress(true);
+        // void syncProgress(false);
+        void throttledSync();
       }
     };
   }, [state.isDirty, syncProgress]);

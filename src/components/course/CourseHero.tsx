@@ -20,12 +20,12 @@ import { AvatarStackWrapper } from "@/components/ui/AvatarStackWrapper";
 import { ProgressRadial } from "@/components/ui/ProgressRadial";
 import { cn } from "@/lib/utils";
 import {
-  formatDuration,
   formatPrice,
   formatDifficulty,
   formatCategory,
   formatNumber,
 } from "@/utils/format";
+import { formatDuration } from "@/utils/time";
 import {
   Clock,
   Users,

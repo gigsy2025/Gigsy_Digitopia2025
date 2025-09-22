@@ -16,6 +16,7 @@ import { api } from "convex/_generated/api";
 import { preloadQuery } from "convex/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { CourseDetailsWrapper } from "./CourseDetailsWrapper";
+import { getCourse } from "@/utils/fetchers";
 import type { Id } from "convex/_generated/dataModel";
 
 // Enhanced debugging logger for course pages
@@ -80,15 +81,11 @@ export async function generateMetadata({
       );
     }
 
-    // Preload course data
-    logger.debug("🔍 Preloading course data for metadata");
-    const preloadedCourse = await preloadQuery(
-      api.courses.getCourseDetails,
-      { courseId: resolvedParams.courseId as Id<"courses"> },
-      { token },
-    );
+    // Get course data for metadata
+    logger.debug("🔍 Getting course data for metadata");
+    const courseData = await getCourse(resolvedParams.courseId);
 
-    if (!preloadedCourse) {
+    if (!courseData) {
       logger.warn("⚠️ Course not found for metadata generation", {
         courseId: resolvedParams.courseId,
       });
@@ -100,36 +97,35 @@ export async function generateMetadata({
 
     logger.info("✅ Course metadata generated successfully", {
       courseId: resolvedParams.courseId,
-      title: preloadedCourse.title,
-      hasDescription: !!preloadedCourse.description,
-      hasShortDescription: !!preloadedCourse.shortDescription,
+      title: courseData?.title,
+      hasDescription: !!courseData?.description,
+      hasShortDescription: !!courseData?.shortDescription,
     });
 
     return {
-      title: `${preloadedCourse.title} | Course Details`,
+      title: `${courseData?.title || "Course"} | Course Details`,
       description:
-        preloadedCourse.shortDescription ??
-        preloadedCourse.description?.slice(0, 160),
+        courseData?.shortDescription ?? courseData?.description?.slice(0, 160),
       openGraph: {
-        title: preloadedCourse.title,
+        title: courseData?.title || "Course",
         description:
-          preloadedCourse.shortDescription ??
-          preloadedCourse.description?.slice(0, 160),
+          courseData?.shortDescription ??
+          courseData?.description?.slice(0, 160),
         type: "website",
       },
       twitter: {
         card: "summary_large_image",
-        title: preloadedCourse.title,
+        title: courseData?.title || "Course",
         description:
-          preloadedCourse.shortDescription ??
-          preloadedCourse.description?.slice(0, 160),
+          courseData?.shortDescription ??
+          courseData?.description?.slice(0, 160),
       },
     };
   } catch (error) {
-    logger.error("❌ Failed to generate metadata", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      params: await params,
-    });
+    logger.error(
+      "❌ Failed to generate metadata",
+      error instanceof Error ? error : new Error("Unknown error"),
+    );
     return {
       title: "Course Not Found",
       description: "The requested course could not be found.",
@@ -154,11 +150,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
     // Validate courseId format (basic check)
     if (!resolvedParams.courseId || resolvedParams.courseId.length < 10) {
-      logger.error("❌ Invalid courseId format", {
-        courseId: resolvedParams.courseId,
-        length: resolvedParams.courseId?.length,
-        minimum: 10,
-      });
+      logger.error(
+        "❌ Invalid courseId format",
+        new Error(`Invalid courseId format: ${resolvedParams.courseId}`),
+      );
       notFound();
     }
 
@@ -187,46 +182,40 @@ export default async function CoursePage({ params }: CoursePageProps) {
       });
     }
 
-    // Preload course data to check if it exists
+    // Get course data to check if it exists
     try {
-      logger.debug("🔍 Preloading course data", {
+      logger.debug("🔍 Getting course data", {
         courseId: resolvedParams.courseId,
         hasAuthToken: !!token,
       });
 
-      const preloadedCourse = await preloadQuery(
-        api.courses.getCourseDetails,
-        { courseId: resolvedParams.courseId as Id<"courses"> },
-        { token },
-      );
+      const courseData = await getCourse(resolvedParams.courseId);
 
       // Check if course exists
-      if (!preloadedCourse) {
-        logger.error("❌ Course not found in database", {
-          courseId: resolvedParams.courseId,
-          reason: "Course does not exist or is not accessible",
-        });
+      if (!courseData) {
+        logger.error(
+          "❌ Course not found in database",
+          new Error("Course does not exist or is not accessible"),
+        );
         notFound();
       }
-
       logger.info("✅ Course data preloaded successfully", {
-        courseId: preloadedCourse._id,
-        title: preloadedCourse.title,
-        modulesCount: preloadedCourse.modules?.length || 0,
-        isPublished: preloadedCourse.isPublished,
-        hasDescription: !!preloadedCourse.description,
+        courseId: courseData?.id,
+        title: courseData?.title,
+        modulesCount: courseData?.modules?.length || 0,
+        status: courseData?.status,
+        hasDescription: !!courseData?.description,
       });
     } catch (error) {
-      logger.error("❌ Error preloading course data", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        courseId: resolvedParams.courseId,
-      });
+      logger.error(
+        "❌ Error preloading course data",
+        error instanceof Error ? error : new Error("Unknown error"),
+      );
       notFound();
     }
 
     logger.info("✅ Course page ready to render", {
       courseId: resolvedParams.courseId,
-      timestamp: new Date().toISOString(),
     });
 
     return (
@@ -235,11 +224,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
       </div>
     );
   } catch (error) {
-    logger.error("❌ Critical error loading course page", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString(),
-    });
+    logger.error(
+      "❌ Critical error loading course page",
+      error instanceof Error ? error : new Error("Unknown error"),
+    );
     notFound();
   }
 }

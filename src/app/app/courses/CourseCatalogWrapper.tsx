@@ -317,9 +317,6 @@ export function CourseCatalogWrapper() {
               totalPages={totalPages}
               totalResults={totalResults}
               onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
-              // Search and sort
-              searchTerm={filters.searchTerm ?? ""}
-              sortBy={filters.sortBy ?? "relevance"}
             />
           </div>
         </div>

@@ -144,6 +144,20 @@ function transformConvexCourse(courseData: ConvexCourseData): Course {
     authorId: courseData.authorId ?? courseData.author?._id ?? "",
     authorName: courseData.author?.name ?? "Unknown Author",
     authorAvatar: courseData.author?.avatarUrl,
+    authors: courseData.author
+      ? [
+          {
+            id: courseData.author._id,
+            name: courseData.author.name,
+            avatarUrl: courseData.author.avatarUrl,
+          },
+        ]
+      : [],
+    totalLessons:
+      courseData.modules?.reduce(
+        (total, module) => total + (module.lessons?.length || 0),
+        0,
+      ) || 0,
     modules:
       courseData.modules?.map((module, index) => ({
         id: module._id,
@@ -184,8 +198,8 @@ function transformConvexLesson(
     moduleId: lessonData.moduleId ?? "",
     courseId: lessonData.courseId ?? "",
     sequenceIndex: lessonData.sequenceIndex ?? 0,
-    previousLesson: null,
-    nextLesson: null,
+    previousLesson: undefined,
+    nextLesson: undefined,
     quiz: quiz as Array<{
       _id: string;
       question: string;
@@ -229,6 +243,7 @@ function transformLessonProgress(
   return {
     lessonId,
     userId,
+    completed: progressData.isCompleted ?? false,
     isCompleted: progressData.isCompleted ?? false,
     watchedDuration: progressData.watchedDuration ?? 0,
     totalDuration: progressData.totalDuration ?? 0,
@@ -347,7 +362,6 @@ export const preloadCourseProgress = cache(
         api.lessons.getCourseProgress,
         {
           courseId: courseId as Id<"courses">,
-          userId: userId as Id<"users"> | undefined,
         },
         { token, ...(options.url && { url: options.url }) },
       );
@@ -380,7 +394,6 @@ export const preloadLessonProgress = cache(
         api.lessons.getProgress,
         {
           lessonId: lessonId as Id<"lessons">,
-          userId: userId as Id<"users"> | undefined,
         },
         { token, ...(options.url && { url: options.url }) },
       );

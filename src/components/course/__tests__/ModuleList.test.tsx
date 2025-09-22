@@ -169,7 +169,7 @@ describe("ModuleList", () => {
     render(<ModuleList {...propsWithCurrent} />);
 
     const currentLesson = screen.getByRole("button", {
-      "aria-current": "page",
+      name: /Getting Started/i,
     });
     expect(currentLesson).toBeInTheDocument();
   });

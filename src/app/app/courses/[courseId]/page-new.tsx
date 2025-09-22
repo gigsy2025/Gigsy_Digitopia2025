@@ -94,13 +94,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       preloadedProgress = null;
     }
 
-    return (
-      <CourseDetailsWrapper
-        preloadedCourse={preloadedCourse}
-        preloadedProgress={preloadedProgress}
-        courseId={resolvedParams.courseId}
-      />
-    );
+    return <CourseDetailsWrapper courseId={resolvedParams.courseId} />;
   } catch (error) {
     console.error("[CoursePage] Failed to load course:", error);
     notFound();

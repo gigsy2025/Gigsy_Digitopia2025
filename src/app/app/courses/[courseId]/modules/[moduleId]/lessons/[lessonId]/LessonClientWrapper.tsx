@@ -14,7 +14,8 @@
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProgress } from "@/hooks/useProgress";
+import { useOptimizedProgress } from "@/hooks/useOptimizedProgress";
+import { ProgressSyncIndicator } from "@/components/progress/ProgressSyncIndicator";
 import type { LessonWithNavigation } from "@/types/course";
 
 // Dynamically import heavy components with ssr: false
@@ -44,15 +45,6 @@ const LessonViewer = dynamic(
   },
 );
 
-// Import debug panel dynamically for development
-const ProgressDebugPanel = dynamic(
-  () => import("@/components/debug/ProgressDebugPanel"),
-  {
-    ssr: false,
-    loading: () => null,
-  },
-);
-
 /**
  * Lesson Player Skeleton
  */
@@ -74,12 +66,34 @@ export const LessonContent: React.FC<LessonContentProps> = ({
   lesson,
   userId,
 }) => {
-  // Initialize progress tracking for debug panel
-  const progressHook = useProgress({
+  // Initialize optimized progress tracking with 3-minute debounce
+  const progressHook = useOptimizedProgress({
     lessonId: lesson.id,
     courseId: lesson.courseId,
     moduleId: lesson.moduleId,
     userId,
+    debounceConfig: {
+      intervalMs: 6000, // 3 minutes
+      maxRetries: 3,
+      retryDelayMs: 5000,
+      batchSize: 10,
+      enableOptimisticUpdates: true,
+      enableCompression: true,
+    },
+    onProgressUpdate: (progress) => {
+      console.log("[LessonClientWrapper] Progress updated:", {
+        lessonId: progress.lessonId,
+        percentage: progress.progressPercentage,
+        watchedDuration: progress.watchedDuration,
+        isCompleted: progress.isCompleted,
+      });
+    },
+    onComplete: () => {
+      console.log("[LessonClientWrapper] Lesson completed!");
+    },
+    onError: (error) => {
+      console.error("[LessonClientWrapper] Progress tracking error:", error);
+    },
   });
 
   // Determine content type and render appropriate component
@@ -93,15 +107,56 @@ export const LessonContent: React.FC<LessonContentProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Progress Sync Status - Professional Indicator */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-sm font-medium">
+            Progress Tracking:
+          </span>
+          <ProgressSyncIndicator
+            state={{
+              isPendingSync: progressHook.isPendingSync,
+              lastSyncedAt: progressHook.lastSyncedAt,
+              pendingUpdates: progressHook.pendingUpdates,
+              retryCount: progressHook.retryCount,
+              error: progressHook.error,
+            }}
+            onForceSync={progressHook.forceSync}
+            compact={true}
+          />
+        </div>
+
+        {/* Progress Stats */}
+        <div className="text-muted-foreground flex items-center gap-4 text-xs">
+          <span>{Math.round(progressHook.watchedPercentage)}% Complete</span>
+          {progressHook.pendingUpdates > 0 && (
+            <span className="text-orange-600">
+              {progressHook.pendingUpdates} Updates Pending
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Debug Panel - Development Only */}
       {process.env.NODE_ENV === "development" && (
-        <Suspense fallback={null}>
-          <ProgressDebugPanel
-            {...progressHook}
-            lessonId={lesson.id}
-            userId={userId}
-          />
-        </Suspense>
+        <div className="rounded-lg border border-dashed border-orange-200 bg-orange-50 p-4">
+          <h3 className="mb-2 text-sm font-medium text-orange-800">
+            🔧 Progress Debug Info (Development)
+          </h3>
+          <div className="grid grid-cols-2 gap-2 text-xs text-orange-700">
+            <div>Progress: {Math.round(progressHook.watchedPercentage)}%</div>
+            <div>Completed: {progressHook.completed ? "Yes" : "No"}</div>
+            <div>Pending Updates: {progressHook.pendingUpdates}</div>
+            <div>
+              Last Sync:{" "}
+              {progressHook.lastSyncedAt
+                ? new Date(progressHook.lastSyncedAt).toLocaleTimeString()
+                : "Never"}
+            </div>
+            <div>Retry Count: {progressHook.retryCount}</div>
+            <div>Error: {progressHook.error ?? "None"}</div>
+          </div>
+        </div>
       )}
 
       {/* Main Content */}

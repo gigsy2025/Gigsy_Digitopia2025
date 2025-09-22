@@ -586,7 +586,10 @@ export function AdminCourseForm() {
           title: data.title,
           description: data.description,
           shortDescription: data.shortDescription,
-          difficultyLevel: data.difficultyLevel,
+          difficultyLevel:
+            data.difficultyLevel === "expert"
+              ? "advanced"
+              : data.difficultyLevel,
           pricingType: data.pricingType,
           price: data.price,
           estimatedDuration: data.estimatedDuration,

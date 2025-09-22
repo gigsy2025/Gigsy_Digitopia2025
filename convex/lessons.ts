@@ -667,11 +667,10 @@ async function updateCompletionAnalytics(
       });
     }
   } catch (error) {
-    logger.error("❌ Failed to update completion analytics", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      userId,
-      courseId: _courseId,
-    });
+    logger.error(
+      "❌ Failed to update completion analytics",
+      error instanceof Error ? error : new Error("Unknown error"),
+    );
     // Don't throw - analytics failure shouldn't block progress tracking
   }
 }

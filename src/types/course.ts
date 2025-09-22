@@ -311,3 +311,23 @@ export interface SearchResults {
     authors: Array<{ name: string; count: number }>;
   };
 }
+
+// =============================================================================
+// FORM DATA TYPES
+// =============================================================================
+
+export interface CourseFormData {
+  title: string;
+  description: string;
+  difficultyLevel: "beginner" | "intermediate" | "advanced";
+  thumbnailId: string;
+  modules: Array<{
+    title: string;
+    lessons: Array<{
+      title: string;
+      content: string;
+    }>;
+  }>;
+}
+
+export type FormStep = "basic" | "media" | "structure" | "pricing";

@@ -148,7 +148,7 @@ export const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({
     setAutoPlay(true);
     const interval = setInterval(() => {
       setTestCurrentTime(([current]) => {
-        const newTime = Math.min(current + 1, testDuration);
+        const newTime = Math.min((current ?? 0) + 1, testDuration);
         handleTestProgress(newTime);
 
         if (newTime >= testDuration) {
@@ -297,14 +297,14 @@ export const ProgressDebugPanel: React.FC<ProgressDebugPanelProps> = ({
               {/* Progress Slider */}
               <div className="space-y-2">
                 <Label>
-                  Test Progress: {formatTime(testCurrentTime[0])} /{" "}
+                  Test Progress: {formatTime(testCurrentTime[0] ?? 0)} /{" "}
                   {formatTime(testDuration)}
                 </Label>
                 <Slider
                   value={testCurrentTime}
                   onValueChange={(value) => {
                     setTestCurrentTime(value);
-                    handleTestProgress(value[0]);
+                    handleTestProgress(value[0] ?? 0);
                   }}
                   max={testDuration}
                   step={1}
