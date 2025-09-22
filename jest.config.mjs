@@ -23,6 +23,24 @@ const config = {
   // Coverage settings
   collectCoverage: true,
   coverageDirectory: "coverage",
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "convex/**/*.ts",
+    "!**/node_modules/**",
+    "!**/__tests__/**",
+    "!**/*.stories.tsx",
+    "!src/app/layout.tsx",
+    "!src/app/global-error.tsx",
+    "!convex/_generated/**",
+    "!src/instrumentation*.ts",
+    "!src/middleware.ts",
+    "!src/env.js",
+    "!src/components/ui/**",
+    "!src/lib/validations/**",
+    "!src/lib/auth/**",
+    "!src/providers/**",
+    "!src/app/**/layout.tsx"
+  ],
 
   // Module path mappings to match your src/ directory structure
   moduleNameMapper: {

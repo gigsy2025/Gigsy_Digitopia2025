@@ -33,7 +33,7 @@ import type { Doc } from "./_generated/dataModel";
 /**
  * Skill categories for organization and filtering
  */
-const SKILL_CATEGORIES = [
+export const SKILL_CATEGORIES = [
   "development",
   "design",
   "marketing",
@@ -60,7 +60,7 @@ const EXPERIENCE_LEVELS = [
  * Curated skills catalog with categorization and metadata
  * In production, this would be sourced from a dedicated skills database
  */
-const SKILLS_CATALOG = [
+export const SKILLS_CATALOG = [
   // Development Skills
   {
     id: "javascript",
@@ -562,7 +562,7 @@ type SkillId = (typeof SKILLS_CATALOG)[number]["id"];
 /**
  * Validates skill IDs against the known catalog
  */
-function validateSkillIds(skillIds: string[]): {
+export function _validateSkillIds(skillIds: string[]): {
   valid: SkillId[];
   invalid: string[];
 } {
@@ -584,7 +584,7 @@ function validateSkillIds(skillIds: string[]): {
 /**
  * Calculates profile completeness percentage based on skills and other factors
  */
-function calculateProfileCompleteness(user: Doc<"users">): number {
+export function _calculateProfileCompleteness(user: Doc<"users">): number {
   let score = 0;
   const maxScore = 100;
 
@@ -619,14 +619,14 @@ function calculateProfileCompleteness(user: Doc<"users">): number {
 /**
  * Performs fuzzy search on skills catalog
  */
-function searchSkills(
+export function _searchSkills(
   query: string,
   category?: string,
   limit = 20,
 ): (typeof SKILLS_CATALOG)[number][] {
   const normalizedQuery = query.toLowerCase().trim();
 
-  if (!normalizedQuery) {
+  if (query.trim() === "") {
     // Return popular skills if no query
     let results = SKILLS_CATALOG.filter((skill) => skill.isPopular);
     if (category && category !== "all") {
@@ -660,8 +660,8 @@ function searchSkills(
       }
     }
 
-    // Popular skills get a small boost
-    if (skill.isPopular) {
+    // Popular skills get a small boost if they already have a match score
+    if (score > 0 && skill.isPopular) {
       score += 5;
     }
 
@@ -692,22 +692,24 @@ function searchSkills(
  *
  * @returns Complete user profile with skills and metadata
  */
+export const _getCurrentUser = async (ctx: any) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    return null;
+  }
+
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .filter((q) => q.eq(q.field("deletedAt"), undefined))
+    .unique();
+
+  return user;
+};
+
 export const getCurrentUser = query({
   args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .filter((q) => q.eq(q.field("deletedAt"), undefined))
-      .unique();
-
-    return user;
-  },
+  handler: _getCurrentUser,
 });
 
 /**
@@ -718,51 +720,53 @@ export const getCurrentUser = query({
  *
  * @returns Skills status and user profile summary
  */
+export const _checkUserHasSkills = async (ctx: any) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    return {
+      hasSkills: false,
+      shouldShowOnboarding: false,
+      user: null,
+    };
+  }
+
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .filter((q) => q.eq(q.field("deletedAt"), undefined))
+    .unique();
+
+  if (!user) {
+    return {
+      hasSkills: false,
+      shouldShowOnboarding: false,
+      user: null,
+    };
+  }
+
+  const skills = user.profile?.skills ?? [];
+  const hasSkills = skills.length > 0;
+  const completeness = _calculateProfileCompleteness(user);
+
+  return {
+    hasSkills,
+    shouldShowOnboarding: !hasSkills,
+    user: {
+      id: user._id,
+      clerkId: user.clerkId,
+      name: user.name,
+      email: user.email,
+      skills,
+      profileCompleteness: completeness,
+      experienceLevel: user.profile?.experienceLevel,
+      location: user.profile?.location,
+    },
+  };
+};
+
 export const checkUserHasSkills = query({
   args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return {
-        hasSkills: false,
-        shouldShowOnboarding: false,
-        user: null,
-      };
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .filter((q) => q.eq(q.field("deletedAt"), undefined))
-      .unique();
-
-    if (!user) {
-      return {
-        hasSkills: false,
-        shouldShowOnboarding: false,
-        user: null,
-      };
-    }
-
-    const skills = user.profile?.skills ?? [];
-    const hasSkills = skills.length > 0;
-    const completeness = calculateProfileCompleteness(user);
-
-    return {
-      hasSkills,
-      shouldShowOnboarding: !hasSkills,
-      user: {
-        id: user._id,
-        clerkId: user.clerkId,
-        name: user.name,
-        email: user.email,
-        skills,
-        profileCompleteness: completeness,
-        experienceLevel: user.profile?.experienceLevel,
-        location: user.profile?.location,
-      },
-    };
-  },
+  handler: _checkUserHasSkills,
 });
 
 /**
@@ -779,40 +783,47 @@ export const checkUserHasSkills = query({
  * @param limit - Maximum results to return (default: 50)
  * @returns Filtered skills catalog with metadata
  */
+export const _getSkillsCatalog = async (
+  ctx: any,
+  { query, category, limit = 50 }: { query?: string; category?: string; limit?: number },
+  skillsCatalog: any[],
+  skillCategories: readonly string[]
+) => {
+  // Use the advanced search function
+  const searchResults = _searchSkills(query ?? "", category, limit);
+
+  // Get popular skills for quick selection
+  const popularSkills = skillsCatalog.filter(
+    (skill) => skill.isPopular,
+  ).slice(0, 12);
+
+  // Group skills by category for organized display
+  const categories = skillCategories.reduce(
+    (acc, cat) => {
+      acc[cat] = skillsCatalog.filter(
+        (skill) => skill.category === cat,
+      ).slice(0, 8); // Top 8 per category
+      return acc;
+    },
+    {} as Record<string, (typeof skillsCatalog)[number][]>,
+  );
+
+  return {
+    skills: searchResults,
+    popularSkills,
+    categories,
+    totalCount: searchResults.length,
+    availableCategories: skillCategories,
+  };
+};
+
 export const getSkillsCatalog = query({
   args: {
     query: v.optional(v.string()),
     category: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { query, category, limit = 50 }) => {
-    // Use the advanced search function
-    const searchResults = searchSkills(query ?? "", category, limit);
-
-    // Get popular skills for quick selection
-    const popularSkills = SKILLS_CATALOG.filter(
-      (skill) => skill.isPopular,
-    ).slice(0, 12);
-
-    // Group skills by category for organized display
-    const categories = SKILL_CATEGORIES.reduce(
-      (acc, cat) => {
-        acc[cat] = SKILLS_CATALOG.filter(
-          (skill) => skill.category === cat,
-        ).slice(0, 8); // Top 8 per category
-        return acc;
-      },
-      {} as Record<string, (typeof SKILLS_CATALOG)[number][]>,
-    );
-
-    return {
-      skills: searchResults,
-      popularSkills,
-      categories,
-      totalCount: searchResults.length,
-      availableCategories: SKILL_CATEGORIES,
-    };
-  },
+  handler: (ctx, args) => _getSkillsCatalog(ctx, args, SKILLS_CATALOG, SKILL_CATEGORIES),
 });
 
 /**
@@ -825,57 +836,63 @@ export const getSkillsCatalog = query({
  * @param experienceLevel - User's experience level (optional)
  * @returns Personalized skill recommendations
  */
+export const _getSkillRecommendations = async (
+  ctx: any,
+  { currentSkills, experienceLevel }: { currentSkills: string[]; experienceLevel?: string },
+  skillsCatalog: any[]
+) => {
+  const currentSkillsSet = new Set(currentSkills);
+  const recommendations: (typeof skillsCatalog)[number][] = [];
+
+  // Find related skills based on current skills
+  for (const skillId of currentSkills) {
+    const skill = skillsCatalog.find((s) => s.id === skillId);
+    if (skill?.relatedSkills) {
+      for (const relatedId of skill.relatedSkills) {
+        if (!currentSkillsSet.has(relatedId)) {
+          const relatedSkill = skillsCatalog.find((s) => s.id === relatedId);
+          if (
+            relatedSkill &&
+            !recommendations.find((r) => r.id === relatedId)
+          ) {
+            recommendations.push(relatedSkill);
+          }
+        }
+      }
+    }
+  }
+
+  // Add popular skills from same categories
+  const userCategories = new Set(
+    currentSkills
+      .map((id) => skillsCatalog.find((s) => s.id === id)?.category)
+      .filter(Boolean),
+  );
+
+  for (const category of userCategories) {
+    const categoryPopularSkills = skillsCatalog.filter(
+      (skill) =>
+        skill.category === category &&
+        skill.isPopular &&
+        !currentSkillsSet.has(skill.id) &&
+        !recommendations.find((r) => r.id === skill.id),
+    );
+
+    recommendations.push(...categoryPopularSkills.slice(0, 3));
+  }
+
+  return {
+    recommendations: recommendations.slice(0, 10),
+    reasoning: "Based on your current skills and popular combinations",
+  };
+};
+
 export const getSkillRecommendations = query({
   args: {
     currentSkills: v.array(v.string()),
     experienceLevel: v.optional(v.string()),
   },
-  handler: async (ctx, { currentSkills, experienceLevel }) => {
-    const currentSkillsSet = new Set(currentSkills);
-    const recommendations: (typeof SKILLS_CATALOG)[number][] = [];
-
-    // Find related skills based on current skills
-    for (const skillId of currentSkills) {
-      const skill = SKILLS_CATALOG.find((s) => s.id === skillId);
-      if (skill?.relatedSkills) {
-        for (const relatedId of skill.relatedSkills) {
-          if (!currentSkillsSet.has(relatedId)) {
-            const relatedSkill = SKILLS_CATALOG.find((s) => s.id === relatedId);
-            if (
-              relatedSkill &&
-              !recommendations.find((r) => r.id === relatedId)
-            ) {
-              recommendations.push(relatedSkill);
-            }
-          }
-        }
-      }
-    }
-
-    // Add popular skills from same categories
-    const userCategories = new Set(
-      currentSkills
-        .map((id) => SKILLS_CATALOG.find((s) => s.id === id)?.category)
-        .filter(Boolean),
-    );
-
-    for (const category of userCategories) {
-      const categoryPopularSkills = SKILLS_CATALOG.filter(
-        (skill) =>
-          skill.category === category &&
-          skill.isPopular &&
-          !currentSkillsSet.has(skill.id) &&
-          !recommendations.find((r) => r.id === skill.id),
-      );
-
-      recommendations.push(...categoryPopularSkills.slice(0, 3));
-    }
-
-    return {
-      recommendations: recommendations.slice(0, 10),
-      reasoning: "Based on your current skills and popular combinations",
-    };
-  },
+  handler: (ctx, args) => _getSkillRecommendations(ctx, args, SKILLS_CATALOG),
 });
 
 // ============================================================================
@@ -897,141 +914,143 @@ export const getSkillRecommendations = query({
  * @param skills - Array of skill IDs to assign to user
  * @returns Success status with profile metrics
  */
+export const _updateUserSkills = async (ctx: any, { skills }: { skills: string[] }) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new ConvexError("User must be authenticated");
+  }
+
+  // Validate skills array
+  if (!Array.isArray(skills) || skills.length === 0) {
+    throw new ConvexError("At least one skill must be provided");
+  }
+
+  if (skills.length > 20) {
+    throw new ConvexError("Maximum 20 skills allowed");
+  }
+
+  // Validate skills against catalog
+  const { valid: validSkills, invalid: invalidSkills } =
+    _validateSkillIds(skills);
+  if (invalidSkills.length > 0) {
+    throw new ConvexError(
+      `Invalid skills provided: ${invalidSkills.join(", ")}`,
+    );
+  }
+
+  // Find user with error handling
+  let user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .filter((q) => q.eq(q.field("deletedAt"), undefined))
+    .unique();
+
+  // If user doesn't exist, create a minimal user record first
+  if (!user) {
+    // Create a basic user profile for skills onboarding
+    const timestamp = Date.now();
+    const userId = await ctx.db.insert("users", {
+      clerkId: identity.subject,
+      email: identity.email ?? `temp-${identity.subject}@example.com`,
+      name: identity.name ?? "User",
+      avatarUrl: identity.pictureUrl,
+      roles: ["user"],
+      balances: [
+        {
+          currency: "USD" as const,
+          amount: 0,
+          lastUpdated: timestamp,
+          isActive: true,
+        },
+      ],
+      profile: {
+        skills: [],
+        education: [],
+        workExperience: [],
+        experienceLevel: "beginner" as const,
+        completeness: 0,
+        lastUpdated: timestamp,
+        version: 1,
+      },
+      updatedAt: timestamp,
+      createdBy: identity.subject,
+      deletedAt: undefined,
+      embedding: undefined,
+      embeddingUpdatedAt: undefined,
+    });
+
+    // Fetch the newly created user
+    user = await ctx.db.get(userId);
+    if (!user) {
+      throw new ConvexError("Failed to create user record");
+    }
+  }
+
+  // Calculate enhanced profile completeness
+  const currentProfile = user.profile;
+  const completeness = _calculateProfileCompleteness({
+    ...user,
+    profile: {
+      bio: currentProfile?.bio,
+      headline: currentProfile?.headline,
+      location: currentProfile?.location,
+      skills: validSkills,
+      experienceLevel: currentProfile?.experienceLevel ?? "beginner",
+      education: currentProfile?.education ?? [],
+      workExperience: currentProfile?.workExperience ?? [],
+      portfolio: currentProfile?.portfolio,
+      completeness: currentProfile?.completeness,
+      lastUpdated: currentProfile?.lastUpdated,
+      version: currentProfile?.version,
+    },
+  });
+
+  // Create optimized profile update with required fields
+  const profileUpdate = currentProfile
+    ? {
+        bio: currentProfile.bio,
+        headline: currentProfile.headline,
+        location: currentProfile.location,
+        skills: validSkills,
+        experienceLevel: currentProfile.experienceLevel ?? "beginner",
+        education: currentProfile.education ?? [],
+        workExperience: currentProfile.workExperience ?? [],
+        portfolio: currentProfile.portfolio,
+        completeness,
+        lastUpdated: Date.now(),
+        version: (currentProfile.version ?? 0) + 1,
+      }
+    : {
+        skills: validSkills,
+        education: [],
+        workExperience: [],
+        experienceLevel: "beginner" as const,
+        completeness,
+        lastUpdated: Date.now(),
+        version: 1,
+      };
+
+  // Execute atomic update
+  await ctx.db.patch(user._id, {
+    profile: profileUpdate,
+    updatedAt: Date.now(),
+  });
+
+  return {
+    success: true,
+    userId: user._id,
+    skillsCount: validSkills.length,
+    profileCompleteness: completeness,
+    addedSkills: validSkills,
+    version: profileUpdate.version,
+  };
+};
+
 export const updateUserSkills = mutation({
   args: {
     skills: v.array(v.string()),
   },
-  handler: async (ctx, { skills }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("User must be authenticated");
-    }
-
-    // Validate skills array
-    if (!Array.isArray(skills) || skills.length === 0) {
-      throw new ConvexError("At least one skill must be provided");
-    }
-
-    if (skills.length > 20) {
-      throw new ConvexError("Maximum 20 skills allowed");
-    }
-
-    // Validate skills against catalog
-    const { valid: validSkills, invalid: invalidSkills } =
-      validateSkillIds(skills);
-    if (invalidSkills.length > 0) {
-      throw new ConvexError(
-        `Invalid skills provided: ${invalidSkills.join(", ")}`,
-      );
-    }
-
-    // Find user with error handling
-    let user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .filter((q) => q.eq(q.field("deletedAt"), undefined))
-      .unique();
-
-    // If user doesn't exist, create a minimal user record first
-    if (!user) {
-      // Create a basic user profile for skills onboarding
-      const timestamp = Date.now();
-      const userId = await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        email: identity.email ?? `temp-${identity.subject}@example.com`,
-        name: identity.name ?? "User",
-        avatarUrl: identity.pictureUrl,
-        roles: ["user"],
-        balances: [
-          {
-            currency: "USD" as const,
-            amount: 0,
-            lastUpdated: timestamp,
-            isActive: true,
-          },
-        ],
-        profile: {
-          skills: [],
-          education: [],
-          workExperience: [],
-          experienceLevel: "beginner" as const,
-          completeness: 0,
-          lastUpdated: timestamp,
-          version: 1,
-        },
-        updatedAt: timestamp,
-        createdBy: identity.subject,
-        deletedAt: undefined,
-        embedding: undefined,
-        embeddingUpdatedAt: undefined,
-      });
-
-      // Fetch the newly created user
-      user = await ctx.db.get(userId);
-      if (!user) {
-        throw new ConvexError("Failed to create user record");
-      }
-    }
-
-    // Calculate enhanced profile completeness
-    const currentProfile = user.profile;
-    const completeness = calculateProfileCompleteness({
-      ...user,
-      profile: {
-        bio: currentProfile?.bio,
-        headline: currentProfile?.headline,
-        location: currentProfile?.location,
-        skills: validSkills,
-        experienceLevel: currentProfile?.experienceLevel ?? "beginner",
-        education: currentProfile?.education ?? [],
-        workExperience: currentProfile?.workExperience ?? [],
-        portfolio: currentProfile?.portfolio,
-        completeness: currentProfile?.completeness,
-        lastUpdated: currentProfile?.lastUpdated,
-        version: currentProfile?.version,
-      },
-    });
-
-    // Create optimized profile update with required fields
-    const profileUpdate = currentProfile
-      ? {
-          bio: currentProfile.bio,
-          headline: currentProfile.headline,
-          location: currentProfile.location,
-          skills: validSkills,
-          experienceLevel: currentProfile.experienceLevel ?? "beginner",
-          education: currentProfile.education ?? [],
-          workExperience: currentProfile.workExperience ?? [],
-          portfolio: currentProfile.portfolio,
-          completeness,
-          lastUpdated: Date.now(),
-          version: (currentProfile.version ?? 0) + 1,
-        }
-      : {
-          skills: validSkills,
-          education: [],
-          workExperience: [],
-          experienceLevel: "beginner" as const,
-          completeness,
-          lastUpdated: Date.now(),
-          version: 1,
-        };
-
-    // Execute atomic update
-    await ctx.db.patch(user._id, {
-      profile: profileUpdate,
-      updatedAt: Date.now(),
-    });
-
-    return {
-      success: true,
-      userId: user._id,
-      skillsCount: validSkills.length,
-      profileCompleteness: completeness,
-      addedSkills: validSkills,
-      version: profileUpdate.version,
-    };
-  },
+  handler: _updateUserSkills,
 });
 
 /**
@@ -1043,92 +1062,94 @@ export const updateUserSkills = mutation({
  * @param newSkills - Array of skill IDs to add
  * @returns Updated skills list with metrics
  */
-export const addUserSkills = mutation({
-  args: {
-    newSkills: v.array(v.string()),
-  },
-  handler: async (ctx, { newSkills }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("User must be authenticated");
-    }
+export const _addUserSkills = async (ctx: any, { newSkills }: { newSkills: string[] }) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new ConvexError("User must be authenticated");
+  }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .filter((q) => q.eq(q.field("deletedAt"), undefined))
-      .unique();
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .filter((q) => q.eq(q.field("deletedAt"), undefined))
+    .unique();
 
-    if (!user) {
-      throw new ConvexError("User not found");
-    }
+  if (!user) {
+    throw new ConvexError("User not found");
+  }
 
-    const currentSkills = user.profile?.skills ?? [];
-    const skillsSet = new Set([...currentSkills, ...newSkills]);
-    const updatedSkills = Array.from(skillsSet);
+  const currentSkills = user.profile?.skills ?? [];
+  const skillsSet = new Set([...currentSkills, ...newSkills]);
+  const updatedSkills = Array.from(skillsSet);
 
-    if (updatedSkills.length > 20) {
-      throw new ConvexError("Maximum 20 skills allowed");
-    }
+  if (updatedSkills.length > 20) {
+    throw new ConvexError("Maximum 20 skills allowed");
+  }
 
-    // Validate new skills
-    const { valid: validNewSkills, invalid: invalidSkills } =
-      validateSkillIds(newSkills);
-    if (invalidSkills.length > 0) {
-      throw new ConvexError(
-        `Invalid skills provided: ${invalidSkills.join(", ")}`,
-      );
-    }
-
-    const finalSkills = Array.from(
-      new Set([...currentSkills, ...validNewSkills]),
+  // Validate new skills
+  const { valid: validNewSkills, invalid: invalidSkills } =
+    _validateSkillIds(newSkills);
+  if (invalidSkills.length > 0) {
+    throw new ConvexError(
+      `Invalid skills provided: ${invalidSkills.join(", ")}`,
     );
-    const completeness = calculateProfileCompleteness({
-      ...user,
-      profile: {
-        bio: user.profile?.bio,
-        headline: user.profile?.headline,
-        location: user.profile?.location,
-        skills: finalSkills,
-        experienceLevel: user.profile?.experienceLevel ?? "beginner",
-        education: user.profile?.education ?? [],
-        workExperience: user.profile?.workExperience ?? [],
-        portfolio: user.profile?.portfolio,
-        completeness: user.profile?.completeness,
-        lastUpdated: user.profile?.lastUpdated,
-        version: user.profile?.version,
-      },
-    });
+  }
 
-    const profileUpdate = {
+  const finalSkills = Array.from(
+    new Set([...currentSkills, ...validNewSkills]),
+  );
+  const completeness = _calculateProfileCompleteness({
+    ...user,
+    profile: {
       bio: user.profile?.bio,
       headline: user.profile?.headline,
       location: user.profile?.location,
       skills: finalSkills,
+      experienceLevel: user.profile?.experienceLevel ?? "beginner",
       education: user.profile?.education ?? [],
       workExperience: user.profile?.workExperience ?? [],
-      experienceLevel: user.profile?.experienceLevel ?? "beginner",
       portfolio: user.profile?.portfolio,
-      completeness,
-      lastUpdated: Date.now(),
-      version: (user.profile?.version ?? 0) + 1,
-    };
+      completeness: user.profile?.completeness,
+      lastUpdated: user.profile?.lastUpdated,
+      version: user.profile?.version,
+    },
+  });
 
-    await ctx.db.patch(user._id, {
-      profile: profileUpdate,
-      updatedAt: Date.now(),
-    });
+  const profileUpdate = {
+    bio: user.profile?.bio,
+    headline: user.profile?.headline,
+    location: user.profile?.location,
+    skills: finalSkills,
+    education: user.profile?.education ?? [],
+    workExperience: user.profile?.workExperience ?? [],
+    experienceLevel: user.profile?.experienceLevel ?? "beginner",
+    portfolio: user.profile?.portfolio,
+    completeness,
+    lastUpdated: Date.now(),
+    version: (user.profile?.version ?? 0) + 1,
+  };
 
-    return {
-      success: true,
-      userId: user._id,
-      skillsCount: finalSkills.length,
-      addedCount: validNewSkills.filter(
-        (skill) => !currentSkills.includes(skill),
-      ).length,
-      profileCompleteness: completeness,
-    };
+  await ctx.db.patch(user._id, {
+    profile: profileUpdate,
+    updatedAt: Date.now(),
+  });
+
+  return {
+    success: true,
+    userId: user._id,
+    skillsCount: finalSkills.length,
+    addedCount: validNewSkills.filter(
+      (skill) => !currentSkills.includes(skill),
+    ).length,
+    profileCompleteness: completeness,
+  };
+};
+
+export const addUserSkills = mutation({
+  args: {
+    newSkills: v.array(v.string()),
   },
+  handler: _addUserSkills,
 });
 
 /**
@@ -1137,76 +1158,78 @@ export const addUserSkills = mutation({
  * @param skillsToRemove - Array of skill IDs to remove
  * @returns Updated skills list with metrics
  */
-export const removeUserSkills = mutation({
-  args: {
-    skillsToRemove: v.array(v.string()),
-  },
-  handler: async (ctx, { skillsToRemove }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("User must be authenticated");
-    }
+export const _removeUserSkills = async (ctx: any, { skillsToRemove }: { skillsToRemove: string[] }) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throw new ConvexError("User must be authenticated");
+  }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .filter((q) => q.eq(q.field("deletedAt"), undefined))
-      .unique();
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .filter((q) => q.eq(q.field("deletedAt"), undefined))
+    .unique();
 
-    if (!user) {
-      throw new ConvexError("User not found");
-    }
+  if (!user) {
+    throw new ConvexError("User not found");
+  }
 
-    const currentSkills = user.profile?.skills ?? [];
-    const skillsToRemoveSet = new Set(skillsToRemove);
-    const updatedSkills = currentSkills.filter(
-      (skill) => !skillsToRemoveSet.has(skill),
-    );
+  const currentSkills = user.profile?.skills ?? [];
+  const skillsToRemoveSet = new Set(skillsToRemove);
+  const updatedSkills = currentSkills.filter(
+    (skill) => !skillsToRemoveSet.has(skill),
+  );
 
-    const completeness = calculateProfileCompleteness({
-      ...user,
-      profile: {
-        bio: user.profile?.bio,
-        headline: user.profile?.headline,
-        location: user.profile?.location,
-        skills: updatedSkills,
-        experienceLevel: user.profile?.experienceLevel ?? "beginner",
-        education: user.profile?.education ?? [],
-        workExperience: user.profile?.workExperience ?? [],
-        portfolio: user.profile?.portfolio,
-        completeness: user.profile?.completeness,
-        lastUpdated: user.profile?.lastUpdated,
-        version: user.profile?.version,
-      },
-    });
-
-    const profileUpdate = {
+  const completeness = _calculateProfileCompleteness({
+    ...user,
+    profile: {
       bio: user.profile?.bio,
       headline: user.profile?.headline,
       location: user.profile?.location,
       skills: updatedSkills,
+      experienceLevel: user.profile?.experienceLevel ?? "beginner",
       education: user.profile?.education ?? [],
       workExperience: user.profile?.workExperience ?? [],
-      experienceLevel: user.profile?.experienceLevel ?? "beginner",
       portfolio: user.profile?.portfolio,
-      completeness,
-      lastUpdated: Date.now(),
-      version: (user.profile?.version ?? 0) + 1,
-    };
+      completeness: user.profile?.completeness,
+      lastUpdated: user.profile?.lastUpdated,
+      version: user.profile?.version,
+    },
+  });
 
-    await ctx.db.patch(user._id, {
-      profile: profileUpdate,
-      updatedAt: Date.now(),
-    });
+  const profileUpdate = {
+    bio: user.profile?.bio,
+    headline: user.profile?.headline,
+    location: user.profile?.location,
+    skills: updatedSkills,
+    education: user.profile?.education ?? [],
+    workExperience: user.profile?.workExperience ?? [],
+    experienceLevel: user.profile?.experienceLevel ?? "beginner",
+    portfolio: user.profile?.portfolio,
+    completeness,
+    lastUpdated: Date.now(),
+    version: (user.profile?.version ?? 0) + 1,
+  };
 
-    return {
-      success: true,
-      userId: user._id,
-      skillsCount: updatedSkills.length,
-      removedCount: skillsToRemove.length,
-      profileCompleteness: completeness,
-    };
+  await ctx.db.patch(user._id, {
+    profile: profileUpdate,
+    updatedAt: Date.now(),
+  });
+
+  return {
+    success: true,
+    userId: user._id,
+    skillsCount: updatedSkills.length,
+    removedCount: skillsToRemove.length,
+    profileCompleteness: completeness,
+  };
+};
+
+export const removeUserSkills = mutation({
+  args: {
+    skillsToRemove: v.array(v.string()),
   },
+  handler: _removeUserSkills,
 });
 
 // ============================================================================
