@@ -243,11 +243,11 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
   const sidebarContent = (
     <>
       {/* Course Progress */}
-      <Card>
+      <Card className="w-[100%]">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Course Progress</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="w-[100%] space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span>
               {courseProgress.completedLessons.length} of{" "}
@@ -388,9 +388,10 @@ export const LessonSidebar: React.FC<LessonSidebarProps> = ({
       )}
 
       {/* Sidebar */}
+      {/*min-width: 395px;*/}
       <aside
         className={cn(
-          "w-80 space-y-4",
+          "w-[100%] space-y-4",
           "md:sticky md:top-4 md:h-fit",
           "md:translate-x-0 md:bg-transparent",
           "bg-background fixed top-0 right-0 z-50 h-full transform p-4 transition-transform",

@@ -278,9 +278,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
               <LessonNavigation lesson={lesson} />
             </div>
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+            <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-4">
               {/* Main Content */}
-              <div className="space-y-8 lg:col-span-3">
+              <div className="w-[100%] space-y-8 lg:col-span-3">
                 {/* Lesson Header */}
                 <LessonHeader lesson={lesson} />
 
@@ -325,7 +325,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
               </div>
 
               {/* Sidebar */}
-              <div className="lg:col-span-1">
+              <div className="w-[100%] lg:col-span-1">
                 <LessonSidebar
                   lesson={lesson}
                   modules={modules}

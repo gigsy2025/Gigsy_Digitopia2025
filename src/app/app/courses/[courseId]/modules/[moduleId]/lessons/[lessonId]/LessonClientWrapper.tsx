@@ -106,9 +106,9 @@ export const LessonContent: React.FC<LessonContentProps> = ({
         lesson.content.includes("video")));
 
   return (
-    <div className="space-y-6">
+    <div className="w-[100%] space-y-6">
       {/* Progress Sync Status - Professional Indicator */}
-      <div className="flex items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-sm font-medium">
             Progress Tracking:
