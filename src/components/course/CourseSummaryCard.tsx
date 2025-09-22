@@ -174,7 +174,7 @@ export const CourseSummaryCard: React.FC<CourseSummaryCardProps> = ({
         {/* Skills Preview */}
         {!compact && course.skills && course.skills.length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium">Skills you'll learn:</div>
+            <div className="text-sm font-medium">Skills you&apos;ll learn:</div>
             <div className="flex flex-wrap gap-1">
               {course.skills.slice(0, 3).map((skill, index) => (
                 <Badge key={index} variant="outline" className="text-xs">

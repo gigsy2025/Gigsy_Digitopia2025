@@ -193,7 +193,7 @@ export function CourseDetailsWrapper({ courseId }: CourseDetailsWrapperProps) {
                               ),
                           );
 
-                        const targetLesson = firstIncompleteLesson || {
+                        const targetLesson = firstIncompleteLesson ?? {
                           ...course.modules[0]?.lessons[0],
                           moduleId: course.modules[0]?.id,
                         };

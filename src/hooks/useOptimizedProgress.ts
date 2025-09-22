@@ -158,7 +158,12 @@ export function useOptimizedProgress({
 
   useEffect(() => {
     debouncerRef.current = new ProgressDebouncer(debouncerConfig, {
-      onStateChange: (newState: any) => {
+      onStateChange: (newState: {
+        isPending: boolean;
+        lastSyncedAt: number;
+        pendingUpdates: number;
+        retryCount: number;
+      }) => {
         setDebouncerState({
           isPendingSync: newState.isPending,
           lastSyncedAt: newState.lastSyncedAt,
@@ -166,7 +171,7 @@ export function useOptimizedProgress({
           retryCount: newState.retryCount,
         });
       },
-      onProgressUpdate: (update: any) => {
+      onProgressUpdate: (update: ProgressUpdate) => {
         // Handle optimistic updates
         const progressPercentage = update.percentage;
         const isCompleted = progressPercentage >= 90;
@@ -197,7 +202,7 @@ export function useOptimizedProgress({
 
         onProgressUpdate?.(progress);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         console.error("[OptimizedProgress] Debouncer error:", error);
         setState((prev) => ({ ...prev, error: error.message }));
         onError?.(error);
@@ -417,7 +422,7 @@ export function useMultiLessonProgress(
         ...options?.debounceConfig,
       },
       {
-        onProgressUpdate: (update: any) => {
+        onProgressUpdate: (update: ProgressUpdate) => {
           const progress: LessonProgress = {
             lessonId: update.lessonId,
             userId,

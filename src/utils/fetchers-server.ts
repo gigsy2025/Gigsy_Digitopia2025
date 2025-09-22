@@ -125,7 +125,7 @@ function transformConvexCourse(courseData: ConvexCourseData): Course {
     title: courseData.title,
     description: courseData.description,
     shortDescription: courseData.shortDescription,
-    category: (courseData.category as Course["category"]) ?? "technology",
+    category: courseData.category ?? "technology",
     difficulty:
       ((courseData.difficultyLevel === "expert"
         ? "advanced"
@@ -155,9 +155,9 @@ function transformConvexCourse(courseData: ConvexCourseData): Course {
       : [],
     totalLessons:
       courseData.modules?.reduce(
-        (total, module) => total + (module.lessons?.length || 0),
+        (total, module) => total + (module.lessons?.length ?? 0),
         0,
-      ) || 0,
+      ) ?? 0,
     modules:
       courseData.modules?.map((module, index) => ({
         id: module._id,

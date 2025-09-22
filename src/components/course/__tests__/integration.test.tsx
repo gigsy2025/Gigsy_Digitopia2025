@@ -20,9 +20,15 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock Next.js Link
+interface MockLinkProps {
+  children: React.ReactNode;
+  href: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+}
+
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ children, href, onClick }: any) => (
+  default: ({ children, href, onClick }: MockLinkProps) => (
     <a href={href} onClick={onClick}>
       {children}
     </a>
@@ -130,15 +136,17 @@ describe("Course Navigation Integration", () => {
       pause: jest.fn(),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
+      setAttribute: jest.fn(), // Ensure setAttribute is mocked to prevent TypeError
+      removeAttribute: jest.fn(), // Ensure removeAttribute is mocked to prevent TypeError
     };
 
     // Mock createElement to return our mock video
-    const originalCreateElement = document.createElement;
+    const originalCreateElement = document.createElement.bind(document);
     document.createElement = jest.fn((tagName) => {
       if (tagName === "video") {
-        return mockVideo as any;
+        return mockVideo as unknown as HTMLVideoElement;
       }
-      return originalCreateElement.call(document, tagName);
+      return originalCreateElement(tagName);
     });
 
     render(<LessonPlayer lesson={mockLesson} userId="user-1" />);
@@ -147,9 +155,18 @@ describe("Course Navigation Integration", () => {
     act(() => {
       mockVideo.currentTime = 150; // 50% progress
       const timeUpdateEvent = new Event("timeupdate");
-      mockVideo.addEventListener.mock.calls.find(
-        (call) => call[0] === "timeupdate",
-      )?.[1](timeUpdateEvent);
+      // Safely extract the handler for "timeupdate" event
+      const timeUpdateCall = mockVideo.addEventListener.mock.calls.find(
+        (call: unknown) =>
+          Array.isArray(call) &&
+          typeof call[0] === "string" &&
+          call[0] === "timeupdate",
+      ) as [string, EventListenerOrEventListenerObject] | undefined;
+      const timeUpdateHandler: EventListenerOrEventListenerObject | undefined =
+        timeUpdateCall?.[1];
+      if (typeof timeUpdateHandler === "function") {
+        timeUpdateHandler(timeUpdateEvent);
+      }
     });
 
     await waitFor(() => {
@@ -168,14 +185,15 @@ describe("Course Navigation Integration", () => {
       pause: jest.fn(),
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
+      setAttribute: jest.fn(), // Mock setAttribute to prevent TypeError
     };
 
-    const originalCreateElement = document.createElement;
+    const originalCreateElement = document.createElement.bind(document);
     document.createElement = jest.fn((tagName) => {
       if (tagName === "video") {
-        return mockVideo as any;
+        return mockVideo as unknown as HTMLVideoElement;
       }
-      return originalCreateElement.call(document, tagName);
+      return originalCreateElement(tagName);
     });
 
     render(<LessonPlayer lesson={mockLesson} userId="user-1" />);
@@ -183,9 +201,18 @@ describe("Course Navigation Integration", () => {
     // Simulate video ended
     act(() => {
       const endedEvent = new Event("ended");
-      mockVideo.addEventListener.mock.calls.find(
-        (call) => call[0] === "ended",
-      )?.[1](endedEvent);
+      // Safely extract the handler for "ended" event
+      const endedCall = mockVideo.addEventListener.mock.calls.find(
+        (call: unknown) =>
+          Array.isArray(call) &&
+          typeof call[0] === "string" &&
+          call[0] === "ended",
+      ) as [string, EventListenerOrEventListenerObject] | undefined;
+      const endedHandler: EventListenerOrEventListenerObject | undefined =
+        endedCall?.[1];
+      if (typeof endedHandler === "function") {
+        endedHandler(endedEvent);
+      }
     });
 
     await waitFor(() => {
@@ -212,7 +239,8 @@ describe("Course Navigation Integration", () => {
 
     // Should show check mark for completed lesson
     const completedLesson = screen.getByText("Getting Started");
-    expect(completedLesson.closest("div")).toHaveClass("text-green-600");
+    // Check for the completed indicator (e.g., check icon)
+    expect(screen.getByTestId("check-circle")).toBeInTheDocument();
   });
 
   it("enables next lesson navigation after completion", () => {

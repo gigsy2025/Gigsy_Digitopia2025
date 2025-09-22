@@ -75,7 +75,7 @@ export function parseLessonRoute(route: string): {
 } | null {
   const lessonRoutePattern =
     /^\/app\/courses\/([^\/]+)\/modules\/([^\/]+)\/lessons\/([^\/]+)$/;
-  const match = route.match(lessonRoutePattern);
+  const match = lessonRoutePattern.exec(route);
 
   if (!match) {
     return null;
@@ -102,7 +102,7 @@ export function isValidLessonRoute(route: string): boolean {
 export function logRouteMigration(
   oldRoute: string,
   newRoute: string,
-  context: string = "migration",
+  context = "migration",
 ): void {
   if (process.env.NODE_ENV === "development") {
     console.log(`🔄 [RouteMigration:${context}] ${oldRoute} → ${newRoute}`);
@@ -119,7 +119,7 @@ export function migrateLegacyRoute(
 ): string | null {
   // Pattern: /app/courses/[courseId]/lessons/[lessonId]
   const legacyPattern = /^\/app\/courses\/([^\/]+)\/lessons\/([^\/]+)$/;
-  const match = legacyRoute.match(legacyPattern);
+  const match = legacyPattern.exec(legacyRoute);
 
   if (!match) {
     return null;

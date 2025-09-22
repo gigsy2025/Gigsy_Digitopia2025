@@ -33,7 +33,7 @@ const createModuleLogger = (context: string) => ({
       data ? JSON.stringify(data, null, 2) : "",
     );
   },
-  error: (message: string, error?: Error | unknown) => {
+  error: (message: string, error?: Error) => {
     console.error(`❌ [ModulePage:${context}] ${message}`, error);
   },
   debug: (message: string, data?: Record<string, unknown>) => {
@@ -176,11 +176,17 @@ export default function ModuleDetailPage(props: ModuleDetailPageProps) {
   }
 
   if (!currentModule) {
-    logger.error("❌ Module not found", {
+    logger.error(
+      "❌ Module not found",
+      new Error(
+        `Module not found: moduleId=${params.moduleId}, courseId=${params.courseId}`,
+      ),
+    );
+    logger.info("Module not found context", {
       moduleId: params.moduleId,
       courseId: params.courseId,
       availableModules:
-        course?.modules?.map((m) => ({ id: m._id, title: m.title })) || [],
+        course?.modules?.map((m) => ({ id: m._id, title: m.title })) ?? [],
     });
     return (
       <div className="flex flex-col items-center justify-center py-16">

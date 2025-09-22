@@ -279,7 +279,7 @@ export const ModuleList: React.FC<ModuleListProps> = ({
           const moduleProgress = getModuleProgress(module);
           const isModuleCompleted = moduleProgress === 100;
           const hasAccessibleLessons = module.lessons.some(
-            (lesson) => isEnrolled || lesson.isFree || !lesson.isLocked,
+            (lesson) => isEnrolled ?? lesson.isFree ?? !lesson.isLocked,
           );
 
           return (

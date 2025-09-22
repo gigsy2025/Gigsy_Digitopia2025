@@ -9,9 +9,16 @@ import { ModuleList } from "@/components/course/ModuleList";
 import type { Module } from "@/types/course";
 
 // Mock Next.js Link component
+import type { ReactNode, AnchorHTMLAttributes } from "react";
+
+interface MockLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+  children: ReactNode;
+}
+
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ children, href, ...props }: any) => (
+  default: ({ children, href, ...props }: MockLinkProps) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -92,6 +99,12 @@ describe("ModuleList", () => {
 
   it("shows completed lesson status", () => {
     render(<ModuleList {...defaultProps} />);
+
+    // Expand the module to reveal lessons and their completion status
+    const moduleButton = screen.getByRole("button", {
+      name: /getting started/i,
+    });
+    fireEvent.click(moduleButton);
 
     // Check mark for completed lesson
     expect(screen.getByTestId("check-circle")).toBeInTheDocument();
@@ -177,6 +190,6 @@ describe("ModuleList", () => {
   it("handles empty modules gracefully", () => {
     render(<ModuleList {...defaultProps} modules={[]} />);
 
-    expect(screen.getByText(/no modules available/i)).toBeInTheDocument();
+    expect(screen.getByTestId("no-modules-message")).toBeInTheDocument();
   });
 });

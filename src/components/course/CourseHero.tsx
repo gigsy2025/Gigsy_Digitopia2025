@@ -157,7 +157,9 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
             {/* Learning Outcomes */}
             {course.learningOutcomes && course.learningOutcomes.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold">What you'll learn</h3>
+                <h3 className="text-lg font-semibold">
+                  What you&apos;ll learn
+                </h3>
                 <ul className="space-y-2">
                   {course.learningOutcomes.slice(0, 4).map((outcome, index) => (
                     <li key={index} className="flex items-start gap-2 text-sm">
@@ -316,7 +318,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({
                 {course.skills && course.skills.length > 0 && (
                   <div className="space-y-2 border-t pt-4">
                     <h4 className="text-sm font-semibold">
-                      Skills you'll gain:
+                      Skills you&apos;ll gain:
                     </h4>
                     <div className="flex flex-wrap gap-1">
                       {course.skills.slice(0, 6).map((skill, index) => (

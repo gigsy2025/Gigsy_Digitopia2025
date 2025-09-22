@@ -140,8 +140,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
             if (sectionId) {
               onProgress?.({
                 type: "timeupdate",
-                section: sectionId,
-              } as any);
+                currentTime: progressSeconds,
+                duration: estimatedReadingSeconds,
+                // section: sectionId, // Removed to match PlayerEvent type
+              });
             }
           }
         });

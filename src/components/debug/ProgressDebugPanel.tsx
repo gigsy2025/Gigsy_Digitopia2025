@@ -46,7 +46,17 @@ interface ProgressDebugPanelProps {
   isLoading: boolean;
   error: string | null;
   isDirty: boolean;
-  lastSyncedProgress: any;
+  /**
+   * Last synced progress object returned from backend.
+   * Should match the shape of the progress API response.
+   */
+  lastSyncedProgress: {
+    progressSeconds: number;
+    completed: boolean;
+    watchedPercentage: number;
+    updatedAt?: string;
+    [key: string]: unknown;
+  } | null;
   _debug?: {
     lastSyncTime: number;
     syncInterval: number;

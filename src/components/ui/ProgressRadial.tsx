@@ -133,9 +133,7 @@ export const ProgressRadial: React.FC<ProgressRadialProps> = ({
 
       {/* Center content */}
       <div className="absolute inset-0 flex items-center justify-center">
-        {children ? (
-          children
-        ) : (
+        {children ?? (
           <div
             className={cn(
               "text-foreground text-center font-medium",

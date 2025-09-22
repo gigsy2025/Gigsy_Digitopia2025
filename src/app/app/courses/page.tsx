@@ -98,7 +98,7 @@ export default async function CourseCatalogPage({ searchParams }: CoursePageProp
       minRating: params.rating ? parseFloat(params.rating) : undefined,
       maxDuration: params.duration ? parseInt(params.duration) : undefined,
       isNew: params.new === 'true',
-      offset: params.page ? (parseInt(params.page) - 1) * (parseInt(params.limit || '12')) : 0,
+      offset: params.page ? (parseInt(params.page) - 1) * (parseInt(params.limit ?? '12')) : 0,
       limit: params.limit ? parseInt(params.limit) : 12,
     };
 
