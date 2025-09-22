@@ -17,9 +17,9 @@ export const AvatarStack = ({
 }: AvatarStackProps) => (
   <div
     className={cn(
-      "-space-x-1 flex items-center",
+      "flex items-center -space-x-1",
       animate && "hover:space-x-0 [&>*]:transition-all",
-      className
+      className,
     )}
     {...props}
   >
@@ -33,7 +33,7 @@ export const AvatarStack = ({
           className={cn(
             "size-full shrink-0 overflow-hidden rounded-full",
             '[&_[data-slot="avatar"]]:size-full',
-            className
+            className,
           )}
           style={{
             width: size,

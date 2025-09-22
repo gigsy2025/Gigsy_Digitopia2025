@@ -7,13 +7,23 @@
 
 import React from "react";
 import { LessonPlayer } from "@/components/lesson/LessonPlayer";
-import type { LessonWithNavigation } from "@/types/course";
+import type {
+  LessonWithNavigation,
+  PlayerEvent as PlayerEventType,
+} from "@/types/course";
+import type PlayerEvent from "@/components/lesson/LessonPlayer"; // Import PlayerEvent type explicitly
 
 // Mock progress hook for examples
 jest.mock("@/hooks/useProgress", () => ({
   useProgress: () => ({
-    updateProgress: () => {},
-    markCompleted: () => {},
+    updateProgress: (...args: unknown[]) => {
+      // Mock implementation for Storybook/Jest
+      console.log("Mock updateProgress called", ...args);
+    },
+    markCompleted: () => {
+      // Mock implementation for Storybook/Jest
+      console.log("Mock markCompleted called");
+    },
     progressSeconds: 0,
     completed: false,
     watchedPercentage: 0,
@@ -81,7 +91,11 @@ export const AutoPlayLessonPlayer = () => (
 );
 
 export const LessonPlayerWithCallbacks = () => {
-  const handleProgress = (event: any) => {
+  /**
+   * Handles progress events from the LessonPlayer.
+   * @param event - PlayerEvent object containing current time and watched percentage.
+   */
+  const handleProgress = (event: PlayerEventType) => {
     console.log("Progress event:", event);
   };
 

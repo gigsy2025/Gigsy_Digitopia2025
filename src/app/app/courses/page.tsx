@@ -22,10 +22,10 @@
  * @since 2025-09-20
  */
 
-import React from 'react';
-import type { Metadata } from 'next';
-import { preloadCourses } from '@/utils/fetchers';
-import { CourseCatalogWrapper } from './CourseCatalogWrapper';
+import React from "react";
+import type { Metadata } from "next";
+import { preloadCourses } from "@/utils/fetchers";
+import { CourseCatalogWrapper } from "./CourseCatalogWrapper";
 
 interface CoursePageProps {
   searchParams: Promise<{
@@ -46,14 +46,17 @@ interface CoursePageProps {
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ searchParams }: CoursePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: CoursePageProps): Promise<Metadata> {
   const params = await searchParams;
   const searchTerm = params.search;
-  const categories = params.categories?.split(',');
-  
-  let title = 'Course Catalog';
-  let description = 'Discover and learn from our extensive library of online courses.';
-  
+  const categories = params.categories?.split(",");
+
+  let title = "Course Catalog";
+  let description =
+    "Discover and learn from our extensive library of online courses.";
+
   if (searchTerm) {
     title = `Search: ${searchTerm} | Course Catalog`;
     description = `Find courses about ${searchTerm}. ${description}`;
@@ -61,17 +64,17 @@ export async function generateMetadata({ searchParams }: CoursePageProps): Promi
     title = `${categories[0]} Courses | Course Catalog`;
     description = `Explore ${categories[0]} courses. ${description}`;
   }
-  
+
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      type: 'website',
+      type: "website",
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title,
       description,
     },
@@ -82,23 +85,28 @@ export async function generateMetadata({ searchParams }: CoursePageProps): Promi
  * Course Catalog Page Component
  * Server Component that preloads initial data for optimal performance
  */
-export default async function CourseCatalogPage({ searchParams }: CoursePageProps) {
+export default async function CourseCatalogPage({
+  searchParams,
+}: CoursePageProps) {
   try {
     const params = await searchParams;
-    
+
     // Transform URL params to Convex filters
     const filters = {
       searchTerm: params.search,
-      categories: params.categories?.split(','),
-      difficulties: params.difficulties?.split(','),
+      categories: params.categories?.split(","),
+      difficulties: params.difficulties?.split(","),
       sortBy: params.sort,
-      priceRange: params.priceMin && params.priceMax 
-        ? [parseInt(params.priceMin), parseInt(params.priceMax)]
-        : undefined,
+      priceRange:
+        params.priceMin && params.priceMax
+          ? [parseInt(params.priceMin), parseInt(params.priceMax)]
+          : undefined,
       minRating: params.rating ? parseFloat(params.rating) : undefined,
       maxDuration: params.duration ? parseInt(params.duration) : undefined,
-      isNew: params.new === 'true',
-      offset: params.page ? (parseInt(params.page) - 1) * (parseInt(params.limit ?? '12')) : 0,
+      isNew: params.new === "true",
+      offset: params.page
+        ? (parseInt(params.page) - 1) * parseInt(params.limit ?? "12")
+        : 0,
       limit: params.limit ? parseInt(params.limit) : 12,
     };
 
@@ -106,17 +114,17 @@ export default async function CourseCatalogPage({ searchParams }: CoursePageProp
     const preloadedCourses = await preloadCourses(filters);
 
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         {/* Server-rendered metadata and preloaded data */}
         <CourseCatalogWrapper />
       </div>
     );
   } catch (error) {
-    console.error('[CourseCatalogPage] Failed to load courses:', error);
-    
+    console.error("[CourseCatalogPage] Failed to load courses:", error);
+
     // Fallback to client-only rendering
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <CourseCatalogWrapper />
       </div>
     );
