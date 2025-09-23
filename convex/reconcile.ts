@@ -62,14 +62,17 @@ interface WalletDiscrepancy {
  */
 const calculateLedgerBalance = async (
   ctx: ReconcilationCtx,
-  walletId: Id<"wallets">
+  walletId: Id<"wallets">,
 ): Promise<number> => {
   const transactions = await ctx.runQuery(
-    internal.internal.walletTransactions.getWalletTransactions, 
-    { walletId }
+    internal.internal.walletTransactions.getWalletTransactions,
+    { walletId },
   );
-  return transactions.reduce((sum: number, tx: DataModel["transactions"]["document"]) => sum + tx.amount, 0);
-}
+  return transactions.reduce(
+    (sum: number, tx: DataModel["transactions"]["document"]) => sum + tx.amount,
+    0,
+  );
+};
 
 /**
  * Get current projection balance
@@ -79,14 +82,14 @@ const calculateLedgerBalance = async (
  */
 const getProjectionBalance = async (
   ctx: ReconcilationCtx,
-  walletId: Id<"wallets">
+  walletId: Id<"wallets">,
 ): Promise<number> => {
   const balance = await ctx.runQuery(
-    internal.internal.walletBalances.getWalletBalance, 
-    { walletId }
+    internal.internal.walletBalances.getWalletBalance,
+    { walletId },
   );
   return balance || 0;
-}
+};
 
 /**
  * Log reconciliation event for monitoring
@@ -94,7 +97,11 @@ const getProjectionBalance = async (
  * @param details - Event details
  * @param level - Log level
  */
-function logReconciliation(event: string, details: any, level: "info" | "warn" | "error" = "info") {
+function logReconciliation(
+  event: string,
+  details: any,
+  level: "info" | "warn" | "error" = "info",
+) {
   const logData = {
     service: "reconciliation",
     event,
@@ -120,7 +127,7 @@ function logReconciliation(event: string, details: any, level: "info" | "warn" |
 async function sendReconciliationAlert(issue: string, details: any) {
   // TODO: Integrate with your alerting system (Slack, PagerDuty, etc.)
   logReconciliation("CRITICAL_ALERT", { issue, ...details }, "error");
-  
+
   // Example: Send to monitoring service
   // await notificationService.sendAlert({
   //   severity: "high",
@@ -158,225 +165,271 @@ type ReconciliationReturnType = {
  */
 async function performReconciliation(
   ctx: ReconcilationCtx,
-  args: ReconciliationArgs
+  args: ReconciliationArgs,
 ): Promise<ReconciliationReturnType> {
-    const startTime = Date.now();
-    const batchSize = args.batchSize ?? RECONCILE_BATCH_SIZE;
-    const dryRun = args.dryRun ?? false;
+  const startTime = Date.now();
+  const batchSize = args.batchSize ?? RECONCILE_BATCH_SIZE;
+  const dryRun = args.dryRun ?? false;
 
-    logReconciliation("RECONCILE_STARTED", {
-      batchSize,
-      dryRun,
-      specificWallets: args.walletIds?.length ?? 0,
-    });
+  logReconciliation("RECONCILE_STARTED", {
+    batchSize,
+    dryRun,
+    specificWallets: args.walletIds?.length ?? 0,
+  });
 
-    const result: ReconciliationResult = {
-      walletsProcessed: 0,
-      discrepanciesFound: 0,
-      discrepanciesFixed: 0,
-      errors: [],
-      totalDriftAmount: 0,
-      processingTimeMs: 0,
-    };
+  const result: ReconciliationResult = {
+    walletsProcessed: 0,
+    discrepanciesFound: 0,
+    discrepanciesFixed: 0,
+    errors: [],
+    totalDriftAmount: 0,
+    processingTimeMs: 0,
+  };
+
+  try {
+    // Get wallets to process with proper error handling
+    let wallets: Array<DataModel["wallets"]["document"]> = [];
 
     try {
-      // Get wallets to process with proper error handling
-      let wallets: Array<DataModel["wallets"]["document"]> = [];
-      
-      try {
-        if (args.walletIds && args.walletIds.length > 0) {
-          // Process specific wallets
-          const walletPromises = args.walletIds.map(async (walletId) => {
-            try {
-              return await ctx.runQuery((internal as any).reconcileQueries.getWalletById, { walletId });
-            } catch (error) {
-              logReconciliation("WALLET_FETCH_ERROR", { 
-                walletId, 
-                error: error instanceof Error ? error.message : String(error) 
-              }, "error");
-              return null;
-            }
-          });
-          
-          const walletResults = await Promise.all(walletPromises);
-          wallets = walletResults.filter((wallet: DataModel["wallets"]["document"] | null): wallet is DataModel["wallets"]["document"] => wallet !== null);
-        } else {
-          // Process all wallets using internal query
-          wallets = await ctx.runQuery((internal as any).reconcileQueries.getAllWallets, {});
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error fetching wallets';
-        logReconciliation("WALLET_FETCH_FAILED", { error: errorMessage }, "error");
-        throw new ConvexError(`Failed to fetch wallets: ${errorMessage}`);
-      }
-
-      logReconciliation("WALLETS_FOUND", { count: wallets.length });
-
-      // Process wallets in batches
-      for (let i = 0; i < wallets.length; i += batchSize) {
-        const batch = wallets.slice(i, i + batchSize);
-        const discrepancies: WalletDiscrepancy[] = [];
-
-        // Check each wallet in the batch
-        for (const wallet of batch) {
+      if (args.walletIds && args.walletIds.length > 0) {
+        // Process specific wallets
+        const walletPromises = args.walletIds.map(async (walletId) => {
           try {
-            const ledgerBalance = await calculateLedgerBalance(ctx, wallet._id);
-            const projectionBalance = await getProjectionBalance(ctx, wallet._id);
-            const drift = Math.abs(ledgerBalance - projectionBalance);
+            return await ctx.runQuery(
+              (internal as any).reconcileQueries.getWalletById,
+              { walletId },
+            );
+          } catch (error) {
+            logReconciliation(
+              "WALLET_FETCH_ERROR",
+              {
+                walletId,
+                error: error instanceof Error ? error.message : String(error),
+              },
+              "error",
+            );
+            return null;
+          }
+        });
 
-            result.walletsProcessed++;
+        const walletResults = await Promise.all(walletPromises);
+        wallets = walletResults.filter(
+          (
+            wallet: DataModel["wallets"]["document"] | null,
+          ): wallet is DataModel["wallets"]["document"] => wallet !== null,
+        );
+      } else {
+        // Process all wallets using internal query
+        wallets = await ctx.runQuery(
+          (internal as any).reconcileQueries.getAllWallets,
+          {},
+        );
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unknown error fetching wallets";
+      logReconciliation(
+        "WALLET_FETCH_FAILED",
+        { error: errorMessage },
+        "error",
+      );
+      throw new ConvexError(`Failed to fetch wallets: ${errorMessage}`);
+    }
 
-            if (drift > 0) {
-              const discrepancy: WalletDiscrepancy = {
+    logReconciliation("WALLETS_FOUND", { count: wallets.length });
+
+    // Process wallets in batches
+    for (let i = 0; i < wallets.length; i += batchSize) {
+      const batch = wallets.slice(i, i + batchSize);
+      const discrepancies: WalletDiscrepancy[] = [];
+
+      // Check each wallet in the batch
+      for (const wallet of batch) {
+        try {
+          const ledgerBalance = await calculateLedgerBalance(ctx, wallet._id);
+          const projectionBalance = await getProjectionBalance(ctx, wallet._id);
+          const drift = Math.abs(ledgerBalance - projectionBalance);
+
+          result.walletsProcessed++;
+
+          if (drift > 0) {
+            const discrepancy: WalletDiscrepancy = {
+              walletId: wallet._id,
+              currency: wallet.currency,
+              ledgerBalance,
+              projectionBalance,
+              drift,
+              transactionCount: 0, // Could calculate if needed
+            };
+
+            discrepancies.push(discrepancy);
+            result.discrepanciesFound++;
+            result.totalDriftAmount += drift;
+
+            // Alert on significant drift
+            if (drift > MAX_DRIFT_THRESHOLD) {
+              await sendReconciliationAlert("SIGNIFICANT_BALANCE_DRIFT", {
                 walletId: wallet._id,
+                userId: wallet.userId,
                 currency: wallet.currency,
                 ledgerBalance,
                 projectionBalance,
                 drift,
-                transactionCount: 0, // Could calculate if needed
-              };
-
-              discrepancies.push(discrepancy);
-              result.discrepanciesFound++;
-              result.totalDriftAmount += drift;
-
-              // Alert on significant drift
-              if (drift > MAX_DRIFT_THRESHOLD) {
-                await sendReconciliationAlert("SIGNIFICANT_BALANCE_DRIFT", {
-                  walletId: wallet._id,
-                  userId: wallet.userId,
-                  currency: wallet.currency,
-                  ledgerBalance,
-                  projectionBalance,
-                  drift,
-                });
-              }
+              });
             }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            result.errors.push({
-              walletId: wallet._id,
-              error: errorMessage,
-              timestamp: Date.now(),
-            });
-
-            logReconciliation("WALLET_RECONCILE_ERROR", {
-              walletId: wallet._id,
-              error: errorMessage,
-            }, "error");
           }
-        }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          result.errors.push({
+            walletId: wallet._id,
+            error: errorMessage,
+            timestamp: Date.now(),
+          });
 
-        // Fix discrepancies if not dry run
-        if (!dryRun && discrepancies.length > 0) {
-          for (const discrepancy of discrepancies) {
-            try {
-              await ctx.runMutation(internal.internal.walletMutations.updateWalletBalance, {
+          logReconciliation(
+            "WALLET_RECONCILE_ERROR",
+            {
+              walletId: wallet._id,
+              error: errorMessage,
+            },
+            "error",
+          );
+        }
+      }
+
+      // Fix discrepancies if not dry run
+      if (!dryRun && discrepancies.length > 0) {
+        for (const discrepancy of discrepancies) {
+          try {
+            await ctx.runMutation(
+              internal.internal.walletMutations.updateWalletBalance,
+              {
                 walletId: discrepancy.walletId,
                 balance: discrepancy.ledgerBalance,
                 currency: discrepancy.currency,
-              });
-              result.discrepanciesFixed++;
+              },
+            );
+            result.discrepanciesFixed++;
 
-              logReconciliation("BALANCE_CORRECTED", {
-                walletId: discrepancy.walletId,
-                oldBalance: discrepancy.projectionBalance,
-                newBalance: discrepancy.ledgerBalance,
-                drift: discrepancy.drift,
-              });
+            logReconciliation("BALANCE_CORRECTED", {
+              walletId: discrepancy.walletId,
+              oldBalance: discrepancy.projectionBalance,
+              newBalance: discrepancy.ledgerBalance,
+              drift: discrepancy.drift,
+            });
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            result.errors.push({
+              walletId: discrepancy.walletId,
+              error: `Fix failed: ${errorMessage}`,
+              timestamp: Date.now(),
+            });
 
-            } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : String(error);
-              result.errors.push({
-                walletId: discrepancy.walletId,
-                error: `Fix failed: ${errorMessage}`,
-                timestamp: Date.now(),
-              });
-
-              logReconciliation("BALANCE_FIX_ERROR", {
+            logReconciliation(
+              "BALANCE_FIX_ERROR",
+              {
                 walletId: discrepancy.walletId,
                 error: errorMessage,
-              }, "error");
-            }
+              },
+              "error",
+            );
           }
         }
+      }
 
-        // Log batch progress
-        logReconciliation("BATCH_PROCESSED", {
-          batchNumber: Math.floor(i / batchSize) + 1,
-          walletsInBatch: batch.length,
-          discrepanciesInBatch: discrepancies.length,
-          totalProcessed: result.walletsProcessed,
-        });
+      // Log batch progress
+      logReconciliation("BATCH_PROCESSED", {
+        batchNumber: Math.floor(i / batchSize) + 1,
+        walletsInBatch: batch.length,
+        discrepanciesInBatch: discrepancies.length,
+        totalProcessed: result.walletsProcessed,
+      });
 
-        // Check timeout
-        if (Date.now() - startTime > RECONCILE_TIMEOUT_MS) {
-          logReconciliation("RECONCILE_TIMEOUT", {
+      // Check timeout
+      if (Date.now() - startTime > RECONCILE_TIMEOUT_MS) {
+        logReconciliation(
+          "RECONCILE_TIMEOUT",
+          {
             processedSoFar: result.walletsProcessed,
             totalWallets: wallets.length,
-          }, "warn");
-          break;
-        }
+          },
+          "warn",
+        );
+        break;
       }
-
-      result.processingTimeMs = Date.now() - startTime;
-
-      // Final logging and alerting
-      logReconciliation("RECONCILE_COMPLETED", {
-        ...result,
-        dryRun,
-        successRate: result.errors.length === 0 ? 100 : 
-          ((result.walletsProcessed - result.errors.length) / result.walletsProcessed) * 100,
-      });
-
-      // Alert on high error rate
-      if (result.errors.length > result.walletsProcessed * 0.1) {
-        await sendReconciliationAlert("HIGH_RECONCILIATION_ERROR_RATE", {
-          errorRate: (result.errors.length / result.walletsProcessed) * 100,
-          totalErrors: result.errors.length,
-          totalProcessed: result.walletsProcessed,
-        });
-      }
-
-      // Alert on high discrepancy rate
-      if (result.discrepanciesFound > result.walletsProcessed * 0.05) {
-        await sendReconciliationAlert("HIGH_BALANCE_DISCREPANCY_RATE", {
-          discrepancyRate: (result.discrepanciesFound / result.walletsProcessed) * 100,
-          totalDiscrepancies: result.discrepanciesFound,
-          totalDrift: result.totalDriftAmount,
-        });
-      }
-
-      const message = dryRun 
-        ? `Dry run completed: ${result.discrepanciesFound} discrepancies found`
-        : `Reconciliation completed: ${result.discrepanciesFixed}/${result.discrepanciesFound} discrepancies fixed`;
-
-      return {
-        success: true,
-        result,
-        message,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      result.processingTimeMs = Date.now() - startTime;
-
-      logReconciliation("RECONCILE_FAILED", {
-        error: errorMessage,
-        partialResult: result,
-      }, "error");
-
-      await sendReconciliationAlert("RECONCILIATION_SYSTEM_FAILURE", {
-        error: errorMessage,
-        partialResult: result,
-      });
-
-      return {
-        success: false,
-        result,
-        message: `Reconciliation failed: ${errorMessage}`,
-      };
     }
+
+    result.processingTimeMs = Date.now() - startTime;
+
+    // Final logging and alerting
+    logReconciliation("RECONCILE_COMPLETED", {
+      ...result,
+      dryRun,
+      successRate:
+        result.errors.length === 0
+          ? 100
+          : ((result.walletsProcessed - result.errors.length) /
+              result.walletsProcessed) *
+            100,
+    });
+
+    // Alert on high error rate
+    if (result.errors.length > result.walletsProcessed * 0.1) {
+      await sendReconciliationAlert("HIGH_RECONCILIATION_ERROR_RATE", {
+        errorRate: (result.errors.length / result.walletsProcessed) * 100,
+        totalErrors: result.errors.length,
+        totalProcessed: result.walletsProcessed,
+      });
+    }
+
+    // Alert on high discrepancy rate
+    if (result.discrepanciesFound > result.walletsProcessed * 0.05) {
+      await sendReconciliationAlert("HIGH_BALANCE_DISCREPANCY_RATE", {
+        discrepancyRate:
+          (result.discrepanciesFound / result.walletsProcessed) * 100,
+        totalDiscrepancies: result.discrepanciesFound,
+        totalDrift: result.totalDriftAmount,
+      });
+    }
+
+    const message = dryRun
+      ? `Dry run completed: ${result.discrepanciesFound} discrepancies found`
+      : `Reconciliation completed: ${result.discrepanciesFixed}/${result.discrepanciesFound} discrepancies fixed`;
+
+    return {
+      success: true,
+      result,
+      message,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    result.processingTimeMs = Date.now() - startTime;
+
+    logReconciliation(
+      "RECONCILE_FAILED",
+      {
+        error: errorMessage,
+        partialResult: result,
+      },
+      "error",
+    );
+
+    await sendReconciliationAlert("RECONCILIATION_SYSTEM_FAILURE", {
+      error: errorMessage,
+      partialResult: result,
+    });
+
+    return {
+      success: false,
+      result,
+      message: `Reconciliation failed: ${errorMessage}`,
+    };
   }
+}
 
 // Define the action with proper typing
 export const reconcileBalances = action({
@@ -385,7 +438,10 @@ export const reconcileBalances = action({
     dryRun: v.optional(v.boolean()),
     walletIds: v.optional(v.array(v.id("wallets"))),
   },
-  handler: async (ctx: ReconcilationCtx, args: { batchSize?: number; dryRun?: boolean; walletIds?: Id<"wallets">[] }): Promise<ReconciliationReturnType> => {
+  handler: async (
+    ctx: ReconcilationCtx,
+    args: { batchSize?: number; dryRun?: boolean; walletIds?: Id<"wallets">[] },
+  ): Promise<ReconciliationReturnType> => {
     return performReconciliation(ctx, args);
   },
 });
@@ -408,10 +464,14 @@ export const reconciliationHealthCheck = action({
       // Check database connectivity and get counts
       try {
         // Use type assertion to access healthQueries
-        const counts = await ctx.runQuery(
-          (internal as any).healthQueries.getHealthCheckCounts, 
-          {}
-        ) as { walletCount: number; transactionCount: number; balanceProjectionCount: number };
+        const counts = (await ctx.runQuery(
+          (internal as any).healthQueries.getHealthCheckCounts,
+          {},
+        )) as {
+          walletCount: number;
+          transactionCount: number;
+          balanceProjectionCount: number;
+        };
         checks.walletCount = counts.walletCount;
         checks.transactionCount = counts.transactionCount;
         checks.balanceProjectionCount = counts.balanceProjectionCount;
@@ -423,22 +483,29 @@ export const reconciliationHealthCheck = action({
       // TODO: Get last reconcile time from a reconciliation log table
       // checks.lastReconcileTime = await getLastReconcileTime(ctx);
 
-      const healthy = checks.databaseConnectivity && 
-                     checks.walletCount >= 0 && 
-                     checks.transactionCount >= 0;
+      const healthy =
+        checks.databaseConnectivity &&
+        checks.walletCount >= 0 &&
+        checks.transactionCount >= 0;
 
       logReconciliation("HEALTH_CHECK", { healthy, checks });
 
       return {
         healthy,
         checks,
-        message: healthy ? "Reconciliation system is healthy" : "Reconciliation system has issues",
+        message: healthy
+          ? "Reconciliation system is healthy"
+          : "Reconciliation system has issues",
       };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      logReconciliation("HEALTH_CHECK_FAILED", { error: errorMessage }, "error");
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      logReconciliation(
+        "HEALTH_CHECK_FAILED",
+        { error: errorMessage },
+        "error",
+      );
 
       return {
         healthy: false,
@@ -473,13 +540,20 @@ export const emergencyReconcileWallet = action({
   }),
   handler: async (ctx: ReconcilationCtx, { walletId, reason }) => {
     try {
-      logReconciliation("EMERGENCY_RECONCILE_STARTED", {
-        walletId,
-        reason,
-      }, "warn");
+      logReconciliation(
+        "EMERGENCY_RECONCILE_STARTED",
+        {
+          walletId,
+          reason,
+        },
+        "warn",
+      );
 
       // Use internal query to get wallet
-      const wallet = await ctx.runQuery((internal as any).reconcileQueries.getWalletById, { walletId });
+      const wallet = await ctx.runQuery(
+        (internal as any).reconcileQueries.getWalletById,
+        { walletId },
+      );
       if (!wallet) {
         throw new ConvexError("Wallet not found");
       }
@@ -504,21 +578,31 @@ export const emergencyReconcileWallet = action({
       }
 
       // Update the projection using internal mutation
-      await ctx.runMutation((internal as any).walletMutations.updateWalletBalance, {
-        walletId,
-        balance: ledgerBalance,
-      });
+      await ctx.runMutation(
+        (internal as any).walletMutations.updateWalletBalance,
+        {
+          walletId,
+          balance: ledgerBalance,
+        },
+      );
 
       // Get the updated balance for logging
-      const updatedBalance: number = await ctx.runQuery((internal as any).walletBalances.getWalletBalance, { walletId });
-      
-      logReconciliation("EMERGENCY_RECONCILE_COMPLETED", {
-        walletId,
-        oldBalance: projectionBalance,
-        newBalance: updatedBalance,
-        drift,
-        reason,
-      }, "info");
+      const updatedBalance: number = await ctx.runQuery(
+        (internal as any).walletBalances.getWalletBalance,
+        { walletId },
+      );
+
+      logReconciliation(
+        "EMERGENCY_RECONCILE_COMPLETED",
+        {
+          walletId,
+          oldBalance: projectionBalance,
+          newBalance: updatedBalance,
+          drift,
+          reason,
+        },
+        "info",
+      );
 
       // Alert on emergency reconciliation since we found a discrepancy
       await sendReconciliationAlert("EMERGENCY_RECONCILIATION_PERFORMED", {
@@ -537,13 +621,18 @@ export const emergencyReconcileWallet = action({
         message: `Successfully reconciled wallet ${walletId} - corrected drift of ${drift}`,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      logReconciliation("EMERGENCY_RECONCILE_FAILED", {
-        walletId,
-        reason,
-        error: errorMessage,
-      }, "error");
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      logReconciliation(
+        "EMERGENCY_RECONCILE_FAILED",
+        {
+          walletId,
+          reason,
+          error: errorMessage,
+        },
+        "error",
+      );
 
       await sendReconciliationAlert("EMERGENCY_RECONCILIATION_FAILED", {
         walletId,
@@ -567,7 +656,7 @@ export const scheduledReconciliation = internalAction({
         scheduledAt: new Date().toISOString(),
       });
 
-            // Call the main reconciliation action with the appropriate arguments
+      // Call the main reconciliation action with the appropriate arguments
       interface ReconciliationResult {
         success: boolean;
         message: string;
@@ -586,13 +675,17 @@ export const scheduledReconciliation = internalAction({
         success: result.success,
         message: `Scheduled reconciliation: ${result.message}`,
       };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      logReconciliation("SCHEDULED_RECONCILE_FAILED", {
-        error: errorMessage,
-      }, "error");
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      logReconciliation(
+        "SCHEDULED_RECONCILE_FAILED",
+        {
+          error: errorMessage,
+        },
+        "error",
+      );
 
       await sendReconciliationAlert("SCHEDULED_RECONCILIATION_FAILED", {
         error: errorMessage,

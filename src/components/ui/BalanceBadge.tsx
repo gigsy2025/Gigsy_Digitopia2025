@@ -25,19 +25,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "convex/react";
 import { formatCurrency } from "@/lib/format-currency";
 import { formatDistanceToNow } from "date-fns";
-import { RefreshCw, AlertTriangle, ChevronDown, Wallet, TrendingUp, Eye, EyeOff, AlertCircle } from "lucide-react";
+import {
+  RefreshCw,
+  AlertTriangle,
+  ChevronDown,
+  Wallet,
+  TrendingUp,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useToast } from "@/components/ui/use-toast";
-import type { Currency, WalletBalance, FormattedBalance } from "@/types/finance";
+import type {
+  Currency,
+  WalletBalance,
+  FormattedBalance,
+} from "@/types/finance";
 import { CURRENCY_CONFIGS } from "@/types/finance";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from "@/hooks/use-mobile";
 import { useBalances, useBalanceFormatter } from "@/hooks/useBalances";
@@ -46,7 +64,9 @@ import type { BalanceBadgeProps } from "@/types/finance";
 /**
  * Loading skeleton for balance badge
  */
-const BalanceBadgeLoading: React.FC<{ compact?: boolean }> = ({ compact = false }) => (
+const BalanceBadgeLoading: React.FC<{ compact?: boolean }> = ({
+  compact = false,
+}) => (
   <div className="flex items-center gap-2 px-3 py-1.5">
     <Skeleton className="h-4 w-4 rounded" />
     <div className="flex items-baseline gap-2">
@@ -59,21 +79,21 @@ const BalanceBadgeLoading: React.FC<{ compact?: boolean }> = ({ compact = false 
 /**
  * Error state for balance badge
  */
-const BalanceBadgeError: React.FC<{ error: Error; onRetry?: () => void }> = ({ 
-  error, 
-  onRetry 
+const BalanceBadgeError: React.FC<{ error: Error; onRetry?: () => void }> = ({
+  error,
+  onRetry,
 }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge variant="destructive" className="px-3 py-1.5 cursor-pointer">
-          <AlertCircle className="h-3 w-3 mr-1" />
+        <Badge variant="destructive" className="cursor-pointer px-3 py-1.5">
+          <AlertCircle className="mr-1 h-3 w-3" />
           <span className="text-xs">Balance Error</span>
           {onRetry && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+              className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
               onClick={onRetry}
             >
               <RefreshCw className="h-3 w-3" />
@@ -83,7 +103,7 @@ const BalanceBadgeError: React.FC<{ error: Error; onRetry?: () => void }> = ({
       </TooltipTrigger>
       <TooltipContent>
         <p className="text-sm">Failed to load balance</p>
-        <p className="text-xs text-muted-foreground">{error.message}</p>
+        <p className="text-muted-foreground text-xs">{error.message}</p>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
@@ -99,13 +119,13 @@ const CurrencyBalance: React.FC<{
   compact?: boolean;
   showTrend?: boolean;
   lastUpdated?: number;
-}> = ({ 
-  currency, 
-  amount, 
-  symbol, 
-  compact = false, 
+}> = ({
+  currency,
+  amount,
+  symbol,
+  compact = false,
   showTrend = false,
-  lastUpdated 
+  lastUpdated,
 }) => {
   const isRecent = useMemo(() => {
     if (!lastUpdated) return false;
@@ -114,20 +134,19 @@ const CurrencyBalance: React.FC<{
 
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-xs text-muted-foreground font-medium">
+      <span className="text-muted-foreground text-xs font-medium">
         {compact ? currency : "Balance"}
       </span>
       <div className="flex items-baseline gap-1">
-        <span className="text-sm font-semibold text-foreground">
-          {symbol}{amount}
+        <span className="text-foreground text-sm font-semibold">
+          {symbol}
+          {amount}
         </span>
         {!compact && (
-          <span className="text-xs text-muted-foreground">
-            {currency}
-          </span>
+          <span className="text-muted-foreground text-xs">{currency}</span>
         )}
         {showTrend && isRecent && (
-          <TrendingUp className="h-3 w-3 text-green-500 ml-1" />
+          <TrendingUp className="ml-1 h-3 w-3 text-green-500" />
         )}
       </div>
     </div>
@@ -148,8 +167,9 @@ const MultiCurrencyDropdown: React.FC<{
   primaryCurrency: Currency;
   onCurrencySelect?: (currency: Currency) => void;
 }> = ({ balances, primaryCurrency, onCurrencySelect }) => {
-  const primary = balances.find(b => b.currency === primaryCurrency) || balances[0];
-  
+  const primary =
+    balances.find((b) => b.currency === primaryCurrency) ?? balances[0];
+
   if (!primary) return null;
 
   return (
@@ -158,17 +178,17 @@ const MultiCurrencyDropdown: React.FC<{
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-2 hover:bg-accent/50 focus:bg-accent/50"
+          className="hover:bg-accent/50 focus:bg-accent/50 h-auto p-2"
         >
           <div className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-muted-foreground" />
+            <Wallet className="text-muted-foreground h-4 w-4" />
             <CurrencyBalance
               currency={primary.currency}
               amount={primary.amount}
               symbol={primary.symbol}
               compact={true}
             />
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            <ChevronDown className="text-muted-foreground h-3 w-3" />
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -181,18 +201,22 @@ const MultiCurrencyDropdown: React.FC<{
         {balances.map((balance) => (
           <DropdownMenuItem
             key={balance.currency}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex cursor-pointer items-center justify-between"
             onClick={() => onCurrencySelect?.(balance.currency)}
           >
             <div className="flex items-center gap-2">
               <span className="font-medium">{balance.currency}</span>
-              <span className="text-xs text-muted-foreground">
-                {balance.currency === "EGP" ? "Egyptian Pound" : 
-                 balance.currency === "USD" ? "US Dollar" : "Euro"}
+              <span className="text-muted-foreground text-xs">
+                {balance.currency === "EGP"
+                  ? "Egyptian Pound"
+                  : balance.currency === "USD"
+                    ? "US Dollar"
+                    : "Euro"}
               </span>
             </div>
             <span className="font-semibold">
-              {balance.symbol}{balance.amount}
+              {balance.symbol}
+              {balance.amount}
             </span>
           </DropdownMenuItem>
         ))}
@@ -203,7 +227,7 @@ const MultiCurrencyDropdown: React.FC<{
 
 /**
  * Main Balance Badge Component
- * 
+ *
  * ACCESSIBILITY: Full ARIA support and keyboard navigation
  * PERFORMANCE: Memoized renders and optimized re-renders
  * RESPONSIVE: Adaptive display based on screen size
@@ -213,37 +237,42 @@ export default function BalanceBadge({
   showAllCurrencies = false,
   compact = false,
   className,
-  userId
+  userId,
 }: BalanceBadgeProps) {
   // Call all hooks unconditionally at the top level
-  const { 
-    balances, 
-    isLoading, 
-    error, 
-    refresh, 
+  const {
+    balances,
+    isLoading,
+    error,
+    refresh,
     getFormattedWithSymbol,
     getAllFormatted,
     getPrimaryBalance,
     getBalance,
     formatted,
     hasSufficientBalance,
-    getTotalInCurrency
+    getTotalInCurrency,
   } = useBalances(userId);
-  
+
   const { getCurrencySymbol } = useBalanceFormatter();
   const { showToast } = useToast();
 
   // State hooks - all at the top level
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(primaryCurrency);
+  const [selectedCurrency, setSelectedCurrency] =
+    useState<Currency>(primaryCurrency);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Memoized values
-  const formattedBalances = useMemo<Array<FormattedBalance & { lastUpdated?: number }>>(() => {
+  const formattedBalances = useMemo<
+    Array<FormattedBalance & { lastUpdated?: number }>
+  >(() => {
     if (!getAllFormatted) return [];
     return getAllFormatted().map((balance) => {
-      const walletBalance = balances.find((b) => b.currency === balance.currency);
+      const walletBalance = balances.find(
+        (b) => b.currency === balance.currency,
+      );
       return {
         ...balance,
         lastUpdated: walletBalance?.lastUpdated,
@@ -255,23 +284,28 @@ export default function BalanceBadge({
     if (getPrimaryBalance) {
       return getPrimaryBalance();
     }
-    return balances.find((b) => b.currency === primaryCurrency) || null;
+    return balances.find((b) => b.currency === primaryCurrency) ?? null;
   }, [getPrimaryBalance, balances, primaryCurrency]);
 
-  const displayBalance = useMemo<FormattedBalance & { lastUpdated?: number } | null>(() => {
+  const displayBalance = useMemo<
+    (FormattedBalance & { lastUpdated?: number }) | null
+  >(() => {
     if (primaryBalance) {
       // Convert WalletBalance to FormattedBalance
-      const formatted = getFormattedWithSymbol?.(primaryBalance.currency) || '0';
-      const symbol = CURRENCY_CONFIGS[primaryBalance.currency]?.symbol || primaryBalance.currency;
+      const formatted =
+        getFormattedWithSymbol?.(primaryBalance.currency) || "0";
+      const symbol =
+        CURRENCY_CONFIGS[primaryBalance.currency]?.symbol ||
+        primaryBalance.currency;
       return {
         currency: primaryBalance.currency,
         amount: (primaryBalance.balance / 100).toFixed(2),
         symbol,
         raw: primaryBalance.balance,
-        lastUpdated: primaryBalance.lastUpdated
+        lastUpdated: primaryBalance.lastUpdated,
       };
     }
-    return formattedBalances[0] || null;
+    return formattedBalances[0] ?? null;
   }, [primaryBalance, formattedBalances, getFormattedWithSymbol]);
 
   // Effect hooks
@@ -286,26 +320,23 @@ export default function BalanceBadge({
 
   const handleRefresh = useCallback(async () => {
     try {
-      await refresh?.();
-      showToast("Balances updated", 'success');
+      refresh?.();
+      showToast("Balances updated", "success");
     } catch (error) {
-      showToast("Failed to refresh balances. Please try again.", 'error');
+      showToast("Failed to refresh balances. Please try again.", "error");
     }
   }, [refresh, showToast]);
 
   const toggleBalanceVisibility = useCallback(() => {
     const newVisibility = !isBalanceVisible;
     setIsBalanceVisible(newVisibility);
-    showToast(
-      newVisibility ? "Balance shown" : "Balance hidden",
-      'info'
-    );
+    showToast(newVisibility ? "Balance shown" : "Balance hidden", "info");
   }, [isBalanceVisible, showToast]);
 
   // Render logic
   if (isLoading) {
     return (
-      <div className={cn("hidden sm:flex items-center", className)}>
+      <div className={cn("hidden items-center sm:flex", className)}>
         <BalanceBadgeLoading compact={compact} />
       </div>
     );
@@ -313,22 +344,21 @@ export default function BalanceBadge({
 
   if (error) {
     return (
-      <div className={cn("hidden sm:flex items-center", className)}>
+      <div className={cn("hidden items-center sm:flex", className)}>
         <BalanceBadgeError error={error} onRetry={handleRefresh} />
       </div>
     );
   }
 
-  
   // No balances state
   if (!displayBalance || formattedBalances.length === 0) {
     return (
-      <div className={cn("hidden sm:flex items-center", className)}>
+      <div className={cn("hidden items-center sm:flex", className)}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Badge variant="secondary" className="px-3 py-1.5">
-                <Wallet className="h-3 w-3 mr-2" />
+                <Wallet className="mr-2 h-3 w-3" />
                 <span className="text-xs">No Balance</span>
               </Badge>
             </TooltipTrigger>
@@ -344,7 +374,7 @@ export default function BalanceBadge({
   // Multi-currency display
   if (showAllCurrencies && formattedBalances.length > 1) {
     return (
-      <div className={cn("hidden sm:flex items-center", className)}>
+      <div className={cn("hidden items-center sm:flex", className)}>
         <MultiCurrencyDropdown
           balances={formattedBalances}
           primaryCurrency={primaryCurrency}
@@ -355,15 +385,15 @@ export default function BalanceBadge({
   }
 
   return (
-    <div className={cn("hidden sm:flex items-center", className)}>
+    <div className={cn("hidden items-center sm:flex", className)}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={cn(
-                "px-3 py-1.5 hover:bg-accent/50 transition-colors cursor-default",
-                compact && "px-2 py-1"
+                "hover:bg-accent/50 cursor-default px-3 py-1.5 transition-colors",
+                compact && "px-2 py-1",
               )}
             >
               <Wallet className={cn("mr-2", compact ? "h-3 w-3" : "h-4 w-4")} />
@@ -383,18 +413,25 @@ export default function BalanceBadge({
             <div className="space-y-2">
               <p className="font-medium">Your Available Balance</p>
               <div className="space-y-1">
-                {formattedBalances.map((balance: FormattedBalance & { lastUpdated?: number }) => (
-                  <div key={balance.currency} className="flex justify-between text-sm">
-                    <span>{balance.currency}:</span>
-                    <span className="font-medium">
-                      {balance.symbol}{balance.amount}
-                    </span>
-                  </div>
-                ))}
+                {formattedBalances.map(
+                  (balance: FormattedBalance & { lastUpdated?: number }) => (
+                    <div
+                      key={balance.currency}
+                      className="flex justify-between text-sm"
+                    >
+                      <span>{balance.currency}:</span>
+                      <span className="font-medium">
+                        {balance.symbol}
+                        {balance.amount}
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
               {displayBalance.lastUpdated && (
-                <p className="text-xs text-muted-foreground">
-                  Updated {new Date(displayBalance.lastUpdated).toLocaleTimeString()}
+                <p className="text-muted-foreground text-xs">
+                  Updated{" "}
+                  {new Date(displayBalance.lastUpdated).toLocaleTimeString()}
                 </p>
               )}
             </div>
@@ -408,16 +445,16 @@ export default function BalanceBadge({
 /**
  * Compact Balance Badge for mobile/small spaces
  */
-export const CompactBalanceBadge: React.FC<Omit<BalanceBadgeProps, 'compact'>> = (props) => (
-  <BalanceBadge {...props} compact={true} />
-);
+export const CompactBalanceBadge: React.FC<
+  Omit<BalanceBadgeProps, "compact">
+> = (props) => <BalanceBadge {...props} compact={true} />;
 
 /**
  * Full Balance Badge with all currencies
  */
-export const FullBalanceBadge: React.FC<Omit<BalanceBadgeProps, 'showAllCurrencies'>> = (props) => (
-  <BalanceBadge {...props} showAllCurrencies={true} />
-);
+export const FullBalanceBadge: React.FC<
+  Omit<BalanceBadgeProps, "showAllCurrencies">
+> = (props) => <BalanceBadge {...props} showAllCurrencies={true} />;
 
 /**
  * Balance Badge for specific currency
@@ -426,8 +463,8 @@ export const CurrencyBalanceBadge: React.FC<{
   currency: Currency;
   className?: string;
 }> = ({ currency, className }) => (
-  <BalanceBadge 
-    primaryCurrency={currency} 
+  <BalanceBadge
+    primaryCurrency={currency}
     showAllCurrencies={false}
     className={className}
   />

@@ -21,11 +21,11 @@ import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import type { 
-  Currency, 
-  WalletBalance, 
+import type {
+  Currency,
+  WalletBalance,
   UseBalancesResult,
-  FormattedBalance
+  FormattedBalance,
 } from "../types/finance";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -65,34 +65,34 @@ const CURRENCY_CONFIGS = {
  * @returns Formatted string (e.g., "123.45")
  */
 function formatAmount(
-  amount: number, 
-  currency: Currency, 
+  amount: number,
+  currency: Currency,
   options: {
     showSymbol?: boolean;
     showCode?: boolean;
     compact?: boolean;
-  } = {}
+  } = {},
 ): string {
   const config = CURRENCY_CONFIGS[currency];
   const { showSymbol = false, showCode = false, compact = false } = options;
-  
+
   // Convert from smallest unit to main unit
   const mainAmount = amount / Math.pow(10, config.decimals);
-  
+
   // Format with appropriate decimal places
   const formatted = mainAmount.toFixed(config.decimals);
-  
+
   // Apply formatting options
   let result = formatted;
-  
+
   if (showSymbol) {
     result = `${config.symbol}${result}`;
   }
-  
+
   if (showCode) {
     result = `${result} ${config.code}`;
   }
-  
+
   // Compact formatting for large numbers
   if (compact && Math.abs(mainAmount) >= 1000) {
     const compactAmount = Math.abs(mainAmount);
@@ -102,7 +102,7 @@ function formatAmount(
       result = `${config.symbol}${(mainAmount / 1000).toFixed(1)}K`;
     }
   }
-  
+
   return result;
 }
 
@@ -118,10 +118,10 @@ function getFormattedBalance(
     showSymbol?: boolean;
     showCode?: boolean;
     compact?: boolean;
-  } = {}
+  } = {},
 ): FormattedBalance {
   const config = CURRENCY_CONFIGS[balance.currency];
-  
+
   return {
     currency: balance.currency,
     amount: formatAmount(balance.balance, balance.currency, options),
@@ -132,7 +132,7 @@ function getFormattedBalance(
 
 /**
  * Main hook for user balance management
- * 
+ *
  * PERFORMANCE: Memoized computations and selective re-renders
  * REAL-TIME: Convex subscriptions for live balance updates
  * TYPE-SAFETY: Full TypeScript support with proper error handling
@@ -141,14 +141,14 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
   const { user, isLoaded: isUserLoaded } = useUser();
   const [convexUserId, setConvexUserId] = useState<Id<"users"> | null>(null);
   const { showToast } = useToast();
-  
+
   // Mutations
   const initializeWallets = useMutation(walletApi.initializeUserWallets);
-  
+
   // Get the Convex user ID from Clerk user ID
   const userQuery = useQuery(
-    api.users.getUserByClerkId, 
-    user?.id ? { clerkId: user.id } : "skip"
+    api.users.getUserByClerkId,
+    user?.id ? { clerkId: user.id } : "skip",
   );
 
   // Update convexUserId when user data is loaded
@@ -157,42 +157,42 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
       setConvexUserId(userQuery._id);
     }
   }, [userQuery]);
-  
+
   // Check if wallets need to be initialized
   const needsWalletInitialization = useQuery(
-    walletApi.needsWalletInitialization, 
-    convexUserId ? { userId: convexUserId } : "skip"
+    walletApi.needsWalletInitialization,
+    convexUserId ? { userId: convexUserId } : "skip",
   );
-  
+
   // Initialize wallets if needed
-  useEffect(() => {
-    const initializeUserWallets = async () => {
-      if (!convexUserId || needsWalletInitialization === false) return;
-      
-      try {
-        await initializeWallets({
-          userId: convexUserId,
-          clerkId: user?.id || '',
-          currencies: ["EGP", "USD", "EUR"],
-          initialBalances: { EGP: 0, USD: 0, EUR: 0 },
-          idempotencyKey: `init-${convexUserId}-${Date.now()}`
-        });
-      } catch (error) {
-        console.error("Failed to initialize wallets:", error);
-        showToast("Failed to initialize your wallet. Please try again.", "error");
-      }
-    };
-    
-    if (needsWalletInitialization === true) {
-      initializeUserWallets();
+  const initializeUserWallets = useCallback(async () => {
+    if (!convexUserId || !user?.id) return;
+
+    try {
+      await initializeWallets({
+        userId: convexUserId,
+        clerkId: user.id,
+        currencies: ["EGP", "USD", "EUR"],
+        initialBalances: { EGP: 0, USD: 0, EUR: 0 },
+        idempotencyKey: `init-${convexUserId}-${Date.now()}`,
+      });
+    } catch (error) {
+      console.error("Failed to initialize wallets:", error);
+      showToast("Failed to initialize your wallet. Please try again.", "error");
     }
-  }, [convexUserId, needsWalletInitialization, initializeWallets, user?.id, showToast]);
-  
+  }, [convexUserId, user?.id, initializeWallets, showToast]);
+
+  useEffect(() => {
+    if (needsWalletInitialization === true) {
+      void initializeUserWallets();
+    }
+  }, [needsWalletInitialization, initializeUserWallets]);
+
   // Determine the user ID to query with proper typing
   const targetUserId = useMemo((): Id<"users"> | null => {
     // If userId is explicitly provided, use it (must be a valid Convex user ID)
     if (userId) return userId;
-    
+
     // Otherwise use the resolved Convex user ID from Clerk user
     return convexUserId;
   }, [userId, convexUserId]);
@@ -200,7 +200,7 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
   // Query balances using Convex real-time subscription
   const balancesData = useQuery(
     api.finance.getBalancesForUser,
-    targetUserId ? { userId: targetUserId } : "skip"
+    targetUserId ? { userId: targetUserId } : "skip",
   );
 
   // Memoized balance computations
@@ -211,7 +211,9 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
 
   // Loading state - explicitly convert to boolean to ensure type safety
   const isLoading = useMemo(() => {
-    return Boolean(!isUserLoaded || (targetUserId && balancesData === undefined));
+    return Boolean(
+      !isUserLoaded || (targetUserId && balancesData === undefined),
+    );
   }, [isUserLoaded, targetUserId, balancesData]);
 
   // Error handling
@@ -223,18 +225,24 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
   }, []);
 
   // Format balance for specific currency
-  const formatted = useCallback((currency: Currency): string => {
-    const balance = balances.find(b => b.currency === currency);
-    if (!balance) return "0.00";
-    
-    return formatAmount(balance.balance, currency, { showSymbol: false });
-  }, [balances]);
+  const formatted = useCallback(
+    (currency: Currency): string => {
+      const balance = balances.find((b) => b.currency === currency);
+      if (!balance) return "0.00";
+
+      return formatAmount(balance.balance, currency, { showSymbol: false });
+    },
+    [balances],
+  );
 
   // Get raw balance for specific currency
-  const getBalance = useCallback((currency: Currency): number => {
-    const balance = balances.find(b => b.currency === currency);
-    return balance ? balance.balance : 0;
-  }, [balances]);
+  const getBalance = useCallback(
+    (currency: Currency): number => {
+      const balance = balances.find((b) => b.currency === currency);
+      return balance ? balance.balance : 0;
+    },
+    [balances],
+  );
 
   // Refresh function (Convex handles this automatically, but we provide for consistency)
   const refresh = useCallback(() => {
@@ -243,42 +251,53 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
   }, []);
 
   // Get formatted balance with symbol
-  const getFormattedWithSymbol = useCallback((currency: Currency): string => {
-    const balance = balances.find(b => b.currency === currency);
-    if (!balance) return `${CURRENCY_CONFIGS[currency].symbol}0.00`;
-    
-    return formatAmount(balance.balance, currency, { showSymbol: true });
-  }, [balances]);
+  const getFormattedWithSymbol = useCallback(
+    (currency: Currency): string => {
+      const balance = balances.find((b) => b.currency === currency);
+      if (!balance) return `${CURRENCY_CONFIGS[currency].symbol}0.00`;
+
+      return formatAmount(balance.balance, currency, { showSymbol: true });
+    },
+    [balances],
+  );
 
   // Get all balances formatted
   const getAllFormatted = useCallback((): FormattedBalance[] => {
-    return balances.map(balance => getFormattedBalance(balance, { showSymbol: true }));
+    return balances.map((balance) =>
+      getFormattedBalance(balance, { showSymbol: true }),
+    );
   }, [balances]);
 
   // Get primary balance (first active balance or EGP default)
   const getPrimaryBalance = useCallback((): WalletBalance | null => {
     if (balances.length === 0) return null;
-    
+
     // Try to find EGP balance first
-    const egpBalance = balances.find(b => b.currency === "EGP");
+    const egpBalance = balances.find((b) => b.currency === "EGP");
     if (egpBalance) return egpBalance;
-    
+
     // Return first available balance or null if no balances exist
-    return balances[0] || null;
+    return balances[0] ?? null;
   }, [balances]);
 
   // Check if user has sufficient balance for a transaction
-  const hasSufficientBalance = useCallback((currency: Currency, amount: number): boolean => {
-    const balance = getBalance(currency);
-    return balance >= amount;
-  }, [getBalance]);
+  const hasSufficientBalance = useCallback(
+    (currency: Currency, amount: number): boolean => {
+      const balance = getBalance(currency);
+      return balance >= amount;
+    },
+    [getBalance],
+  );
 
   // Get total balance in a specific currency (if conversion rates were available)
-  const getTotalInCurrency = useCallback((targetCurrency: Currency): number => {
-    // For now, just return the balance in the target currency
-    // In a real implementation, you'd apply conversion rates
-    return getBalance(targetCurrency);
-  }, [getBalance]);
+  const getTotalInCurrency = useCallback(
+    (targetCurrency: Currency): number => {
+      // For now, just return the balance in the target currency
+      // In a real implementation, you'd apply conversion rates
+      return getBalance(targetCurrency);
+    },
+    [getBalance],
+  );
 
   return {
     balances,
@@ -299,25 +318,32 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
 /**
  * Hook for specific currency balance
  * Optimized for single currency use cases
- * 
+ *
  * @param currency - The currency to get balance for
  * @param userId - Optional Convex user ID (Id<"users">)
  */
-export function useCurrencyBalance(
-  currency: Currency, 
-  userId?: Id<"users">
-) {
-  const { balances, isLoading, error, getBalance, formatted, getFormattedWithSymbol } = useBalances(userId);
-  
+export function useCurrencyBalance(currency: Currency, userId?: Id<"users">) {
+  const {
+    balances,
+    isLoading,
+    error,
+    getBalance,
+    formatted,
+    getFormattedWithSymbol,
+  } = useBalances(userId);
+
   const balance = useMemo(() => {
-    return balances.find(b => b.currency === currency) || null;
+    return balances.find((b) => b.currency === currency) ?? null;
   }, [balances, currency]);
 
   const amount = useMemo(() => getBalance(currency), [getBalance, currency]);
-  const formattedAmount = useMemo(() => formatted(currency), [formatted, currency]);
+  const formattedAmount = useMemo(
+    () => formatted(currency),
+    [formatted, currency],
+  );
   const formattedWithSymbol = useMemo(
-    () => getFormattedWithSymbol(currency), 
-    [getFormattedWithSymbol, currency]
+    () => getFormattedWithSymbol(currency),
+    [getFormattedWithSymbol, currency],
   );
 
   return {
@@ -336,13 +362,20 @@ export function useCurrencyBalance(
  * Provides formatting functions without querying balances
  */
 export function useBalanceFormatter() {
-  const formatBalance = useCallback((amount: number, currency: Currency, options?: {
-    showSymbol?: boolean;
-    showCode?: boolean;
-    compact?: boolean;
-  }) => {
-    return formatAmount(amount, currency, options);
-  }, []);
+  const formatBalance = useCallback(
+    (
+      amount: number,
+      currency: Currency,
+      options?: {
+        showSymbol?: boolean;
+        showCode?: boolean;
+        compact?: boolean;
+      },
+    ) => {
+      return formatAmount(amount, currency, options);
+    },
+    [],
+  );
 
   const getCurrencySymbol = useCallback((currency: Currency) => {
     return CURRENCY_CONFIGS[currency].symbol;
@@ -352,17 +385,20 @@ export function useBalanceFormatter() {
     return CURRENCY_CONFIGS[currency].name;
   }, []);
 
-  const parseAmount = useCallback((formattedAmount: string, currency: Currency): number => {
-    // Remove currency symbols and parse
-    const cleanAmount = formattedAmount.replace(/[^0-9.-]/g, '');
-    const parsed = parseFloat(cleanAmount);
-    
-    if (isNaN(parsed)) return 0;
-    
-    // Convert to smallest unit
-    const config = CURRENCY_CONFIGS[currency];
-    return Math.round(parsed * Math.pow(10, config.decimals));
-  }, []);
+  const parseAmount = useCallback(
+    (formattedAmount: string, currency: Currency): number => {
+      // Remove currency symbols and parse
+      const cleanAmount = formattedAmount.replace(/[^0-9.-]/g, "");
+      const parsed = parseFloat(cleanAmount);
+
+      if (isNaN(parsed)) return 0;
+
+      // Convert to smallest unit
+      const config = CURRENCY_CONFIGS[currency];
+      return Math.round(parsed * Math.pow(10, config.decimals));
+    },
+    [],
+  );
 
   return {
     formatBalance,
@@ -378,58 +414,71 @@ export function useBalanceFormatter() {
  * Provides validation utilities for balance operations
  */
 export function useBalanceValidation() {
-  const validateAmount = useCallback((amount: number, currency: Currency): {
-    valid: boolean;
-    errors: string[];
-  } => {
-    const errors: string[] = [];
-    
-    if (!Number.isInteger(amount)) {
-      errors.push("Amount must be an integer (smallest currency unit)");
-    }
-    
-    if (amount <= 0) {
-      errors.push("Amount must be positive");
-    }
-    
-    if (amount > 1000000000) { // 10M in smallest unit
-      errors.push("Amount exceeds maximum limit");
-    }
-    
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  }, []);
+  const validateAmount = useCallback(
+    (
+      amount: number,
+      currency: Currency,
+    ): {
+      valid: boolean;
+      errors: string[];
+    } => {
+      const errors: string[] = [];
 
-  const validateCurrency = useCallback((currency: string): currency is Currency => {
-    return ["EGP", "USD", "EUR"].includes(currency);
-  }, []);
+      if (!Number.isInteger(amount)) {
+        errors.push("Amount must be an integer (smallest currency unit)");
+      }
 
-  const validateTransfer = useCallback((
-    fromBalance: number,
-    transferAmount: number,
-    currency: Currency
-  ): {
-    valid: boolean;
-    errors: string[];
-  } => {
-    const errors: string[] = [];
-    
-    const amountValidation = validateAmount(transferAmount, currency);
-    if (!amountValidation.valid) {
-      errors.push(...amountValidation.errors);
-    }
-    
-    if (fromBalance < transferAmount) {
-      errors.push(`Insufficient ${currency} balance`);
-    }
-    
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  }, [validateAmount]);
+      if (amount <= 0) {
+        errors.push("Amount must be positive");
+      }
+
+      if (amount > 1000000000) {
+        // 10M in smallest unit
+        errors.push("Amount exceeds maximum limit");
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+    },
+    [],
+  );
+
+  const validateCurrency = useCallback(
+    (currency: string): currency is Currency => {
+      return ["EGP", "USD", "EUR"].includes(currency);
+    },
+    [],
+  );
+
+  const validateTransfer = useCallback(
+    (
+      fromBalance: number,
+      transferAmount: number,
+      currency: Currency,
+    ): {
+      valid: boolean;
+      errors: string[];
+    } => {
+      const errors: string[] = [];
+
+      const amountValidation = validateAmount(transferAmount, currency);
+      if (!amountValidation.valid) {
+        errors.push(...amountValidation.errors);
+      }
+
+      if (fromBalance < transferAmount) {
+        errors.push(`Insufficient ${currency} balance`);
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+      };
+    },
+    [validateAmount],
+  );
 
   return {
     validateAmount,

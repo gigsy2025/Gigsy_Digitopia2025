@@ -19,7 +19,7 @@ type Currency = "EGP" | "USD" | "EUR";
 export type { Currency };
 
 // --- Transaction Types ---
-export type TransactionType = 
+export type TransactionType =
   | "DEPOSIT"
   | "ESCROW_HOLD"
   | "ESCROW_RELEASE"
@@ -256,7 +256,10 @@ export class FinanceError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: Record<
+      string,
+      string | number | boolean | object | null | undefined
+    >,
   ) {
     super(message);
     this.name = "FinanceError";
@@ -264,36 +267,27 @@ export class FinanceError extends Error {
 }
 
 export class InsufficientBalanceError extends FinanceError {
-  constructor(
-    currency: Currency,
-    required: number,
-    available: number
-  ) {
+  constructor(currency: Currency, required: number, available: number) {
     super(
       `Insufficient ${currency} balance: required ${required}, available ${available}`,
       "INSUFFICIENT_BALANCE",
-      { currency, required, available }
+      { currency, required, available },
     );
   }
 }
 
 export class InvalidAmountError extends FinanceError {
   constructor(amount: number, reason: string) {
-    super(
-      `Invalid amount ${amount}: ${reason}`,
-      "INVALID_AMOUNT",
-      { amount, reason }
-    );
+    super(`Invalid amount ${amount}: ${reason}`, "INVALID_AMOUNT", {
+      amount,
+      reason,
+    });
   }
 }
 
 export class WalletNotFoundError extends FinanceError {
   constructor(walletId: string) {
-    super(
-      `Wallet not found: ${walletId}`,
-      "WALLET_NOT_FOUND",
-      { walletId }
-    );
+    super(`Wallet not found: ${walletId}`, "WALLET_NOT_FOUND", { walletId });
   }
 }
 
@@ -302,7 +296,7 @@ export class DuplicateTransactionError extends FinanceError {
     super(
       `Transaction already processed: ${idempotencyKey}`,
       "DUPLICATE_TRANSACTION",
-      { idempotencyKey }
+      { idempotencyKey },
     );
   }
 }
@@ -324,7 +318,10 @@ export interface AuditTrail {
   userId: string;
   action: string;
   timestamp: number;
-  details: any;
+  details: Record<
+    string,
+    string | number | boolean | object | null | undefined
+  >;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -347,9 +344,7 @@ export interface SystemHealth {
 }
 
 // --- Export all types ---
-export type {
-  Id,
-};
+export type { Id };
 
 // --- Constants ---
 export const SUPPORTED_CURRENCIES: Currency[] = ["EGP", "USD", "EUR"];

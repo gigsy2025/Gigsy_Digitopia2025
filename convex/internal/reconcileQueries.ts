@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 
 export const getWalletById = internalQuery({
-  args: { walletId: v.id('wallets') },
+  args: { walletId: v.id("wallets") },
   handler: async (ctx, { walletId }) => {
     return await ctx.db.get(walletId);
   },
@@ -17,7 +17,7 @@ export const getAllWallets = internalQuery({
 });
 
 export const getWalletBalanceRecord = internalQuery({
-  args: { walletId: v.id('wallets') },
+  args: { walletId: v.id("wallets") },
   handler: async (ctx, { walletId }) => {
     return await ctx.db
       .query("walletBalances")

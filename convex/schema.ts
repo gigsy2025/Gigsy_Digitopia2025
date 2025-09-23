@@ -11,14 +11,14 @@ const TransactionType = v.union(
   v.literal("ESCROW_RELEASE"),
   v.literal("PAYOUT"),
   v.literal("FEE"),
-  v.literal("REFUND")
+  v.literal("REFUND"),
 );
 
 const TransactionStatus = v.union(
   v.literal("PENDING"),
   v.literal("COMPLETED"),
   v.literal("FAILED"),
-  v.literal("CANCELLED")
+  v.literal("CANCELLED"),
 );
 
 const schema = defineSchema({
@@ -782,7 +782,7 @@ const schema = defineSchema({
     relatedEntityType: v.optional(v.string()),
     relatedEntityId: v.optional(v.string()),
     createdAt: v.number(),
-    createdBy: v.string()
+    createdBy: v.string(),
   })
     .index("by_wallet", ["walletId"])
     .index("by_related", ["relatedEntityType", "relatedEntityId"])
@@ -794,8 +794,10 @@ const schema = defineSchema({
     currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
     balance: v.number(), // integer smallest unit
     lastTransactionAt: v.optional(v.number()),
-    lastUpdated: v.number()
-  }).index("by_wallet", ["walletId"]).index("by_user_currency", ["walletId", "currency"]),
+    lastUpdated: v.number(),
+  })
+    .index("by_wallet", ["walletId"])
+    .index("by_user_currency", ["walletId", "currency"]),
 
   // --- Gamification Service Tables ---
 

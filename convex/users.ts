@@ -18,13 +18,15 @@ import { internal } from "./_generated/api";
 // Define the type for the wallet initialization function reference
 type InitializeWalletsFunction = {
   _name: "internal/walletInit:initializeUserWallets";
-  _args: [{
-    userId: Id<"users">;
-    clerkId: string;
-    currencies: ("EGP" | "USD" | "EUR")[];
-    initialBalances: Record<string, number>;
-    idempotencyKey: string;
-  }];
+  _args: [
+    {
+      userId: Id<"users">;
+      clerkId: string;
+      currencies: ("EGP" | "USD" | "EUR")[];
+      initialBalances: Record<string, number>;
+      idempotencyKey: string;
+    },
+  ];
 };
 
 // --- Constants ---
@@ -229,7 +231,7 @@ export const initializeUser = mutation({
 
       // Create the user document without initialBalance and initialCurrency
       const { initialBalance, initialCurrency, ...userData } = validatedData;
-      
+
       const userId = await ctx.db.insert("users", {
         ...userData,
         balances: initialBalances,
@@ -249,22 +251,32 @@ export const initializeUser = mutation({
         const walletInitArgs = {
           userId,
           clerkId: validatedData.clerkId,
-          currencies: initialBalances.map(b => b.currency as 'EGP' | 'USD' | 'EUR'),
-          initialBalances: initialBalances.reduce<Record<string, number>>((acc, balance) => {
-            acc[balance.currency] = balance.amount;
-            return acc;
-          }, {} as Record<'EGP' | 'USD' | 'EUR', number>),
+          currencies: initialBalances.map(
+            (b) => b.currency as "EGP" | "USD" | "EUR",
+          ),
+          initialBalances: initialBalances.reduce<Record<string, number>>(
+            (acc, balance) => {
+              acc[balance.currency] = balance.amount;
+              return acc;
+            },
+            {} as Record<"EGP" | "USD" | "EUR", number>,
+          ),
           idempotencyKey: `user-init-${validatedData.clerkId}-${Date.now()}`,
         };
 
         // Create the function reference with proper typing
         const walletInitRef: InitializeWalletsFunction = {
           _name: "internal/walletInit:initializeUserWallets",
-          _args: [walletInitArgs]
+          _args: [walletInitArgs],
         };
 
         // Schedule the function to run after the current transaction
-        await ctx.scheduler.runAfter(0, internal.internal.walletInit.initializeUserWallets,walletInitArgs)
+        await ctx.scheduler
+          .runAfter(
+            0,
+            internal.internal.walletInit.initializeUserWallets,
+            walletInitArgs,
+          )
           .catch((error) => {
             console.error("Failed to schedule wallet initialization:", error);
             // Continue even if scheduling fails - it can be retried
@@ -276,7 +288,7 @@ export const initializeUser = mutation({
         userId,
         success: true,
         message: "User created successfully",
-        balances: initialBalances.map(balance => ({
+        balances: initialBalances.map((balance) => ({
           currency: balance.currency,
           amount: balance.amount,
           isActive: balance.isActive,

@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useUser } from '@clerk/nextjs';
-import { useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
-import BalanceBadge from './BalanceBadge';
-import { Skeleton } from '../ui/skeleton';
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import BalanceBadge from "./BalanceBadge";
+import { Skeleton } from "../ui/skeleton";
 
 export function ClientBalanceBadge() {
   const { user, isLoaded: isUserLoaded } = useUser();
-  
+
   // Always call the query hook, but conditionally pass the clerkId
   const userQuery = useQuery(
-    api.users.getUserByClerkId, 
-    isUserLoaded && user?.id ? { clerkId: user.id } : "skip"
+    api.users.getUserByClerkId,
+    isUserLoaded && user?.id ? { clerkId: user.id } : "skip",
   );
 
   // Show skeleton while loading

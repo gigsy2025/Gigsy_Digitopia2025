@@ -12,13 +12,16 @@ declare module "convex/server" {
           walletId: Id<"wallets">;
           amount: number;
           currency: string;
-          type: 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER';
+          type: "DEPOSIT" | "WITHDRAWAL" | "TRANSFER";
           description?: string;
           idempotencyKey?: string;
           relatedEntityType?: string;
           relatedEntityId?: string;
         },
-        { status: 'ok' | 'already_processed'; transactionId: Id<"transactions"> }
+        {
+          status: "ok" | "already_processed";
+          transactionId: Id<"transactions">;
+        }
       >;
       updateWalletBalance: FunctionReference<
         "mutation",

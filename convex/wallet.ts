@@ -35,11 +35,7 @@ export const getMyWallets = query({
 
 export const createWallet = mutation({
   args: {
-    currency: v.union(
-      v.literal("EGP"),
-      v.literal("USD"),
-      v.literal("EUR")
-    ),
+    currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -60,7 +56,7 @@ export const createWallet = mutation({
     const existing = await ctx.db
       .query("wallets")
       .withIndex("by_user_currency", (q) =>
-        q.eq("userId", user._id).eq("currency", args.currency)
+        q.eq("userId", user._id).eq("currency", args.currency),
       )
       .first();
 
@@ -93,7 +89,7 @@ export const createTransaction = internalMutation({
       v.literal("ESCROW_RELEASE"),
       v.literal("PAYOUT"),
       v.literal("FEE"),
-      v.literal("REFUND")
+      v.literal("REFUND"),
     ),
     description: v.optional(v.string()),
     metadata: v.optional(v.any()),
@@ -109,7 +105,7 @@ export const createTransaction = internalMutation({
       const existing = await ctx.db
         .query("transactions")
         .withIndex("by_idempotency_key", (q) =>
-          q.eq("idempotencyKey", idempotencyKey)
+          q.eq("idempotencyKey", idempotencyKey),
         )
         .first();
 

@@ -27,7 +27,10 @@ export const needsWalletInitialization = query({
   args: {
     userId: v.id("users"),
   },
-  handler: async (ctx, args: NeedsWalletInitializationArgs): Promise<boolean> => {
+  handler: async (
+    ctx,
+    args: NeedsWalletInitializationArgs,
+  ): Promise<boolean> => {
     // Check if the user has any wallets
     const wallets = await ctx.db
       .query("wallets")
@@ -43,32 +46,39 @@ export const initializeUserWallets = mutation({
   args: {
     userId: v.id("users"),
     clerkId: v.string(),
-    currencies: v.optional(v.array(v.union(
-      v.literal("EGP"),
-      v.literal("USD"),
-      v.literal("EUR")
-    ))),
-    initialBalances: v.optional(v.object({
-      EGP: v.optional(v.number()),
-      USD: v.optional(v.number()),
-      EUR: v.optional(v.number()),
-    })),
+    currencies: v.optional(
+      v.array(v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR"))),
+    ),
+    initialBalances: v.optional(
+      v.object({
+        EGP: v.optional(v.number()),
+        USD: v.optional(v.number()),
+        EUR: v.optional(v.number()),
+      }),
+    ),
     idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args: InitializeUserWalletsArgs): Promise<void> => {
-    const { userId, currencies = DEFAULT_CURRENCIES, initialBalances = {} } = args;
-    
+    const {
+      userId,
+      currencies = DEFAULT_CURRENCIES,
+      initialBalances = {},
+    } = args;
+
     // Create a wallet for each currency
     for (const currency of currencies) {
-      const balance = initialBalances[currency as keyof typeof initialBalances] || 0;
-      
+      const balance =
+        initialBalances[currency as keyof typeof initialBalances] || 0;
+
       await ctx.db.insert("wallets", {
         userId,
         currency,
         balance,
         isActive: true,
         updatedAt: Date.now(),
-        ...(args.idempotencyKey && { metadata: { idempotencyKey: args.idempotencyKey } })
+        ...(args.idempotencyKey && {
+          metadata: { idempotencyKey: args.idempotencyKey },
+        }),
       });
     }
   },
