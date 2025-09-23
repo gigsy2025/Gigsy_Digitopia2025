@@ -240,10 +240,11 @@ export const initializeUser = mutation({
           _args: [{
             userId,
             clerkId: validatedData.clerkId,
+            currencies: initialBalances.map(b => b.currency as 'EGP' | 'USD' | 'EUR'),
             initialBalances: initialBalances.reduce<Record<string, number>>((acc, balance) => {
               acc[balance.currency] = balance.amount;
               return acc;
-            }, {}),
+            }, {} as Record<'EGP' | 'USD' | 'EUR', number>),
             idempotencyKey: `user-init-${validatedData.clerkId}-${Date.now()}`,
           }],
           _scheduler: "default" as const,
