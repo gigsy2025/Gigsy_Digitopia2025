@@ -3,6 +3,24 @@ import { v } from "convex/values";
 
 const Currency = v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR"));
 
+const TransactionType = v.union(
+  v.literal("DEPOSIT"),
+  v.literal("WITHDRAWAL"),
+  v.literal("TRANSFER"),
+  v.literal("ESCROW_HOLD"),
+  v.literal("ESCROW_RELEASE"),
+  v.literal("PAYOUT"),
+  v.literal("FEE"),
+  v.literal("REFUND")
+);
+
+const TransactionStatus = v.union(
+  v.literal("PENDING"),
+  v.literal("COMPLETED"),
+  v.literal("FAILED"),
+  v.literal("CANCELLED")
+);
+
 const schema = defineSchema({
   users: defineTable({
     // --- Core Identity & Authentication ---
@@ -741,41 +759,34 @@ const schema = defineSchema({
   // --- Wallets: one per user per currency (meta only) ---
   wallets: defineTable({
     userId: v.id("users"),
-    currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
-    createdAt: v.number(),
-    createdBy: v.string(),
+    currency: Currency,
+    balance: v.number(), // Stored in smallest unit (e.g., cents)
+    isActive: v.boolean(),
+    metadata: v.optional(v.any()),
     updatedAt: v.number(),
-  }).index("by_user_currency", ["userId", "currency"]).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_currency", ["userId", "currency"]),
 
   // --- Immutable ledger (append-only) ---
   transactions: defineTable({
     walletId: v.id("wallets"),
     amount: v.number(), // integer smallest unit (positive for credit, negative for debit)
     currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
-    type: v.union(
-      v.literal("DEPOSIT"),
-      v.literal("ESCROW_HOLD"),
-      v.literal("ESCROW_RELEASE"),
-      v.literal("PAYOUT"),
-      v.literal("FEE"),
-      v.literal("WITHDRAWAL"),
-      v.literal("REFUND"),
-      v.literal("TRANSFER") // internal transfer marker
-    ),
-    status: v.union(
-      v.literal("PENDING"),
-      v.literal("COMPLETED"),
-      v.literal("FAILED"),
-      v.literal("CANCELLED")
-    ),
+    type: TransactionType,
+    status: TransactionStatus,
     description: v.optional(v.string()),
+    metadata: v.optional(v.any()),
     // Idempotency & reconciliation fields
     idempotencyKey: v.optional(v.string()), // platform-provided idempotency key
     relatedEntityType: v.optional(v.string()),
     relatedEntityId: v.optional(v.string()),
     createdAt: v.number(),
     createdBy: v.string()
-  }).index("by_wallet", ["walletId"]).index("by_related", ["relatedEntityType", "relatedEntityId"]),
+  })
+    .index("by_wallet", ["walletId"])
+    .index("by_related", ["relatedEntityType", "relatedEntityId"])
+    .index("by_idempotency_key", ["idempotencyKey"]),
 
   // --- Cached materialized balances for fast read & UI subscriptions ---
   walletBalances: defineTable({

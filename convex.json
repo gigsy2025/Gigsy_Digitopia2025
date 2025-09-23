@@ -1,3 +1,6 @@
 {
-  "plugins": []
+  "plugins": [],
+  "internal": {
+    "walletInit": "./internal/walletInit"
+  }
 }

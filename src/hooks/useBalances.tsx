@@ -17,16 +17,20 @@
  */
 
 import { useMemo, useCallback, useEffect, useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
-import { Id } from "../../convex/_generated/dataModel";
+import type { Id } from "../../convex/_generated/dataModel";
 import type { 
   Currency, 
   WalletBalance, 
   UseBalancesResult,
   FormattedBalance
 } from "../types/finance";
+import { useToast } from "@/components/ui/use-toast";
+
+// Use the public API endpoints directly
+const walletApi = api.walletApi;
 
 // Import currency configs
 const CURRENCY_CONFIGS = {
@@ -136,6 +140,10 @@ function getFormattedBalance(
 export function useBalances(userId?: Id<"users">): UseBalancesResult {
   const { user, isLoaded: isUserLoaded } = useUser();
   const [convexUserId, setConvexUserId] = useState<Id<"users"> | null>(null);
+  const { showToast } = useToast();
+  
+  // Mutations
+  const initializeWallets = useMutation(walletApi.initializeUserWallets);
   
   // Get the Convex user ID from Clerk user ID
   const userQuery = useQuery(
@@ -149,6 +157,36 @@ export function useBalances(userId?: Id<"users">): UseBalancesResult {
       setConvexUserId(userQuery._id);
     }
   }, [userQuery]);
+  
+  // Check if wallets need to be initialized
+  const needsWalletInitialization = useQuery(
+    walletApi.needsWalletInitialization, 
+    convexUserId ? { userId: convexUserId } : "skip"
+  );
+  
+  // Initialize wallets if needed
+  useEffect(() => {
+    const initializeUserWallets = async () => {
+      if (!convexUserId || needsWalletInitialization === false) return;
+      
+      try {
+        await initializeWallets({
+          userId: convexUserId,
+          clerkId: user?.id || '',
+          currencies: ["EGP", "USD", "EUR"],
+          initialBalances: { EGP: 0, USD: 0, EUR: 0 },
+          idempotencyKey: `init-${convexUserId}-${Date.now()}`
+        });
+      } catch (error) {
+        console.error("Failed to initialize wallets:", error);
+        showToast("Failed to initialize your wallet. Please try again.", "error");
+      }
+    };
+    
+    if (needsWalletInitialization === true) {
+      initializeUserWallets();
+    }
+  }, [convexUserId, needsWalletInitialization, initializeWallets, user?.id, showToast]);
   
   // Determine the user ID to query with proper typing
   const targetUserId = useMemo((): Id<"users"> | null => {

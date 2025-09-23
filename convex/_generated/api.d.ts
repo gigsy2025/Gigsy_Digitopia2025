@@ -23,6 +23,7 @@ import type * as internal_healthQueries from "../internal/healthQueries.js";
 import type * as internal_index from "../internal/index.js";
 import type * as internal_reconcileQueries from "../internal/reconcileQueries.js";
 import type * as internal_walletBalances from "../internal/walletBalances.js";
+import type * as internal_walletInit from "../internal/walletInit.js";
 import type * as internal_walletMutations from "../internal/walletMutations.js";
 import type * as internal_walletTransactions from "../internal/walletTransactions.js";
 import type * as lessons from "../lessons.js";
@@ -33,6 +34,8 @@ import type * as schema_fixed from "../schema_fixed.js";
 import type * as skills from "../skills.js";
 import type * as skillsTest from "../skillsTest.js";
 import type * as users from "../users.js";
+import type * as wallet from "../wallet.js";
+import type * as walletApi from "../walletApi.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "internal/index": typeof internal_index;
   "internal/reconcileQueries": typeof internal_reconcileQueries;
   "internal/walletBalances": typeof internal_walletBalances;
+  "internal/walletInit": typeof internal_walletInit;
   "internal/walletMutations": typeof internal_walletMutations;
   "internal/walletTransactions": typeof internal_walletTransactions;
   lessons: typeof lessons;
@@ -63,6 +67,8 @@ declare const fullApi: ApiFromModules<{
   skills: typeof skills;
   skillsTest: typeof skillsTest;
   users: typeof users;
+  wallet: typeof wallet;
+  walletApi: typeof walletApi;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

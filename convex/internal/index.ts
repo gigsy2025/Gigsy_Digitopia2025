@@ -4,28 +4,29 @@ import { getWalletBalance } from "./walletBalances";
 import { updateWalletBalance, createTransaction } from "./walletMutations";
 import { getWalletById, getAllWallets, getWalletBalanceRecord } from "./reconcileQueries";
 import { getHealthCheckCounts } from "./healthQueries";
+import { initializeUserWallets, needsWalletInitialization } from "./walletInit";
 
 // Export the internal queries to be registered with Convex
-export const walletBalances = {
+const walletBalances = {
   getWalletBalance,
 } as const;
 
-export const walletTransactions = {
+const walletTransactions = {
   getWalletTransactions,
 } as const;
 
-export const walletMutations = {
+const walletMutations = {
   updateWalletBalance,
   createTransaction,
 } as const;
 
-export const reconcileQueries = {
+const reconcileQueries = {
   getWalletById,
   getAllWallets,
   getWalletBalanceRecord,
 } as const;
 
-export const healthQueries = {
+const healthQueries = {
   getHealthCheckCounts,
 } as const;
 
@@ -37,4 +38,8 @@ export const internal = {
   walletMutations,
   reconcileQueries,
   healthQueries,
+  walletInit: {
+    initializeUserWallets,
+    needsWalletInitialization,
+  },
 } as const;

@@ -14,6 +14,7 @@ import { mutation, query, internalMutation } from "./_generated/server";
 import { ConvexError } from "convex/values";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 // --- Constants ---
 const DEFAULT_CURRENCIES = ["EGP", "USD", "EUR"] as const;
@@ -205,75 +206,67 @@ export const initializeUser = mutation({
         .first();
 
       if (existingUserByClerkId) {
-        throw new ConvexError(
-          `User with Clerk ID ${validatedData.clerkId} already exists`,
-        );
+        throw new ConvexError("User with this Clerk ID already exists");
       }
 
-      const existingUserByEmail = await ctx.db
-        .query("users")
-        .withIndex("by_email", (q) => q.eq("email", validatedData.email))
-        .first();
-
-      if (existingUserByEmail) {
-        throw new ConvexError(
-          `User with email ${validatedData.email} already exists`,
-        );
-      }
-
-      // Create initial balances and profile
+      // Create initial balances
       const initialBalances = createInitialBalances(
         validatedData.initialCurrency,
         validatedData.initialBalance,
       );
       const defaultProfile = createDefaultProfile();
 
-      const timestamp = Date.now();
-
-      // Create user record with atomic transaction
+      // Create the user document without initialBalance and initialCurrency
+      const { initialBalance, initialCurrency, ...userData } = validatedData;
+      
       const userId = await ctx.db.insert("users", {
-        // Core identity
-        clerkId: validatedData.clerkId,
-        email: validatedData.email,
-        name: validatedData.name,
-        avatarUrl: validatedData.avatarUrl,
-
-        // Authorization
-        roles: validatedData.roles,
-
-        // Multi-currency balances
+        ...userData,
         balances: initialBalances,
-
-        // Profile
         profile: defaultProfile,
-
         // System fields
-        updatedAt: timestamp,
-        createdBy: validatedData.clerkId,
+        updatedAt: Date.now(),
+        createdBy: `clerk:${validatedData.clerkId}`,
         deletedAt: undefined,
-
         // Vector embeddings (will be generated async)
         embedding: undefined,
         embeddingUpdatedAt: undefined,
       });
 
-      // Log successful user creation
-      console.log(`User created successfully: ${userId}`, {
-        clerkId: validatedData.clerkId,
-        email: validatedData.email,
-        roles: validatedData.roles,
-        initialCurrency: validatedData.initialCurrency,
-        balanceCount: initialBalances.length,
-      });
+      // Initialize user wallets
+      if (initialBalances.length > 0) {
+        // Create a scheduled function reference
+        const walletInitRef = {
+          _name: "internal/walletInit:initializeUserWallets",
+          _args: [{
+            userId,
+            clerkId: validatedData.clerkId,
+            initialBalances: initialBalances.reduce<Record<string, number>>((acc, balance) => {
+              acc[balance.currency] = balance.amount;
+              return acc;
+            }, {}),
+            idempotencyKey: `user-init-${validatedData.clerkId}-${Date.now()}`,
+          }],
+          _scheduler: "default" as const,
+          _defer: false,
+        } as const;
 
+        // Schedule the function to run after the current transaction
+        await ctx.scheduler.runAfter(0, walletInitRef as any)
+          .catch((error) => {
+            console.error("Failed to schedule wallet initialization:", error);
+            // Continue even if scheduling fails - it can be retried
+          });
+      }
+
+      // Format the return value to match the expected type
       return {
         userId,
         success: true,
-        message: "User initialized successfully",
-        balances: initialBalances.map((b) => ({
-          currency: b.currency,
-          amount: b.amount,
-          isActive: b.isActive,
+        message: "User created successfully",
+        balances: initialBalances.map(balance => ({
+          currency: balance.currency,
+          amount: balance.amount,
+          isActive: balance.isActive,
         })),
       };
     } catch (error) {
