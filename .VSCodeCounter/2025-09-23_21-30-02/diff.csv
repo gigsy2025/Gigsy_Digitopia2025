@@ -1,0 +1,53 @@
+"filename", "language", "Markdown", "TypeScript JSX", "TypeScript", "JSON with Comments", "JSON", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\clerk.md", "Markdown", 66, 0, 0, 0, 0, 0, 0, 31, 97
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\convex.md", "Markdown", 175, 0, 0, 0, 0, 0, 0, 18, 193
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\frontend.md", "Markdown", 126, 0, 0, 0, 0, 0, 0, 52, 178
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\gigsy-applications.md", "Markdown", 54, 0, 0, 0, 0, 0, 0, 18, 72
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\gigsy-chat.md", "Markdown", 74, 0, 0, 0, 0, 0, 0, 25, 99
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\gigsy-gigs.md", "Markdown", 55, 0, 0, 0, 0, 0, 0, 20, 75
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\gigsy-payment.md", "Markdown", 59, 0, 0, 0, 0, 0, 0, 21, 80
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\workflows\next-tailwind.md", "Markdown", 63, 0, 0, 0, 0, 0, 0, 15, 78
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex.json", "JSON", 0, 0, 0, 0, 3, 0, 0, 0, 3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts", "TypeScript", 0, 0, 22, 0, 0, 0, 0, 0, 22
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\finance.ts", "TypeScript", 0, 0, 572, 0, 0, 0, 131, 110, 813
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\healthQueries.ts", "TypeScript", 0, 0, 16, 0, 0, 0, 0, 3, 19
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\index.ts", "TypeScript", 0, 0, 36, 0, 0, 0, 3, 7, 46
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\reconcileQueries.ts", "TypeScript", 0, 0, 24, 0, 0, 0, 0, 4, 28
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\walletBalances.ts", "TypeScript", 0, 0, 15, 0, 0, 0, 0, 3, 18
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\walletInit.ts", "TypeScript", 0, 0, 190, 0, 0, 0, 22, 23, 235
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\walletMutations.ts", "TypeScript", 0, 0, 110, 0, 0, 0, 7, 12, 129
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\walletTransactions.ts", "TypeScript", 0, 0, 14, 0, 0, 0, 0, 2, 16
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\reconcile.ts", "TypeScript", 0, 0, 443, 0, 0, 0, 90, 76, 609
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts", "TypeScript", 0, 0, 32, 0, 0, 0, -1, 2, 33
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\types\internal.d.ts", "TypeScript", 0, 0, 33, 0, 0, 0, 0, 2, 35
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\users.ts", "TypeScript", 0, 0, 9, 0, 0, 0, 2, -4, 7
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\wallet.ts", "TypeScript", 0, 0, 138, 0, 0, 0, 9, 23, 170
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\walletApi.ts", "TypeScript", 0, 0, 61, 0, 0, 0, 6, 9, 76
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\FINANCE_OPERATIONS.md", "Markdown", 324, 0, 0, 0, 0, 0, 0, 98, 422
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 0, 0, 4, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 0, 336, 0, 74, 410
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\__tests__\finance.test.ts", "TypeScript", 0, 0, 485, 0, 0, 0, 56, 106, 647
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\[courseId]\modules\[moduleId]\page.tsx", "TypeScript JSX", 0, 6, 0, 0, 0, 0, 0, 0, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\courses\page.tsx", "TypeScript JSX", 0, 8, 0, 0, 0, 0, 0, 1, 9
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\layout.tsx", "TypeScript JSX", 0, 6, 0, 0, 0, 0, 1, 1, 8
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseHero.tsx", "TypeScript JSX", 0, 2, 0, 0, 0, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\CourseHero.test.tsx", "TypeScript JSX", 0, -89, 0, 0, 0, 0, -7, -20, -116
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\ModuleList.test.tsx", "TypeScript JSX", 0, -141, 0, 0, 0, 0, -10, -32, -183
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\__tests__\integration.test.tsx", "TypeScript JSX", 0, -212, 0, 0, 0, 0, -23, -36, -271
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\debug\ProgressDebugPanel.tsx", "TypeScript JSX", 0, 6, 0, 0, 0, 0, 4, 0, 10
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\Comments.tsx", "TypeScript JSX", 0, 5, 0, 0, 0, 0, 0, 1, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonPlayer.stories.tsx", "TypeScript JSX", 0, 8, 0, 0, 0, 0, 6, 0, 14
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonSidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 1, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonViewer.tsx", "TypeScript JSX", 0, 1, 0, 0, 0, 0, 1, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\__tests__\LessonPlayer.test.tsx", "TypeScript JSX", 0, -119, 0, 0, 0, 0, -11, -27, -157
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\BalanceBadge.tsx", "TypeScript JSX", 0, 352, 0, 0, 0, 0, 55, 28, 435
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\ClientBalanceBadge.tsx", "TypeScript JSX", 0, 24, 0, 0, 0, 0, 5, 9, 38
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\ProgressRadial.tsx", "TypeScript JSX", 0, -2, 0, 0, 0, 0, 0, 0, -2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\use-toast.ts", "TypeScript", 0, 0, 33, 0, 0, 0, 5, 11, 49
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\use-mobile.ts", "TypeScript", 0, 0, 2, 0, 0, 0, 2, 5, 9
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useBalances.tsx", "TypeScript JSX", 0, 288, 0, 0, 0, 0, 91, 64, 443
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useOptimizedProgress.ts", "TypeScript", 0, 0, 5, 0, 0, 0, 0, 0, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\format-currency.ts", "TypeScript", 0, 0, 19, 0, 0, 0, 5, 5, 29
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\finance.ts", "TypeScript", 0, 0, 287, 0, 0, 0, 33, 41, 361
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\tsconfig.json", "JSON with Comments", 0, 0, 0, 1, 0, 0, 0, 0, 1
+"Total", "-", 996, 143, 2546, 1, 7, 336, 483, 801, 5313
