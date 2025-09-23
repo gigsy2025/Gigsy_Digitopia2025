@@ -11,10 +11,21 @@
  */
 
 import { mutation, query, internalMutation } from "./_generated/server";
-import { ConvexError } from "convex/values";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+
+// Define the type for the wallet initialization function reference
+type InitializeWalletsFunction = {
+  _name: "internal/walletInit:initializeUserWallets";
+  _args: [{
+    userId: Id<"users">;
+    clerkId: string;
+    currencies: ("EGP" | "USD" | "EUR")[];
+    initialBalances: Record<string, number>;
+    idempotencyKey: string;
+  }];
+};
 
 // --- Constants ---
 const DEFAULT_CURRENCIES = ["EGP", "USD", "EUR"] as const;
@@ -234,25 +245,26 @@ export const initializeUser = mutation({
 
       // Initialize user wallets
       if (initialBalances.length > 0) {
-        // Create a scheduled function reference
-        const walletInitRef = {
+        // Prepare wallet initialization arguments
+        const walletInitArgs = {
+          userId,
+          clerkId: validatedData.clerkId,
+          currencies: initialBalances.map(b => b.currency as 'EGP' | 'USD' | 'EUR'),
+          initialBalances: initialBalances.reduce<Record<string, number>>((acc, balance) => {
+            acc[balance.currency] = balance.amount;
+            return acc;
+          }, {} as Record<'EGP' | 'USD' | 'EUR', number>),
+          idempotencyKey: `user-init-${validatedData.clerkId}-${Date.now()}`,
+        };
+
+        // Create the function reference with proper typing
+        const walletInitRef: InitializeWalletsFunction = {
           _name: "internal/walletInit:initializeUserWallets",
-          _args: [{
-            userId,
-            clerkId: validatedData.clerkId,
-            currencies: initialBalances.map(b => b.currency as 'EGP' | 'USD' | 'EUR'),
-            initialBalances: initialBalances.reduce<Record<string, number>>((acc, balance) => {
-              acc[balance.currency] = balance.amount;
-              return acc;
-            }, {} as Record<'EGP' | 'USD' | 'EUR', number>),
-            idempotencyKey: `user-init-${validatedData.clerkId}-${Date.now()}`,
-          }],
-          _scheduler: "default" as const,
-          _defer: false,
-        } as const;
+          _args: [walletInitArgs]
+        };
 
         // Schedule the function to run after the current transaction
-        await ctx.scheduler.runAfter(0, walletInitRef as any)
+        await ctx.scheduler.runAfter(0, internal.internal.walletInit.initializeUserWallets,walletInitArgs)
           .catch((error) => {
             console.error("Failed to schedule wallet initialization:", error);
             // Continue even if scheduling fails - it can be retried
