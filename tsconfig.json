@@ -37,7 +37,8 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "convex/types/*.d.ts"
   ],
   "exclude": ["node_modules", ".next", "coverage", "src/lib/logging/examples.ts", "src/lib/logging/test*.ts"]
 }

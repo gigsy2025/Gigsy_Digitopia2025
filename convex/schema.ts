@@ -1,6 +1,8 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const Currency = v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR"));
+
 const schema = defineSchema({
   users: defineTable({
     // --- Core Identity & Authentication ---
@@ -30,16 +32,16 @@ const schema = defineSchema({
       ),
     ), // Strict role validation
 
-    // --- Multi-Currency Balance Management ---
+    // ---- CACHED PROJECTION ONLY: DO NOT WRITE DIRECTLY FROM CLIENT ----
+    // Multi-currency balance support - READ-ONLY cached projection for fast UI
     balances: v.array(
       v.object({
-        // Multi-currency balance support - users can have balances in different currencies
         currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")), // Supported currencies
-        amount: v.number(), // Balance amount (should be non-negative)
+        amount: v.number(), // Balance amount in smallest unit (integer, e.g., cents/piastres)
         lastUpdated: v.number(), // Timestamp of last balance update
         isActive: v.boolean(), // Whether this currency balance is actively used
       }),
-    ), // Array of currency balances for multi-currency support
+    ), // Array of currency balances for multi-currency support - CACHED ONLY
 
     // --- Profile & Recommendation Data (Career Growth Service) ---
     profile: v.optional(
@@ -736,33 +738,53 @@ const schema = defineSchema({
 
   // --- Payments & Ledger Service Tables ---
 
+  // --- Wallets: one per user per currency (meta only) ---
   wallets: defineTable({
-    userId: v.id("users"), // The `_id` of the user who owns this wallet.
-    currency: v.string(), // e.g., "EGP", "USD".
-    // Standard System Fields
-    updatedAt: v.number(),
+    userId: v.id("users"),
+    currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
+    createdAt: v.number(),
     createdBy: v.string(),
-  }).index("by_user", ["userId"]),
+    updatedAt: v.number(),
+  }).index("by_user_currency", ["userId", "currency"]).index("by_user", ["userId"]),
 
+  // --- Immutable ledger (append-only) ---
   transactions: defineTable({
     walletId: v.id("wallets"),
-    // The amount can be positive (credit) or negative (debit).
-    // Stored as an integer in the smallest currency unit (e.g., cents, piastres) to avoid floating-point errors.
-    amount: v.number(),
-    currency: v.string(),
-    type: v.string(), // "DEPOSIT", "ESCROW_HOLD", "ESCROW_RELEASE", "PAYOUT", "FEE", "WITHDRAWAL", "REFUND"
-    description: v.string(), // A human-readable description of the transaction.
+    amount: v.number(), // integer smallest unit (positive for credit, negative for debit)
+    currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
+    type: v.union(
+      v.literal("DEPOSIT"),
+      v.literal("ESCROW_HOLD"),
+      v.literal("ESCROW_RELEASE"),
+      v.literal("PAYOUT"),
+      v.literal("FEE"),
+      v.literal("WITHDRAWAL"),
+      v.literal("REFUND"),
+      v.literal("TRANSFER") // internal transfer marker
+    ),
+    status: v.union(
+      v.literal("PENDING"),
+      v.literal("COMPLETED"),
+      v.literal("FAILED"),
+      v.literal("CANCELLED")
+    ),
+    description: v.optional(v.string()),
+    // Idempotency & reconciliation fields
+    idempotencyKey: v.optional(v.string()), // platform-provided idempotency key
+    relatedEntityType: v.optional(v.string()),
+    relatedEntityId: v.optional(v.string()),
+    createdAt: v.number(),
+    createdBy: v.string()
+  }).index("by_wallet", ["walletId"]).index("by_related", ["relatedEntityType", "relatedEntityId"]),
 
-    // --- Auditing & Idempotency ---
-    relatedEntityType: v.optional(v.string()), // e.g., "gig", "application".
-    relatedEntityId: v.optional(v.string()), // The `_id` of the related document.
-    externalTransactionId: v.optional(v.string()), // The unique ID from a payment provider like Stripe or Paymob.
-
-    // Standard System Fields
-    createdBy: v.string(), // Can be a clerkId or "system" for fees.
-  })
-    .index("by_wallet", ["walletId"])
-    .index("by_external_id", ["externalTransactionId"]),
+  // --- Cached materialized balances for fast read & UI subscriptions ---
+  walletBalances: defineTable({
+    walletId: v.id("wallets"),
+    currency: v.union(v.literal("EGP"), v.literal("USD"), v.literal("EUR")),
+    balance: v.number(), // integer smallest unit
+    lastTransactionAt: v.optional(v.number()),
+    lastUpdated: v.number()
+  }).index("by_wallet", ["walletId"]).index("by_user_currency", ["walletId", "currency"]),
 
   // --- Gamification Service Tables ---
 

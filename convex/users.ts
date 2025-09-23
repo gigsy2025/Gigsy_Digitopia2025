@@ -321,14 +321,15 @@ export const getUserByClerkId = query({
       balances: v.array(
         v.object({
           currency: v.string(),
-          amount: v.number(),
-          lastUpdated: v.number(),
+          amount: v.float64(),
+          lastUpdated: v.float64(),
           isActive: v.boolean(),
         }),
       ),
       profile: v.optional(v.any()),
-      _creationTime: v.number(),
-      updatedAt: v.number(),
+      _creationTime: v.float64(),
+      updatedAt: v.float64(),
+      createdBy: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, { clerkId }) => {
