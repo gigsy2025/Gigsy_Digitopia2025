@@ -17,6 +17,7 @@
 "use client";
 
 import React, { useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useUser } from "@clerk/nextjs";
 import { ChevronUp, User2, LogOut, Settings, Bell } from "lucide-react";
@@ -139,9 +140,12 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = React.memo(({ item }) => {
       onKeyDown={handleKeyDown}
     >
       {item.type === "route" ? (
-        <a href={item.href} className="flex w-full items-center gap-3">
+        <Link
+          href={item.href ?? "/"}
+          className="flex w-full items-center gap-3"
+        >
           <ItemContent item={item} />
-        </a>
+        </Link>
       ) : item.type === "external" ? (
         <a
           href={item.href}
@@ -168,7 +172,10 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = React.memo(({ item }) => {
           {item.children.map((child) => (
             <SidebarMenuSubItem key={child.id}>
               <SidebarMenuSubButton asChild>
-                <a href={child.href} className="flex items-center gap-3">
+                <Link
+                  href={child.href ?? "/"}
+                  className="flex items-center gap-3"
+                >
                   {child.icon && (
                     <DynamicIcon
                       name={child.icon}
@@ -177,7 +184,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = React.memo(({ item }) => {
                     />
                   )}
                   <span>{child.title}</span>
-                </a>
+                </Link>
               </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           ))}
@@ -347,22 +354,22 @@ const UserAccountSection: React.FC = () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <a href="/app/profile" className="flex items-center gap-2">
+            <Link href="/app/profile" className="flex items-center gap-2">
               <User2 className="h-4 w-4" />
               Profile
-            </a>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href="/app/settings" className="flex items-center gap-2">
+            <Link href="/app/settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Settings
-            </a>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href="/app/notifications" className="flex items-center gap-2">
+            <Link href="/app/notifications" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
               Notifications
-            </a>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -437,7 +444,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/app" className="flex items-center gap-2">
+              <Link href="/app" className="flex items-center gap-2">
                 <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <span className="text-sm font-bold">G</span>
                 </div>
@@ -447,7 +454,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
                     Your freelance platform
                   </span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
