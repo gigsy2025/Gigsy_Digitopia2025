@@ -25,6 +25,7 @@ import type {
   FeatureFlag,
   UseSidebarData,
 } from "@/types/sidebar";
+import { useUser } from "@/providers/UserContext";
 
 /**
  * Core navigation configuration for Gigsy platform
@@ -509,6 +510,7 @@ function enrichNavigationWithDynamicData(
 export function useSidebarItems(): UseSidebarData {
   const pathname = usePathname();
   const permissions = useUserPermissions();
+  const { user } = useUser();
 
   const navigationGroups = useMemo(() => {
     if (permissions.isLoading) {
@@ -518,6 +520,18 @@ export function useSidebarItems(): UseSidebarData {
     try {
       // Generate base navigation structure
       const baseNavigation = createGigsyNavigation();
+
+      // Inject user-specific profile slug if available
+      if (user) {
+        const profileSlug = user.username ?? user.id;
+        for (const group of baseNavigation) {
+          for (const item of group.items) {
+            if (item.id === "profile") {
+              item.href = `/app/profile/${profileSlug}`;
+            }
+          }
+        }
+      }
 
       // Filter by user permissions
       const filteredNavigation = filterNavigationByPermissions(

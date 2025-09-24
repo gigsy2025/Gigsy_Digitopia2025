@@ -46,6 +46,12 @@ export interface UserProfile {
   email?: string;
   /** Full display name */
   name?: string;
+  /** Clerk username, used for vanity URLs and slugs */
+  username?: string;
+  /** First name sourced from Clerk */
+  firstName?: string;
+  /** Last name sourced from Clerk */
+  lastName?: string;
   /** User's avatar URL */
   avatar?: string;
   /** Normalized role (never undefined) */

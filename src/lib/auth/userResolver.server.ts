@@ -133,7 +133,6 @@ function buildUserProfile(
     (email) => email.id === user.primaryEmailAddressId,
   );
 
-  // Get full name or fallback to first/last name
   const displayName =
     user.fullName ??
     [user.firstName, user.lastName].filter(Boolean).join(" ") ??
@@ -143,6 +142,9 @@ function buildUserProfile(
     id: user.id,
     email: primaryEmail?.emailAddress,
     name: displayName,
+    username: user.username ?? undefined,
+    firstName: user.firstName ?? undefined,
+    lastName: user.lastName ?? undefined,
     avatar: user.imageUrl,
     role,
     verified: metadata.verified ?? false,

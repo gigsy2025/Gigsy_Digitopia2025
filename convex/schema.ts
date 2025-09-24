@@ -154,6 +154,145 @@ const schema = defineSchema({
     // Index for efficient user updates and cache invalidation
     .index("by_updated_at", ["updatedAt"]),
 
+  profiles: defineTable({
+    userId: v.id("users"),
+    bio: v.optional(v.string()), // max 500 chars enforced at mutation layer
+    headline: v.optional(v.string()), // max 120 chars enforced at mutation layer
+    country: v.optional(v.string()), // ISO country code (2 letters)
+    city: v.optional(v.string()), // max 100 chars
+    timezone: v.optional(v.string()), // IANA timezone identifier
+    experienceLevel: v.union(
+      v.literal("beginner"),
+      v.literal("intermediate"),
+      v.literal("advanced"),
+      v.literal("expert"),
+    ),
+    skills: v.array(v.string()), // canonical skill slugs <= 50 chars
+    lessonsCompleted: v.optional(v.int64()),
+    lastActivityAt: v.optional(v.number()),
+    completeness: v.optional(v.number()),
+    availability: v.optional(
+      v.object({
+        hoursPerWeek: v.number(),
+        contractType: v.union(
+          v.literal("freelance"),
+          v.literal("part-time"),
+          v.literal("full-time"),
+        ),
+        availableFrom: v.optional(v.string()), // ISO date string
+      }),
+    ),
+    visibility: v.union(
+      v.literal("public"),
+      v.literal("platform"),
+      v.literal("private"),
+    ),
+    lastUpdated: v.number(),
+    version: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_last_activity", ["lastActivityAt"])
+    .index("by_experience", ["experienceLevel"]),
+
+  profileEducation: defineTable({
+    userId: v.id("users"),
+    profileId: v.optional(v.id("profiles")),
+    schoolId: v.optional(v.id("schools")),
+    schoolName: v.string(), // <= 200 chars
+    degree: v.string(), // <= 200 chars
+    start: v.string(), // YYYY-MM
+    end: v.optional(v.string()), // YYYY-MM
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_school", ["schoolId"]),
+
+  profileWorkExperience: defineTable({
+    userId: v.id("users"),
+    profileId: v.optional(v.id("profiles")),
+    companyId: v.optional(v.id("companies")),
+    companyName: v.string(), // <= 200 chars
+    role: v.string(), // <= 200 chars
+    start: v.string(), // YYYY-MM
+    end: v.optional(v.string()), // YYYY-MM
+    description: v.optional(v.string()), // <= 1000 chars
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_company", ["companyId"]),
+
+  profileProjects: defineTable({
+    userId: v.id("users"),
+    profileId: v.optional(v.id("profiles")),
+    title: v.string(), // <= 200 chars
+    url: v.optional(v.string()), // <= 500 chars
+    description: v.optional(v.string()), // <= 1000 chars
+    technologies: v.optional(v.array(v.string())), // tag slugs <= 50 chars
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  profileLanguages: defineTable({
+    userId: v.id("users"),
+    profileId: v.optional(v.id("profiles")),
+    code: v.string(), // ISO 639-1
+    level: v.union(
+      v.literal("basic"),
+      v.literal("conversational"),
+      v.literal("fluent"),
+      v.literal("native"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  schools: defineTable({
+    name: v.string(), // <= 200 chars
+    logoUrl: v.optional(v.string()), // <= 500 chars
+    website: v.optional(v.string()), // <= 500 chars
+    country: v.optional(v.string()), // ISO country code
+    city: v.optional(v.string()), // <= 100 chars
+    type: v.union(
+      v.literal("university"),
+      v.literal("school"),
+      v.literal("bootcamp"),
+      v.literal("online"),
+    ),
+    verified: v.boolean(),
+    ranking: v.optional(v.int64()),
+    alumniCount: v.optional(v.int64()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_name", ["name"])
+    .index("by_country", ["country"]),
+
+  companies: defineTable({
+    name: v.string(), // <= 200 chars
+    logoUrl: v.optional(v.string()), // <= 500 chars
+    website: v.optional(v.string()), // <= 500 chars
+    industry: v.optional(v.string()), // <= 100 chars
+    industryTags: v.optional(v.array(v.string())), // <= 50 chars
+    size: v.union(
+      v.literal("startup"),
+      v.literal("sme"),
+      v.literal("enterprise"),
+    ),
+    employeesCount: v.optional(v.int64()),
+    verified: v.boolean(),
+    description: v.optional(v.string()), // <= 500 chars
+    country: v.optional(v.string()), // ISO country code
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_name", ["name"])
+    .index("by_country", ["country"])
+    .index("by_industry", ["industry"]),
+
   gigs: defineTable({
     // --- Core Gig Details ---
     title: v.string(), // The public title of the gig.

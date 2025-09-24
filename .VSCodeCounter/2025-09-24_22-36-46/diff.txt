@@ -1,0 +1,103 @@
+Date : 2025-09-24 22:36:46
+Directory : c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy
+Total : 48 files,  1543 codes, 14 comments, 204 blanks, all 1761 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |         19 |        811 |          1 |        110 |        922 |
+| TypeScript     |         24 |        485 |         13 |         56 |        554 |
+| Markdown       |          2 |        208 |          0 |         36 |        244 |
+| YAML           |          1 |         30 |          0 |          2 |         32 |
+| JavaScript     |          1 |          8 |          0 |          0 |          8 |
+| JSON           |          1 |          1 |          0 |          0 |          1 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                      | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                         |         48 |      1,543 |         14 |        204 |      1,761 |
+| . (Files)                                                                                                                 |          3 |         39 |          0 |          2 |         41 |
+| convex                                                                                                                    |          1 |        132 |          0 |          7 |        139 |
+| docs                                                                                                                      |          2 |        208 |          0 |         36 |        244 |
+| docs\profile                                                                                                              |          2 |        208 |          0 |         36 |        244 |
+| src                                                                                                                       |         42 |      1,164 |         14 |        159 |      1,337 |
+| src\app                                                                                                                   |          2 |        160 |          0 |         31 |        191 |
+| src\app\app                                                                                                               |          2 |        160 |          0 |         31 |        191 |
+| src\app\app\profile                                                                                                       |          2 |        160 |          0 |         31 |        191 |
+| src\app\app\profile (Files)                                                                                               |          1 |         11 |          0 |          6 |         17 |
+| src\app\app\profile\[profileId]                                                                                           |          1 |        149 |          0 |         25 |        174 |
+| src\components                                                                                                            |         33 |        700 |          1 |        103 |        804 |
+| src\components\ProfileAbout                                                                                               |          4 |         39 |          0 |         10 |         49 |
+| src\components\ProfileEducation                                                                                           |          4 |         39 |          0 |          9 |         48 |
+| src\components\ProfileExperience                                                                                          |          4 |         60 |          0 |          9 |         69 |
+| src\components\ProfileHeader                                                                                              |          4 |        180 |          0 |         25 |        205 |
+| src\components\ProfileLanguages                                                                                           |          4 |         45 |          0 |         10 |         55 |
+| src\components\ProfilePortfolio                                                                                           |          4 |        112 |          0 |         11 |        123 |
+| src\components\ProfileSidebar                                                                                             |          4 |        107 |          1 |         11 |        119 |
+| src\components\ProfileSkills                                                                                              |          4 |         59 |          0 |         10 |         69 |
+| src\components\ui                                                                                                         |          1 |         59 |          0 |          8 |         67 |
+| src\hooks                                                                                                                 |          1 |         12 |          1 |          1 |         14 |
+| src\lib                                                                                                                   |          1 |          3 |         -1 |          0 |          2 |
+| src\lib\auth                                                                                                              |          1 |          3 |         -1 |          0 |          2 |
+| src\services                                                                                                              |          4 |        286 |         10 |         24 |        320 |
+| src\services\profile                                                                                                      |          4 |        286 |         10 |         24 |        320 |
+| src\types                                                                                                                 |          1 |          3 |          3 |          0 |          6 |
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                                  | language       | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts                                                 | TypeScript     |        132 |          0 |          7 |        139 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\profile\PROFILE_LINKEDIN_STYLE_IMPLEMENTATION_TODO.md       | Markdown       |        116 |          0 |         18 |        134 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\profile\USER_PROFILE_IMPLEMENTATION_PLAN.md                 | Markdown       |         92 |          0 |         18 |        110 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\next.config.js                                                   | JavaScript     |          8 |          0 |          0 |          8 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json                                                     | JSON           |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml                                                   | YAML           |         30 |          0 |          2 |         32 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\profile\[profileId]\page.tsx                         | TypeScript JSX |        149 |          0 |         25 |        174 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\profile\page.tsx                                     | TypeScript JSX |         11 |          0 |          6 |         17 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileAbout\ProfileAbout.container.tsx           | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileAbout\ProfileAbout.ui.tsx                  | TypeScript JSX |         28 |          0 |          5 |         33 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileAbout\index.ts                             | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileAbout\types.ts                             | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileEducation\ProfileEducation.container.tsx   | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileEducation\ProfileEducation.ui.tsx          | TypeScript JSX |         28 |          0 |          4 |         32 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileEducation\index.ts                         | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileEducation\types.ts                         | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileExperience\ProfileExperience.container.tsx | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileExperience\ProfileExperience.ui.tsx        | TypeScript JSX |         48 |          0 |          4 |         52 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileExperience\index.ts                        | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileExperience\types.ts                        | TypeScript     |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileHeader\ProfileHeader.container.tsx         | TypeScript JSX |         32 |          0 |         10 |         42 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileHeader\ProfileHeader.ui.tsx                | TypeScript JSX |        142 |          0 |         12 |        154 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileHeader\index.ts                            | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileHeader\types.ts                            | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileLanguages\ProfileLanguages.container.tsx   | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileLanguages\ProfileLanguages.ui.tsx          | TypeScript JSX |         34 |          0 |          5 |         39 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileLanguages\index.ts                         | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileLanguages\types.ts                         | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfilePortfolio\ProfilePortfolio.container.tsx   | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfilePortfolio\ProfilePortfolio.ui.tsx          | TypeScript JSX |        101 |          0 |          6 |        107 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfilePortfolio\index.ts                         | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfilePortfolio\types.ts                         | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSidebar\ProfileSidebar.container.tsx       | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSidebar\ProfileSidebar.ui.tsx              | TypeScript JSX |         96 |          1 |          6 |        103 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSidebar\index.ts                           | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSidebar\types.ts                           | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSkills\ProfileSkills.container.tsx         | TypeScript JSX |          5 |          0 |          2 |          7 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSkills\ProfileSkills.ui.tsx                | TypeScript JSX |         48 |          0 |          5 |         53 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSkills\index.ts                            | TypeScript     |          2 |          0 |          1 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ProfileSkills\types.ts                            | TypeScript     |          4 |          0 |          2 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\tabs.tsx                                       | TypeScript JSX |         59 |          0 |          8 |         67 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useSidebarItems.ts                                     | TypeScript     |         12 |          1 |          1 |         14 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\auth\userResolver.server.ts                              | TypeScript     |          3 |         -1 |          0 |          2 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\services\profile\ProfileRepository.ts                        | TypeScript     |        169 |         10 |          5 |        184 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\services\profile\ProfileService.ts                           | TypeScript     |         14 |          0 |          5 |         19 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\services\profile\index.ts                                    | TypeScript     |          7 |          0 |          3 |         10 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\services\profile\types.ts                                    | TypeScript     |         96 |          0 |         11 |        107 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\auth.ts                                                | TypeScript     |          3 |          3 |          0 |          6 |
+| Total                                                                                                                     |                |      1,543 |         14 |        204 |      1,761 |
++---------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
