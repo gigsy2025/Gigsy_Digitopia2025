@@ -28,6 +28,7 @@ import type * as internal_walletMutations from "../internal/walletMutations.js";
 import type * as internal_walletTransactions from "../internal/walletTransactions.js";
 import type * as lessons from "../lessons.js";
 import type * as messages from "../messages.js";
+import type * as profile from "../profile.js";
 import type * as progressBatch from "../progressBatch.js";
 import type * as reconcile from "../reconcile.js";
 import type * as schema_fixed from "../schema_fixed.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "internal/walletTransactions": typeof internal_walletTransactions;
   lessons: typeof lessons;
   messages: typeof messages;
+  profile: typeof profile;
   progressBatch: typeof progressBatch;
   reconcile: typeof reconcile;
   schema_fixed: typeof schema_fixed;

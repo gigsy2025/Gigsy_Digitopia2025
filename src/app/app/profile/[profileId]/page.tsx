@@ -13,6 +13,7 @@ import { ProfileEducation } from "@/components/ProfileEducation";
 import { ProfileLanguages } from "@/components/ProfileLanguages";
 import { ProfilePortfolio } from "@/components/ProfilePortfolio";
 import { ProfileSidebar } from "@/components/ProfileSidebar";
+import { ProfileOnboarding } from "@/components/profile-onboarding/ProfileOnboarding";
 import { resolveCurrentUser } from "@/lib/auth/userResolver.server";
 import type { UserProfile } from "@/types/auth";
 
@@ -20,6 +21,25 @@ export const dynamic = "force-dynamic";
 
 interface ProfilePageParams {
   profileId: string;
+}
+
+function ownsProfileSlug(profileId: string, currentUser: UserProfile): boolean {
+  const normalizedSlug = currentUser.username ?? undefined;
+  return (
+    profileId === currentUser.id ||
+    (normalizedSlug ? profileId === normalizedSlug : false)
+  );
+}
+
+function resolveDesiredSlug(
+  profileId: string,
+  currentUser: UserProfile,
+): string {
+  const preferredSlug = currentUser.username ?? profileId;
+  if (profileId === currentUser.id) {
+    return preferredSlug;
+  }
+  return profileId;
 }
 
 interface ProfilePageProps {
@@ -39,9 +59,18 @@ export async function generateMetadata({
     ]);
 
     if (!profile) {
+      if (!currentUser || !ownsProfileSlug(profileId, currentUser)) {
+        return {
+          title: "Profile not found | Gigsy",
+          description: "The requested profile could not be located.",
+        };
+      }
+
+      const desiredSlug = resolveDesiredSlug(profileId, currentUser);
+
       return {
-        title: "Profile not found | Gigsy",
-        description: "The requested profile could not be located.",
+        title: "Create your profile | Gigsy",
+        description: `Complete your Gigsy profile (${desiredSlug}) to start showcasing your experience.`,
       };
     }
 
@@ -110,7 +139,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   ]);
 
   if (!profile) {
-    notFound();
+    if (!currentUser || !ownsProfileSlug(profileId, currentUser)) {
+      notFound();
+    }
+
+    const desiredSlug = resolveDesiredSlug(profileId, currentUser);
+
+    return (
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 pb-12">
+        <ProfileOnboarding
+          currentUser={currentUser}
+          desiredSlug={desiredSlug}
+        />
+      </div>
+    );
   }
 
   const viewContext = buildProfileViewContext(profile, currentUser, profileId);

@@ -335,6 +335,15 @@ export const getUserByClerkId = query({
       email: v.string(),
       name: v.string(),
       avatarUrl: v.optional(v.string()),
+      slug: v.optional(v.string()),
+      price: v.optional(v.number()),
+      pricingType: v.optional(
+        v.union(
+          v.literal("free"),
+          v.literal("one-time"),
+          v.literal("subscription"),
+        ),
+      ),
       roles: v.array(v.string()),
       balances: v.array(
         v.object({
@@ -347,7 +356,10 @@ export const getUserByClerkId = query({
       profile: v.optional(v.any()),
       _creationTime: v.float64(),
       updatedAt: v.float64(),
-      createdBy: v.optional(v.string()),
+      createdBy: v.string(),
+      embedding: v.optional(v.array(v.number())),
+      embeddingUpdatedAt: v.optional(v.number()),
+      deletedAt: v.optional(v.number()),
     }),
   ),
   handler: async (ctx, { clerkId }) => {

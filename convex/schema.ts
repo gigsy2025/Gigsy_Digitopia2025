@@ -25,6 +25,7 @@ const schema = defineSchema({
   users: defineTable({
     // --- Core Identity & Authentication ---
     clerkId: v.string(), // The unique identifier from the Clerk authentication service.
+    slug: v.optional(v.string()), // Human-friendly unique profile identifier
     email: v.string(), // The user's primary email address, used for notifications.
     // Legacy price field for backward compatibility
     price: v.optional(v.number()),
@@ -156,6 +157,7 @@ const schema = defineSchema({
 
   profiles: defineTable({
     userId: v.id("users"),
+    slug: v.string(), // Human-friendly unique profile identifier
     bio: v.optional(v.string()), // max 500 chars enforced at mutation layer
     headline: v.optional(v.string()), // max 120 chars enforced at mutation layer
     country: v.optional(v.string()), // ISO country code (2 letters)
@@ -187,12 +189,17 @@ const schema = defineSchema({
       v.literal("platform"),
       v.literal("private"),
     ),
+    coverImageUrl: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    qrCodeUrl: v.optional(v.string()),
+    contactEmail: v.optional(v.string()),
     lastUpdated: v.number(),
     version: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_slug", ["slug"])
     .index("by_last_activity", ["lastActivityAt"])
     .index("by_experience", ["experienceLevel"]),
 
