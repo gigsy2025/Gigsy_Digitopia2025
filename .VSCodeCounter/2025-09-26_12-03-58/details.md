@@ -1,10 +1,10 @@
 # Details
 
-Date : 2025-09-22 13:16:22
+Date : 2025-09-26 12:03:58
 
 Directory c:\\Users\\dell\\WebstormProjects\\Gigsy_Digitopia2025\\gigsy
 
-Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
+Total : 339 files,  68816 codes, 7706 comments, 12969 blanks, all 89491 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -40,6 +40,14 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [.github/instructions/performance-optimization.instructions.md](/.github/instructions/performance-optimization.instructions.md) | Markdown | 341 | 3 | 77 | 421 |
 | [.github/workflows/README.md](/.github/workflows/README.md) | Markdown | 273 | 0 | 81 | 354 |
 | [.github/workflows/ci-cd-docker-enterprise.yml](/.github/workflows/ci-cd-docker-enterprise.yml) | YAML | 399 | 100 | 70 | 569 |
+| [.windsurf/workflows/clerk.md](/.windsurf/workflows/clerk.md) | Markdown | 66 | 0 | 31 | 97 |
+| [.windsurf/workflows/convex.md](/.windsurf/workflows/convex.md) | Markdown | 175 | 0 | 18 | 193 |
+| [.windsurf/workflows/frontend.md](/.windsurf/workflows/frontend.md) | Markdown | 126 | 0 | 52 | 178 |
+| [.windsurf/workflows/gigsy-applications.md](/.windsurf/workflows/gigsy-applications.md) | Markdown | 54 | 0 | 18 | 72 |
+| [.windsurf/workflows/gigsy-chat.md](/.windsurf/workflows/gigsy-chat.md) | Markdown | 74 | 0 | 25 | 99 |
+| [.windsurf/workflows/gigsy-gigs.md](/.windsurf/workflows/gigsy-gigs.md) | Markdown | 55 | 0 | 20 | 75 |
+| [.windsurf/workflows/gigsy-payment.md](/.windsurf/workflows/gigsy-payment.md) | Markdown | 59 | 0 | 21 | 80 |
+| [.windsurf/workflows/next-tailwind.md](/.windsurf/workflows/next-tailwind.md) | Markdown | 63 | 0 | 15 | 78 |
 | [DEBUG\_PROGRESS\_TRACKING.md](/DEBUG_PROGRESS_TRACKING.md) | Markdown | 179 | 0 | 71 | 250 |
 | [DOCKER\_README.md](/DOCKER_README.md) | Markdown | 101 | 0 | 38 | 139 |
 | [Dockerfile](/Dockerfile) | Docker | 51 | 17 | 19 | 87 |
@@ -60,10 +68,10 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [VERCEL\_SETUP\_GUIDE.md](/VERCEL_SETUP_GUIDE.md) | Markdown | 85 | 0 | 35 | 120 |
 | [\_\_mocks\_\_/fileMock.js](/__mocks__/fileMock.js) | JavaScript | 1 | 0 | 1 | 2 |
 | [components.json](/components.json) | JSON | 22 | 0 | 1 | 23 |
-| [convex.json](/convex.json) | JSON | 3 | 0 | 1 | 4 |
+| [convex.json](/convex.json) | JSON | 6 | 0 | 1 | 7 |
 | [convex/README.md](/convex/README.md) | Markdown | 73 | 0 | 18 | 91 |
 | [convex/\_\_tests\_\_/users.test.ts](/convex/__tests__/users.test.ts) | TypeScript | 440 | 79 | 85 | 604 |
-| [convex/\_generated/api.d.ts](/convex/_generated/api.d.ts) | TypeScript | 39 | 17 | 3 | 59 |
+| [convex/\_generated/api.d.ts](/convex/_generated/api.d.ts) | TypeScript | 63 | 17 | 3 | 83 |
 | [convex/\_generated/api.js](/convex/_generated/api.js) | JavaScript | 3 | 17 | 3 | 23 |
 | [convex/\_generated/dataModel.d.ts](/convex/_generated/dataModel.d.ts) | TypeScript | 16 | 39 | 6 | 61 |
 | [convex/\_generated/server.d.ts](/convex/_generated/server.d.ts) | TypeScript | 24 | 105 | 14 | 143 |
@@ -73,11 +81,21 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [convex/courses.ts](/convex/courses.ts) | TypeScript | 751 | 83 | 73 | 907 |
 | [convex/coursesMutations.ts](/convex/coursesMutations.ts) | TypeScript | 443 | 84 | 75 | 602 |
 | [convex/files.ts](/convex/files.ts) | TypeScript | 326 | 84 | 54 | 464 |
+| [convex/finance.ts](/convex/finance.ts) | TypeScript | 667 | 131 | 100 | 898 |
 | [convex/index.ts](/convex/index.ts) | TypeScript | 1 | 0 | 1 | 2 |
+| [convex/internal/healthQueries.ts](/convex/internal/healthQueries.ts) | TypeScript | 16 | 0 | 3 | 19 |
+| [convex/internal/index.ts](/convex/internal/index.ts) | TypeScript | 40 | 3 | 7 | 50 |
+| [convex/internal/reconcileQueries.ts](/convex/internal/reconcileQueries.ts) | TypeScript | 24 | 0 | 4 | 28 |
+| [convex/internal/walletBalances.ts](/convex/internal/walletBalances.ts) | TypeScript | 15 | 0 | 3 | 18 |
+| [convex/internal/walletInit.ts](/convex/internal/walletInit.ts) | TypeScript | 189 | 22 | 22 | 233 |
+| [convex/internal/walletMutations.ts](/convex/internal/walletMutations.ts) | TypeScript | 116 | 7 | 12 | 135 |
+| [convex/internal/walletTransactions.ts](/convex/internal/walletTransactions.ts) | TypeScript | 14 | 0 | 2 | 16 |
 | [convex/lessons.ts](/convex/lessons.ts) | TypeScript | 519 | 87 | 71 | 677 |
 | [convex/messages.ts](/convex/messages.ts) | TypeScript | 17 | 1 | 2 | 20 |
+| [convex/profile.ts](/convex/profile.ts) | TypeScript | 558 | 0 | 74 | 632 |
 | [convex/progressBatch.ts](/convex/progressBatch.ts) | TypeScript | 421 | 60 | 51 | 532 |
-| [convex/schema.ts](/convex/schema.ts) | TypeScript | 676 | 131 | 112 | 919 |
+| [convex/reconcile.ts](/convex/reconcile.ts) | TypeScript | 539 | 90 | 73 | 702 |
+| [convex/schema.ts](/convex/schema.ts) | TypeScript | 849 | 130 | 121 | 1,100 |
 | [convex/schema\_fixed.ts](/convex/schema_fixed.ts) | TypeScript | 629 | 124 | 109 | 862 |
 | [convex/skills-clean.ts](/convex/skills-clean.ts) | TypeScript | 0 | 0 | 1 | 1 |
 | [convex/skills.ts](/convex/skills.ts) | TypeScript | 966 | 175 | 88 | 1,229 |
@@ -85,7 +103,10 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [convex/skills\_backup.ts](/convex/skills_backup.ts) | TypeScript | 0 | 0 | 1 | 1 |
 | [convex/skills\_simple.ts](/convex/skills_simple.ts) | TypeScript | 0 | 0 | 1 | 1 |
 | [convex/tsconfig.json](/convex/tsconfig.json) | JSON with Comments | 18 | 6 | 2 | 26 |
-| [convex/users.ts](/convex/users.ts) | TypeScript | 450 | 111 | 78 | 639 |
+| [convex/types/internal.d.ts](/convex/types/internal.d.ts) | TypeScript | 36 | 0 | 2 | 38 |
+| [convex/users.ts](/convex/users.ts) | TypeScript | 483 | 113 | 74 | 670 |
+| [convex/wallet.ts](/convex/wallet.ts) | TypeScript | 134 | 9 | 24 | 167 |
+| [convex/walletApi.ts](/convex/walletApi.ts) | TypeScript | 71 | 6 | 9 | 86 |
 | [debug-api.ts](/debug-api.ts) | TypeScript | 8 | 2 | 4 | 14 |
 | [deployment/README.md](/deployment/README.md) | Markdown | 244 | 0 | 91 | 335 |
 | [deployment/docker-compose/docker-compose.dev.yml](/deployment/docker-compose/docker-compose.dev.yml) | YAML | 126 | 14 | 35 | 175 |
@@ -103,6 +124,7 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [docs/COURSE\_CATALOG\_TECHNICAL\_DOCS.md](/docs/COURSE_CATALOG_TECHNICAL_DOCS.md) | Markdown | 392 | 0 | 123 | 515 |
 | [docs/DEPLOYMENT\_STRATEGY.md](/docs/DEPLOYMENT_STRATEGY.md) | Markdown | 330 | 0 | 88 | 418 |
 | [docs/ENTERPRISE\_LOGGING\_DOCS.md](/docs/ENTERPRISE_LOGGING_DOCS.md) | Markdown | 308 | 0 | 86 | 394 |
+| [docs/FINANCE\_OPERATIONS.md](/docs/FINANCE_OPERATIONS.md) | Markdown | 324 | 0 | 98 | 422 |
 | [docs/GIGS\_SCHEMA\_REVIEW.md](/docs/GIGS_SCHEMA_REVIEW.md) | Markdown | 259 | 0 | 75 | 334 |
 | [docs/KIBO\_VIDEO\_PLAYER\_GUIDE.md](/docs/KIBO_VIDEO_PLAYER_GUIDE.md) | Markdown | 453 | 0 | 86 | 539 |
 | [docs/LOGGING\_IMPLEMENTATION\_COMPLETE.md](/docs/LOGGING_IMPLEMENTATION_COMPLETE.md) | Markdown | 140 | 0 | 42 | 182 |
@@ -111,17 +133,20 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [docs/SKILLS\_MANAGEMENT\_SYSTEM.md](/docs/SKILLS_MANAGEMENT_SYSTEM.md) | Markdown | 225 | 0 | 93 | 318 |
 | [docs/USERS\_SCHEMA\_REVIEW.md](/docs/USERS_SCHEMA_REVIEW.md) | Markdown | 195 | 0 | 73 | 268 |
 | [docs/USER\_MANAGEMENT\_SERVICE.md](/docs/USER_MANAGEMENT_SERVICE.md) | Markdown | 372 | 0 | 134 | 506 |
+| [docs/profile/PROFILE\_LINKEDIN\_STYLE\_IMPLEMENTATION\_TODO.md](/docs/profile/PROFILE_LINKEDIN_STYLE_IMPLEMENTATION_TODO.md) | Markdown | 116 | 0 | 18 | 134 |
+| [docs/profile/USER\_PROFILE\_IMPLEMENTATION\_PLAN.md](/docs/profile/USER_PROFILE_IMPLEMENTATION_PLAN.md) | Markdown | 92 | 0 | 18 | 110 |
 | [eslint.config.js](/eslint.config.js) | JavaScript | 46 | 0 | 3 | 49 |
 | [healthcheck.js](/healthcheck.js) | JavaScript | 32 | 10 | 8 | 50 |
 | [jest.config.mjs](/jest.config.mjs) | JavaScript | 26 | 15 | 12 | 53 |
 | [jest.setup.ts](/jest.setup.ts) | TypeScript | 115 | 15 | 18 | 148 |
-| [next.config.js](/next.config.js) | JavaScript | 29 | 21 | 11 | 61 |
-| [package.json](/package.json) | JSON | 102 | 0 | 1 | 103 |
-| [pnpm-lock.yaml](/pnpm-lock.yaml) | YAML | 9,721 | 0 | 2,436 | 12,157 |
+| [next.config.js](/next.config.js) | JavaScript | 37 | 21 | 11 | 69 |
+| [package.json](/package.json) | JSON | 107 | 0 | 1 | 108 |
+| [pnpm-lock.yaml](/pnpm-lock.yaml) | YAML | 10,087 | 0 | 2,512 | 12,599 |
 | [postcss.config.js](/postcss.config.js) | JavaScript | 5 | 0 | 1 | 6 |
 | [prettier.config.js](/prettier.config.js) | JavaScript | 3 | 1 | 1 | 5 |
 | [sentry.edge.config.ts](/sentry.edge.config.ts) | TypeScript | 7 | 7 | 6 | 20 |
 | [sentry.server.config.ts](/sentry.server.config.ts) | TypeScript | 7 | 6 | 6 | 19 |
+| [shared/profile/profileCreationSchema.ts](/shared/profile/profileCreationSchema.ts) | TypeScript | 209 | 0 | 18 | 227 |
 | [src/app/(auth)/layout.tsx](/src/app/(auth)/layout.tsx) | TypeScript JSX | 17 | 0 | 3 | 20 |
 | [src/app/(auth)/sign-in/\[\[...sign-in\]\]/page.tsx](/src/app/(auth)/sign-in/%5B%5B...sign-in%5D%5D/page.tsx) | TypeScript JSX | 4 | 0 | 2 | 6 |
 | [src/app/(auth)/sign-up/\[\[...sign-up\]\]/page.tsx](/src/app/(auth)/sign-up/%5B%5B...sign-up%5D%5D/page.tsx) | TypeScript JSX | 4 | 0 | 2 | 6 |
@@ -140,13 +165,16 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [src/app/app/courses/\[courseId\]/lessons/\[lessonId\]/page.tsx](/src/app/app/courses/%5BcourseId%5D/lessons/%5BlessonId%5D/page.tsx) | TypeScript JSX | 0 | 318 | 35 | 353 |
 | [src/app/app/courses/\[courseId\]/modules/\[moduleId\]/lessons/\[lessonId\]/LessonClientWrapper.tsx](/src/app/app/courses/%5BcourseId%5D/modules/%5BmoduleId%5D/lessons/%5BlessonId%5D/LessonClientWrapper.tsx) | TypeScript JSX | 175 | 29 | 16 | 220 |
 | [src/app/app/courses/\[courseId\]/modules/\[moduleId\]/lessons/\[lessonId\]/page.tsx](/src/app/app/courses/%5BcourseId%5D/modules/%5BmoduleId%5D/lessons/%5BlessonId%5D/page.tsx) | TypeScript JSX | 277 | 41 | 35 | 353 |
-| [src/app/app/courses/\[courseId\]/modules/\[moduleId\]/page.tsx](/src/app/app/courses/%5BcourseId%5D/modules/%5BmoduleId%5D/page.tsx) | TypeScript JSX | 326 | 26 | 28 | 380 |
+| [src/app/app/courses/\[courseId\]/modules/\[moduleId\]/page.tsx](/src/app/app/courses/%5BcourseId%5D/modules/%5BmoduleId%5D/page.tsx) | TypeScript JSX | 332 | 26 | 28 | 386 |
 | [src/app/app/courses/\[courseId\]/page-fixed.tsx](/src/app/app/courses/%5BcourseId%5D/page-fixed.tsx) | TypeScript JSX | 21 | 15 | 7 | 43 |
 | [src/app/app/courses/\[courseId\]/page-new.tsx](/src/app/app/courses/%5BcourseId%5D/page-new.tsx) | TypeScript JSX | 71 | 20 | 12 | 103 |
 | [src/app/app/courses/\[courseId\]/page.tsx](/src/app/app/courses/%5BcourseId%5D/page.tsx) | TypeScript JSX | 185 | 24 | 25 | 234 |
-| [src/app/app/courses/page.tsx](/src/app/app/courses/page.tsx) | TypeScript JSX | 81 | 32 | 11 | 124 |
-| [src/app/app/layout.tsx](/src/app/app/layout.tsx) | TypeScript JSX | 51 | 34 | 14 | 99 |
+| [src/app/app/courses/page.tsx](/src/app/app/courses/page.tsx) | TypeScript JSX | 89 | 32 | 12 | 133 |
+| [src/app/app/layout.tsx](/src/app/app/layout.tsx) | TypeScript JSX | 57 | 35 | 15 | 107 |
 | [src/app/app/page.tsx](/src/app/app/page.tsx) | TypeScript JSX | 239 | 15 | 14 | 268 |
+| [src/app/app/profile/\[profileId\]/actions.ts](/src/app/app/profile/%5BprofileId%5D/actions.ts) | TypeScript | 39 | 0 | 12 | 51 |
+| [src/app/app/profile/\[profileId\]/page.tsx](/src/app/app/profile/%5BprofileId%5D/page.tsx) | TypeScript JSX | 188 | 0 | 31 | 219 |
+| [src/app/app/profile/page.tsx](/src/app/app/profile/page.tsx) | TypeScript JSX | 11 | 0 | 6 | 17 |
 | [src/app/atom-test/page.tsx](/src/app/atom-test/page.tsx) | TypeScript JSX | 4 | 0 | 2 | 6 |
 | [src/app/global-error.tsx](/src/app/global-error.tsx) | TypeScript JSX | 20 | 4 | 4 | 28 |
 | [src/app/layout.tsx](/src/app/layout.tsx) | TypeScript JSX | 69 | 1 | 6 | 76 |
@@ -154,49 +182,81 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [src/app/page.tsx](/src/app/page.tsx) | TypeScript JSX | 32 | 1 | 4 | 37 |
 | [src/app/sentry-example-page/page.tsx](/src/app/sentry-example-page/page.tsx) | TypeScript JSX | 220 | 0 | 12 | 232 |
 | [src/app/state/state.ts](/src/app/state/state.ts) | TypeScript | 13 | 0 | 2 | 15 |
-| [src/components/AppSidebar.tsx](/src/components/AppSidebar.tsx) | TypeScript JSX | 374 | 59 | 40 | 473 |
+| [src/components/AppSidebar.tsx](/src/components/AppSidebar.tsx) | TypeScript JSX | 381 | 59 | 40 | 480 |
 | [src/components/AuthDisplay.tsx](/src/components/AuthDisplay.tsx) | TypeScript JSX | 110 | 0 | 9 | 119 |
 | [src/components/Badge.tsx](/src/components/Badge.tsx) | TypeScript JSX | 16 | 0 | 5 | 21 |
 | [src/components/ButtonFetcher.tsx](/src/components/ButtonFetcher.tsx) | TypeScript JSX | 223 | 25 | 31 | 279 |
 | [src/components/DynamicIcon.tsx](/src/components/DynamicIcon.tsx) | TypeScript JSX | 265 | 102 | 43 | 410 |
+| [src/components/ProfileAbout/ProfileAbout.container.tsx](/src/components/ProfileAbout/ProfileAbout.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileAbout/ProfileAbout.ui.tsx](/src/components/ProfileAbout/ProfileAbout.ui.tsx) | TypeScript JSX | 31 | 0 | 5 | 36 |
+| [src/components/ProfileAbout/index.ts](/src/components/ProfileAbout/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileAbout/types.ts](/src/components/ProfileAbout/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfileEducation/ProfileEducation.container.tsx](/src/components/ProfileEducation/ProfileEducation.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileEducation/ProfileEducation.ui.tsx](/src/components/ProfileEducation/ProfileEducation.ui.tsx) | TypeScript JSX | 31 | 0 | 4 | 35 |
+| [src/components/ProfileEducation/index.ts](/src/components/ProfileEducation/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileEducation/types.ts](/src/components/ProfileEducation/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfileExperience/ProfileExperience.container.tsx](/src/components/ProfileExperience/ProfileExperience.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileExperience/ProfileExperience.ui.tsx](/src/components/ProfileExperience/ProfileExperience.ui.tsx) | TypeScript JSX | 63 | 0 | 4 | 67 |
+| [src/components/ProfileExperience/index.ts](/src/components/ProfileExperience/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileExperience/types.ts](/src/components/ProfileExperience/types.ts) | TypeScript | 5 | 0 | 2 | 7 |
+| [src/components/ProfileHeader/ProfileHeader.container.tsx](/src/components/ProfileHeader/ProfileHeader.container.tsx) | TypeScript JSX | 35 | 0 | 10 | 45 |
+| [src/components/ProfileHeader/ProfileHeader.ui.tsx](/src/components/ProfileHeader/ProfileHeader.ui.tsx) | TypeScript JSX | 159 | 0 | 12 | 171 |
+| [src/components/ProfileHeader/index.ts](/src/components/ProfileHeader/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileHeader/types.ts](/src/components/ProfileHeader/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfileLanguages/ProfileLanguages.container.tsx](/src/components/ProfileLanguages/ProfileLanguages.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileLanguages/ProfileLanguages.ui.tsx](/src/components/ProfileLanguages/ProfileLanguages.ui.tsx) | TypeScript JSX | 38 | 0 | 5 | 43 |
+| [src/components/ProfileLanguages/index.ts](/src/components/ProfileLanguages/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileLanguages/types.ts](/src/components/ProfileLanguages/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfilePortfolio/ProfilePortfolio.container.tsx](/src/components/ProfilePortfolio/ProfilePortfolio.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfilePortfolio/ProfilePortfolio.ui.tsx](/src/components/ProfilePortfolio/ProfilePortfolio.ui.tsx) | TypeScript JSX | 121 | 0 | 6 | 127 |
+| [src/components/ProfilePortfolio/index.ts](/src/components/ProfilePortfolio/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfilePortfolio/types.ts](/src/components/ProfilePortfolio/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfileSidebar/ProfileSidebar.container.tsx](/src/components/ProfileSidebar/ProfileSidebar.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileSidebar/ProfileSidebar.ui.tsx](/src/components/ProfileSidebar/ProfileSidebar.ui.tsx) | TypeScript JSX | 117 | 1 | 6 | 124 |
+| [src/components/ProfileSidebar/index.ts](/src/components/ProfileSidebar/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileSidebar/types.ts](/src/components/ProfileSidebar/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
+| [src/components/ProfileSkills/ProfileSkills.container.tsx](/src/components/ProfileSkills/ProfileSkills.container.tsx) | TypeScript JSX | 5 | 0 | 2 | 7 |
+| [src/components/ProfileSkills/ProfileSkills.ui.tsx](/src/components/ProfileSkills/ProfileSkills.ui.tsx) | TypeScript JSX | 48 | 0 | 5 | 53 |
+| [src/components/ProfileSkills/index.ts](/src/components/ProfileSkills/index.ts) | TypeScript | 2 | 0 | 1 | 3 |
+| [src/components/ProfileSkills/types.ts](/src/components/ProfileSkills/types.ts) | TypeScript | 4 | 0 | 2 | 6 |
 | [src/components/SkillsCheck.tsx](/src/components/SkillsCheck.tsx) | TypeScript JSX | 514 | 56 | 74 | 644 |
 | [src/components/SkillsOnboardingModal.tsx](/src/components/SkillsOnboardingModal.tsx) | TypeScript JSX | 460 | 46 | 48 | 554 |
 | [src/components/\_\_tests\_\_/AuthDisplay.test.tsx](/src/components/__tests__/AuthDisplay.test.tsx) | TypeScript JSX | 122 | 6 | 27 | 155 |
 | [src/components/admin/AdminCourseForm.tsx](/src/components/admin/AdminCourseForm.tsx) | TypeScript JSX | 1,659 | 90 | 110 | 1,859 |
 | [src/components/anime-atom.tsx](/src/components/anime-atom.tsx) | TypeScript JSX | 30 | 0 | 4 | 34 |
 | [src/components/course/CourseHero.stories.tsx](/src/components/course/CourseHero.stories.tsx) | TypeScript JSX | 122 | 9 | 9 | 140 |
-| [src/components/course/CourseHero.tsx](/src/components/course/CourseHero.tsx) | TypeScript JSX | 295 | 25 | 24 | 344 |
+| [src/components/course/CourseHero.tsx](/src/components/course/CourseHero.tsx) | TypeScript JSX | 297 | 25 | 24 | 346 |
 | [src/components/course/CourseSummaryCard.tsx](/src/components/course/CourseSummaryCard.tsx) | TypeScript JSX | 215 | 19 | 21 | 255 |
 | [src/components/course/ModuleList.stories.tsx](/src/components/course/ModuleList.stories.tsx) | TypeScript JSX | 257 | 9 | 17 | 283 |
 | [src/components/course/ModuleList.tsx](/src/components/course/ModuleList.tsx) | TypeScript JSX | 358 | 29 | 37 | 424 |
-| [src/components/course/\_\_tests\_\_/CourseHero.test.tsx](/src/components/course/__tests__/CourseHero.test.tsx) | TypeScript JSX | 89 | 7 | 20 | 116 |
-| [src/components/course/\_\_tests\_\_/ModuleList.test.tsx](/src/components/course/__tests__/ModuleList.test.tsx) | TypeScript JSX | 141 | 10 | 32 | 183 |
-| [src/components/course/\_\_tests\_\_/integration.test.tsx](/src/components/course/__tests__/integration.test.tsx) | TypeScript JSX | 212 | 23 | 36 | 271 |
 | [src/components/courses/CourseCard.tsx](/src/components/courses/CourseCard.tsx) | TypeScript JSX | 282 | 20 | 26 | 328 |
 | [src/components/courses/CourseFilters.tsx](/src/components/courses/CourseFilters.tsx) | TypeScript JSX | 528 | 23 | 35 | 586 |
 | [src/components/courses/CourseList.tsx](/src/components/courses/CourseList.tsx) | TypeScript JSX | 453 | 16 | 34 | 503 |
 | [src/components/courses/VirtualizedCourseList.tsx](/src/components/courses/VirtualizedCourseList.tsx) | TypeScript JSX | 54 | 6 | 6 | 66 |
 | [src/components/courses/index.ts](/src/components/courses/index.ts) | TypeScript | 10 | 2 | 2 | 14 |
-| [src/components/debug/ProgressDebugPanel.tsx](/src/components/debug/ProgressDebugPanel.tsx) | TypeScript JSX | 350 | 29 | 37 | 416 |
+| [src/components/debug/ProgressDebugPanel.tsx](/src/components/debug/ProgressDebugPanel.tsx) | TypeScript JSX | 356 | 33 | 37 | 426 |
 | [src/components/examples/AuthExamples.tsx](/src/components/examples/AuthExamples.tsx) | TypeScript JSX | 219 | 36 | 34 | 289 |
 | [src/components/jotai-provider.tsx](/src/components/jotai-provider.tsx) | TypeScript JSX | 5 | 0 | 3 | 8 |
 | [src/components/kibo/CourseVideoPlayer.tsx](/src/components/kibo/CourseVideoPlayer.tsx) | TypeScript JSX | 19 | 21 | 7 | 47 |
 | [src/components/kibo/EnhancedCourseVideoPlayer.tsx](/src/components/kibo/EnhancedCourseVideoPlayer.tsx) | TypeScript JSX | 483 | 44 | 60 | 587 |
 | [src/components/kibo/KiboVideoPlayer.tsx](/src/components/kibo/KiboVideoPlayer.tsx) | TypeScript JSX | 914 | 80 | 106 | 1,100 |
 | [src/components/kibo/KiboVideoPlayerExamples.tsx](/src/components/kibo/KiboVideoPlayerExamples.tsx) | TypeScript JSX | 400 | 35 | 35 | 470 |
-| [src/components/lesson/Comments.tsx](/src/components/lesson/Comments.tsx) | TypeScript JSX | 296 | 25 | 34 | 355 |
-| [src/components/lesson/LessonPlayer.stories.tsx](/src/components/lesson/LessonPlayer.stories.tsx) | TypeScript JSX | 188 | 10 | 16 | 214 |
+| [src/components/lesson/Comments.tsx](/src/components/lesson/Comments.tsx) | TypeScript JSX | 301 | 25 | 35 | 361 |
+| [src/components/lesson/LessonPlayer.stories.tsx](/src/components/lesson/LessonPlayer.stories.tsx) | TypeScript JSX | 196 | 16 | 16 | 228 |
 | [src/components/lesson/LessonPlayer.tsx](/src/components/lesson/LessonPlayer.tsx) | TypeScript JSX | 446 | 32 | 64 | 542 |
-| [src/components/lesson/LessonSidebar.tsx](/src/components/lesson/LessonSidebar.tsx) | TypeScript JSX | 355 | 27 | 29 | 411 |
-| [src/components/lesson/LessonViewer.tsx](/src/components/lesson/LessonViewer.tsx) | TypeScript JSX | 225 | 30 | 39 | 294 |
-| [src/components/lesson/\_\_tests\_\_/LessonPlayer.test.tsx](/src/components/lesson/__tests__/LessonPlayer.test.tsx) | TypeScript JSX | 119 | 11 | 27 | 157 |
+| [src/components/lesson/LessonSidebar.tsx](/src/components/lesson/LessonSidebar.tsx) | TypeScript JSX | 355 | 28 | 29 | 412 |
+| [src/components/lesson/LessonViewer.tsx](/src/components/lesson/LessonViewer.tsx) | TypeScript JSX | 226 | 31 | 39 | 296 |
 | [src/components/lesson/index.ts](/src/components/lesson/index.ts) | TypeScript | 4 | 5 | 2 | 11 |
+| [src/components/profile-onboarding/ProfileOnboarding.tsx](/src/components/profile-onboarding/ProfileOnboarding.tsx) | TypeScript JSX | 39 | 0 | 5 | 44 |
+| [src/components/profile-onboarding/ProfileOnboardingForm.tsx](/src/components/profile-onboarding/ProfileOnboardingForm.tsx) | TypeScript JSX | 552 | 0 | 35 | 587 |
 | [src/components/progress/ProgressSyncIndicator.tsx](/src/components/progress/ProgressSyncIndicator.tsx) | TypeScript JSX | 330 | 43 | 38 | 411 |
 | [src/components/shared/FileUpload.tsx](/src/components/shared/FileUpload.tsx) | TypeScript JSX | 590 | 69 | 66 | 725 |
 | [src/components/theme-provider.tsx](/src/components/theme-provider.tsx) | TypeScript JSX | 9 | 0 | 3 | 12 |
 | [src/components/theme-toggle.tsx](/src/components/theme-toggle.tsx) | TypeScript JSX | 36 | 0 | 5 | 41 |
 | [src/components/ui/AvatarStackWrapper.tsx](/src/components/ui/AvatarStackWrapper.tsx) | TypeScript JSX | 183 | 32 | 22 | 237 |
-| [src/components/ui/ProgressRadial.tsx](/src/components/ui/ProgressRadial.tsx) | TypeScript JSX | 252 | 21 | 20 | 293 |
+| [src/components/ui/BalanceBadge.tsx](/src/components/ui/BalanceBadge.tsx) | TypeScript JSX | 390 | 55 | 27 | 472 |
+| [src/components/ui/ClientBalanceBadge.tsx](/src/components/ui/ClientBalanceBadge.tsx) | TypeScript JSX | 24 | 5 | 9 | 38 |
+| [src/components/ui/ProgressRadial.tsx](/src/components/ui/ProgressRadial.tsx) | TypeScript JSX | 250 | 21 | 20 | 291 |
 | [src/components/ui/accordion.tsx](/src/components/ui/accordion.tsx) | TypeScript JSX | 49 | 5 | 8 | 62 |
 | [src/components/ui/alert-dialog.tsx](/src/components/ui/alert-dialog.tsx) | TypeScript JSX | 126 | 6 | 14 | 146 |
 | [src/components/ui/alert.tsx](/src/components/ui/alert.tsx) | TypeScript JSX | 53 | 5 | 7 | 65 |
@@ -222,21 +282,25 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [src/components/ui/skeleton.tsx](/src/components/ui/skeleton.tsx) | TypeScript JSX | 11 | 0 | 3 | 14 |
 | [src/components/ui/slider.tsx](/src/components/ui/slider.tsx) | TypeScript JSX | 54 | 6 | 8 | 68 |
 | [src/components/ui/switch.tsx](/src/components/ui/switch.tsx) | TypeScript JSX | 24 | 5 | 4 | 33 |
+| [src/components/ui/tabs.tsx](/src/components/ui/tabs.tsx) | TypeScript JSX | 59 | 0 | 8 | 67 |
 | [src/components/ui/textarea.tsx](/src/components/ui/textarea.tsx) | TypeScript JSX | 19 | 5 | 5 | 29 |
 | [src/components/ui/tooltip.tsx](/src/components/ui/tooltip.tsx) | TypeScript JSX | 54 | 0 | 8 | 62 |
+| [src/components/ui/use-toast.ts](/src/components/ui/use-toast.ts) | TypeScript | 45 | 5 | 11 | 61 |
 | [src/env.js](/src/env.js) | JavaScript | 54 | 23 | 4 | 81 |
-| [src/hooks/use-mobile.ts](/src/hooks/use-mobile.ts) | TypeScript | 17 | 0 | 5 | 22 |
-| [src/hooks/useOptimizedProgress.ts](/src/hooks/useOptimizedProgress.ts) | TypeScript | 363 | 79 | 59 | 501 |
+| [src/hooks/use-mobile.ts](/src/hooks/use-mobile.ts) | TypeScript | 19 | 2 | 10 | 31 |
+| [src/hooks/useBalances.tsx](/src/hooks/useBalances.tsx) | TypeScript JSX | 336 | 92 | 64 | 492 |
+| [src/hooks/useOptimizedProgress.ts](/src/hooks/useOptimizedProgress.ts) | TypeScript | 368 | 79 | 59 | 506 |
 | [src/hooks/useProgress.ts](/src/hooks/useProgress.ts) | TypeScript | 512 | 80 | 73 | 665 |
-| [src/hooks/useSidebarItems.ts](/src/hooks/useSidebarItems.ts) | TypeScript | 531 | 62 | 25 | 618 |
+| [src/hooks/useSidebarItems.ts](/src/hooks/useSidebarItems.ts) | TypeScript | 543 | 63 | 26 | 632 |
 | [src/hooks/useSkillsService.ts](/src/hooks/useSkillsService.ts) | TypeScript | 288 | 52 | 51 | 391 |
 | [src/hooks/useUserPermissions.ts](/src/hooks/useUserPermissions.ts) | TypeScript | 203 | 66 | 33 | 302 |
 | [src/instrumentation-client.ts](/src/instrumentation-client.ts) | TypeScript | 11 | 11 | 9 | 31 |
 | [src/instrumentation.ts](/src/instrumentation.ts) | TypeScript | 10 | 0 | 4 | 14 |
 | [src/lib/\_\_tests\_\_/utils.test.ts](/src/lib/__tests__/utils.test.ts) | TypeScript | 96 | 0 | 19 | 115 |
 | [src/lib/auth/policies.ts](/src/lib/auth/policies.ts) | TypeScript | 113 | 72 | 27 | 212 |
-| [src/lib/auth/userResolver.server.ts](/src/lib/auth/userResolver.server.ts) | TypeScript | 127 | 73 | 26 | 226 |
+| [src/lib/auth/userResolver.server.ts](/src/lib/auth/userResolver.server.ts) | TypeScript | 130 | 72 | 26 | 228 |
 | [src/lib/data/courseTransforms.ts](/src/lib/data/courseTransforms.ts) | TypeScript | 262 | 42 | 20 | 324 |
+| [src/lib/format-currency.ts](/src/lib/format-currency.ts) | TypeScript | 22 | 5 | 5 | 32 |
 | [src/lib/logging/hooks.ts](/src/lib/logging/hooks.ts) | TypeScript | 341 | 41 | 44 | 426 |
 | [src/lib/logging/utils.ts](/src/lib/logging/utils.ts) | TypeScript | 291 | 39 | 36 | 366 |
 | [src/lib/performance/caching.ts](/src/lib/performance/caching.ts) | TypeScript | 438 | 128 | 84 | 650 |
@@ -261,11 +325,17 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [src/providers/UserContext.tsx](/src/providers/UserContext.tsx) | TypeScript JSX | 139 | 66 | 33 | 238 |
 | [src/schemas/course.ts](/src/schemas/course.ts) | TypeScript | 328 | 26 | 21 | 375 |
 | [src/services/observability/logging.ts](/src/services/observability/logging.ts) | TypeScript | 504 | 118 | 78 | 700 |
+| [src/services/profile/ProfileRepository.ts](/src/services/profile/ProfileRepository.ts) | TypeScript | 245 | 15 | 19 | 279 |
+| [src/services/profile/ProfileService.ts](/src/services/profile/ProfileService.ts) | TypeScript | 48 | 0 | 9 | 57 |
+| [src/services/profile/index.ts](/src/services/profile/index.ts) | TypeScript | 7 | 0 | 3 | 10 |
+| [src/services/profile/profileFetchers.ts](/src/services/profile/profileFetchers.ts) | TypeScript | 108 | 0 | 18 | 126 |
+| [src/services/profile/types.ts](/src/services/profile/types.ts) | TypeScript | 96 | 0 | 11 | 107 |
 | [src/styles/globals.css](/src/styles/globals.css) | PostCSS | 119 | 0 | 7 | 126 |
-| [src/types/auth.ts](/src/types/auth.ts) | TypeScript | 70 | 65 | 14 | 149 |
+| [src/types/auth.ts](/src/types/auth.ts) | TypeScript | 73 | 68 | 14 | 155 |
 | [src/types/course.ts](/src/types/course.ts) | TypeScript | 293 | 18 | 23 | 334 |
 | [src/types/courses-simple.ts](/src/types/courses-simple.ts) | TypeScript | 88 | 44 | 26 | 158 |
 | [src/types/courses.ts](/src/types/courses.ts) | TypeScript | 756 | 432 | 352 | 1,540 |
+| [src/types/finance.ts](/src/types/finance.ts) | TypeScript | 282 | 33 | 41 | 356 |
 | [src/types/gigs.ts](/src/types/gigs.ts) | TypeScript | 155 | 25 | 23 | 203 |
 | [src/types/logging.ts](/src/types/logging.ts) | TypeScript | 143 | 19 | 19 | 181 |
 | [src/types/profile.ts](/src/types/profile.ts) | TypeScript | 67 | 79 | 11 | 157 |
@@ -279,6 +349,6 @@ Total : 269 files,  61642 codes, 7259 comments, 11898 blanks, all 80799 lines
 | [src/utils/progressDebouncer.ts](/src/utils/progressDebouncer.ts) | TypeScript | 253 | 82 | 61 | 396 |
 | [src/utils/routing.ts](/src/utils/routing.ts) | TypeScript | 135 | 46 | 28 | 209 |
 | [src/utils/time.ts](/src/utils/time.ts) | TypeScript | 135 | 69 | 25 | 229 |
-| [tsconfig.json](/tsconfig.json) | JSON with Comments | 36 | 4 | 4 | 44 |
+| [tsconfig.json](/tsconfig.json) | JSON with Comments | 37 | 4 | 4 | 45 |
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
