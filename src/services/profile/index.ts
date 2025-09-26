@@ -1,8 +1,11 @@
-import { createProfileRepository } from "./ProfileRepository";
+import {
+  createProfileRepository,
+  type ConvexProfileRepositoryOptions,
+} from "./ProfileRepository";
 import { DefaultProfileService } from "./ProfileService";
 
-export function createProfileService() {
-  const repository = createProfileRepository();
+export function createProfileService(options?: ConvexProfileRepositoryOptions) {
+  const repository = createProfileRepository(options);
   return new DefaultProfileService(repository);
 }
 

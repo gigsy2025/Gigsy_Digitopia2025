@@ -6,11 +6,42 @@ import type { FunctionReference } from "convex/server";
 import type { Id } from "convex/_generated/dataModel";
 
 import type { ProfileViewModel } from "./types";
-import type { ProfileCreationInput } from "../../../shared/profile/profileCreationSchema";
+import type {
+  ProfileCreationInput,
+  ProfileUpdateInput,
+} from "../../../shared/profile/profileCreationSchema";
 
 export interface ProfileQueryOptions {
   token?: string;
   url?: string;
+}
+
+function resolveUpdateProfileMutationRef(): FunctionReference<
+  "mutation",
+  "public",
+  { profileId: Id<"profiles"> } & ProfileUpdateInput,
+  ProfileViewModel,
+  string | undefined
+> {
+  const ref = (
+    api.profile as {
+      updateProfile?: FunctionReference<
+        "mutation",
+        "public",
+        { profileId: Id<"profiles"> } & ProfileUpdateInput,
+        ProfileViewModel,
+        string | undefined
+      >;
+    }
+  ).updateProfile;
+
+  if (!ref) {
+    throw new Error(
+      "The updateProfile mutation reference is missing. Run `npx convex dev` to regenerate Convex types.",
+    );
+  }
+
+  return ref;
 }
 
 function resolveCreateProfileMutationRef(): FunctionReference<
@@ -106,6 +137,27 @@ export async function createProfileMutation(
 
   if (!result) {
     throw new Error("Failed to create profile");
+  }
+
+  return result;
+}
+
+export async function updateProfileMutation(
+  profileId: Id<"profiles">,
+  input: ProfileUpdateInput,
+  options?: ProfileQueryOptions,
+): Promise<ProfileViewModel> {
+  const result = await fetchMutation(
+    resolveUpdateProfileMutationRef(),
+    {
+      profileId,
+      ...input,
+    },
+    sanitizeOptions(options),
+  );
+
+  if (!result) {
+    throw new Error("Failed to update profile");
   }
 
   return result;

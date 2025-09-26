@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileHeaderEditButton } from "./ProfileHeaderEditButton";
 import type { ProfileHeaderProps } from "./types";
 
 function getInitials(name: string): string {
@@ -87,6 +88,7 @@ export function ProfileHeaderUI({ summary }: ProfileHeaderUIProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <ProfileHeaderEditButton summary={summary} />
             {summary.social?.linkedinUrl ? (
               <Button asChild variant="default">
                 <a

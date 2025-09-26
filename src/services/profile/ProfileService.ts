@@ -5,6 +5,7 @@ import type { Id } from "convex/_generated/dataModel";
 import type { ProfileViewModel } from "./types";
 import type { ProfileRepository } from "./ProfileRepository";
 import type { ProfileQueryOptions } from "./profileFetchers";
+import type { ProfileUpdateInput } from "shared/profile/profileCreationSchema";
 import {
   preloadProfileBySlug,
   preloadProfileByUserId,
@@ -13,6 +14,10 @@ import {
 export interface ProfileService {
   getProfile(slug: string): Promise<ProfileViewModel | null>;
   getProfileByUserId(userId: Id<"users">): Promise<ProfileViewModel | null>;
+  updateProfile(
+    profileId: Id<"profiles">,
+    input: ProfileUpdateInput,
+  ): Promise<ProfileViewModel>;
   preloadProfile(
     slug: string,
     options?: ProfileQueryOptions,
@@ -38,6 +43,13 @@ export class DefaultProfileService implements ProfileService {
     userId: Id<"users">,
   ): Promise<ProfileViewModel | null> {
     return this.repository.fetchProfileByUserId(userId);
+  }
+
+  async updateProfile(
+    profileId: Id<"profiles">,
+    input: ProfileUpdateInput,
+  ): Promise<ProfileViewModel> {
+    return this.repository.updateProfile(profileId, input);
   }
 
   async preloadProfile(

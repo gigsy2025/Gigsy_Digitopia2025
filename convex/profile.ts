@@ -4,7 +4,9 @@ import { v, ConvexError } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   ProfileCreationInputSchema,
+  ProfileUpdateInputSchema,
   sanitizeProfileCreationInput,
+  sanitizeProfileUpdateInput,
   fallbackSlugCandidates,
   type SanitizedProfileCreationInput,
 } from "../shared/profile/profileCreationSchema";
@@ -16,6 +18,7 @@ type LanguageLevel = "basic" | "conversational" | "fluent" | "native";
 
 type ProfileSummary = {
   userId: Id<"users">;
+  profileRecordId: Id<"profiles">;
   slug: string;
   fullName: string;
   headline?: string;
@@ -43,6 +46,7 @@ type ProfileSummary = {
     githubUrl?: string;
     linkedinUrl?: string;
   };
+  viewerCanEdit?: boolean;
 };
 
 type ProfileAboutSection = {
@@ -175,6 +179,7 @@ function toProfileViewModel(docs: ProfileDocuments): ProfileViewModel {
 
   const summary: ProfileSummary = {
     userId: profile.userId,
+    profileRecordId: profile._id,
     slug: profile.slug,
     fullName: user.name,
     headline: profile.headline ?? user.profile?.headline ?? undefined,
@@ -205,6 +210,7 @@ function toProfileViewModel(docs: ProfileDocuments): ProfileViewModel {
       githubUrl: user.profile?.portfolio?.githubUrl ?? undefined,
       linkedinUrl: user.profile?.portfolio?.linkedinUrl ?? undefined,
     },
+    viewerCanEdit: false,
   };
 
   const about: ProfileAboutSection | undefined = profile.bio
@@ -367,6 +373,49 @@ const ProfileCreationArgs = v.object({
   contactEmail: v.optional(v.string()),
 });
 
+const ProfileUpdateArgs = v.object({
+  profileId: v.id("profiles"),
+  headline: v.optional(v.union(v.string(), v.null())),
+  bio: v.optional(v.union(v.string(), v.null())),
+  experienceLevel: v.optional(
+    v.union(
+      v.literal("beginner"),
+      v.literal("intermediate"),
+      v.literal("advanced"),
+      v.literal("expert"),
+    ),
+  ),
+  visibility: v.optional(
+    v.union(v.literal("public"), v.literal("platform"), v.literal("private")),
+  ),
+  skills: v.optional(v.union(v.array(v.string()), v.null())),
+  availability: v.optional(
+    v.union(
+      v.null(),
+      v.object({
+        hoursPerWeek: v.number(),
+        contractType: v.union(
+          v.literal("freelance"),
+          v.literal("part-time"),
+          v.literal("full-time"),
+        ),
+        availableFrom: v.optional(v.string()),
+      }),
+    ),
+  ),
+  location: v.optional(
+    v.union(
+      v.null(),
+      v.object({
+        country: v.optional(v.string()),
+        city: v.optional(v.string()),
+        timezone: v.optional(v.string()),
+      }),
+    ),
+  ),
+  contactEmail: v.optional(v.union(v.string(), v.null())),
+});
+
 function calculateInitialCompleteness(
   input: SanitizedProfileCreationInput,
 ): number {
@@ -476,7 +525,6 @@ async function ensureAuthenticatedUser(ctx: MutationCtx): Promise<{
   user: Doc<"users">;
 }> {
   const identity = await ctx.auth.getUserIdentity();
-  console.log("identity", identity);
   if (!identity) {
     throw new ConvexError("authentication required to create a profile");
   }
@@ -493,6 +541,18 @@ async function ensureAuthenticatedUser(ctx: MutationCtx): Promise<{
   }
 
   return { identity, user };
+}
+
+function resolveUserFullName(user: Doc<"users">, profile: Doc<"profiles">) {
+  if (user.name?.trim()) {
+    return user.name.trim();
+  }
+
+  if (profile.slug?.trim()) {
+    return profile.slug.trim();
+  }
+
+  return `member-${user._id}`;
 }
 
 export const createProfile = mutation({
@@ -588,6 +648,175 @@ export const createProfile = mutation({
     }
 
     const docs = await loadProfileDocuments(ctx, createdProfile);
+    return toProfileViewModel(docs);
+  },
+});
+
+function buildUpdatePatch(
+  sanitized:
+    | ReturnType<typeof sanitizeProfileUpdateInput>
+    | SanitizedProfileCreationInput,
+): Partial<Doc<"profiles">> {
+  const patch: Partial<Doc<"profiles">> = {};
+
+  if (hasOwnProperty(sanitized, "headline")) {
+    patch.headline = sanitized.headline ?? undefined;
+  }
+
+  if (hasOwnProperty(sanitized, "bio")) {
+    patch.bio = sanitized.bio ?? undefined;
+  }
+
+  if (sanitized.experienceLevel !== undefined) {
+    patch.experienceLevel = sanitized.experienceLevel;
+  }
+
+  if (hasOwnProperty(sanitized, "skills")) {
+    patch.skills = sanitized.skills ?? [];
+  }
+
+  if (hasOwnProperty(sanitized, "visibility") && sanitized.visibility) {
+    patch.visibility = sanitized.visibility;
+  }
+
+  if (hasOwnProperty(sanitized, "availability")) {
+    patch.availability = sanitized.availability
+      ? {
+          hoursPerWeek: sanitized.availability.hoursPerWeek,
+          contractType: sanitized.availability.contractType,
+          availableFrom: sanitized.availability.availableFrom,
+        }
+      : undefined;
+  }
+
+  if (hasOwnProperty(sanitized, "location")) {
+    patch.country = sanitized.location?.country ?? undefined;
+    patch.city = sanitized.location?.city ?? undefined;
+    patch.timezone = sanitized.location?.timezone ?? undefined;
+  }
+
+  if (hasOwnProperty(sanitized, "contactEmail")) {
+    patch.contactEmail = sanitized.contactEmail ?? undefined;
+  }
+
+  return patch;
+}
+
+function hasOwnProperty<T extends object, K extends PropertyKey>(
+  object: T,
+  key: K,
+): key is K & keyof T {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+export const updateProfile = mutation({
+  args: ProfileUpdateArgs,
+  handler: async (ctx, args) => {
+    const { user } = await ensureAuthenticatedUser(ctx);
+
+    const profile = await ctx.db.get(args.profileId);
+    if (!profile) {
+      throw new ConvexError("Profile not found");
+    }
+
+    if (profile.userId !== user._id) {
+      throw new ConvexError("Unauthorized profile update");
+    }
+
+    const validation = ProfileUpdateInputSchema.safeParse({
+      headline: args.headline,
+      bio: args.bio,
+      experienceLevel: args.experienceLevel,
+      visibility: args.visibility,
+      skills: args.skills,
+      availability: args.availability,
+      location: args.location,
+      contactEmail: args.contactEmail,
+    });
+
+    if (!validation.success) {
+      throw new ConvexError("Invalid profile update payload");
+    }
+
+    const sanitized = sanitizeProfileUpdateInput(validation.data);
+    const patch = buildUpdatePatch(sanitized);
+
+    if (Object.keys(patch).length === 0) {
+      return await loadProfileDocuments(ctx, profile).then(toProfileViewModel);
+    }
+
+    const now = Date.now();
+    const patchWithMeta: Partial<Doc<"profiles">> = {
+      ...patch,
+      updatedAt: now,
+      lastUpdated: now,
+      lastActivityAt: now,
+      version: (profile.version ?? 1) + 1,
+    };
+
+    await ctx.db.patch(args.profileId, patchWithMeta);
+
+    const updatedProfile = await ctx.db.get(args.profileId);
+    if (!updatedProfile) {
+      throw new ConvexError("Profile update failed");
+    }
+
+    const existingUser = await ctx.db.get(user._id);
+    if (!existingUser) {
+      throw new ConvexError("User record missing after profile update");
+    }
+
+    const resolvedFullName = resolveUserFullName(existingUser, updatedProfile);
+
+    const resolvedExperienceLevel =
+      updatedProfile.experienceLevel ?? profile.experienceLevel;
+
+    const resolvedVisibility = updatedProfile.visibility ?? profile.visibility;
+
+    const updatedSanitizedInput: SanitizedProfileCreationInput = {
+      fullName: resolvedFullName,
+      headline: updatedProfile.headline ?? undefined,
+      bio: updatedProfile.bio ?? undefined,
+      experienceLevel: resolvedExperienceLevel,
+      visibility: resolvedVisibility,
+      skills: updatedProfile.skills ?? profile.skills ?? [],
+      availability: updatedProfile.availability
+        ? {
+            hoursPerWeek: updatedProfile.availability.hoursPerWeek,
+            contractType: updatedProfile.availability.contractType,
+            availableFrom:
+              updatedProfile.availability.availableFrom ?? undefined,
+          }
+        : undefined,
+      location:
+        updatedProfile.country || updatedProfile.city || updatedProfile.timezone
+          ? {
+              country: updatedProfile.country ?? undefined,
+              city: updatedProfile.city ?? undefined,
+              timezone: updatedProfile.timezone ?? undefined,
+            }
+          : undefined,
+      social: undefined,
+      contactEmail:
+        updatedProfile.contactEmail ?? existingUser.email ?? undefined,
+    };
+
+    const completeness = calculateInitialCompleteness(updatedSanitizedInput);
+
+    const userProfilePatch = buildUserProfilePatch(
+      updatedSanitizedInput,
+      now,
+      existingUser.profile,
+      completeness,
+    );
+
+    await ctx.db.patch(user._id, {
+      name: resolvedFullName,
+      profile: userProfilePatch,
+      updatedAt: now,
+    });
+
+    const docs = await loadProfileDocuments(ctx, updatedProfile);
     return toProfileViewModel(docs);
   },
 });

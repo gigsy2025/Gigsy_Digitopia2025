@@ -98,6 +98,7 @@ export async function generateMetadata({
             avatarUrl: currentUser.avatar ?? profile.summary.avatarUrl,
             userId: currentUser.id,
             slug: currentUserSlug,
+            viewerCanEdit: true,
           },
         };
       }
@@ -195,7 +196,13 @@ function buildProfileViewContext(
     profileId === currentUserSlug;
 
   if (!isViewingOwnProfile) {
-    return profile;
+    return {
+      ...profile,
+      summary: {
+        ...profile.summary,
+        viewerCanEdit: false,
+      },
+    };
   }
 
   const clerkFullName = [currentUser.firstName, currentUser.lastName]
@@ -213,6 +220,7 @@ function buildProfileViewContext(
       avatarUrl: currentUser.avatar ?? profile.summary.avatarUrl,
       userId: currentUser.id,
       slug: currentUserSlug,
+      viewerCanEdit: true,
     },
   };
 }

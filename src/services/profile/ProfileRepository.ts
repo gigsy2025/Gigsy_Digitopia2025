@@ -6,8 +6,12 @@ import {
   fetchProfileBySlug as convexFetchProfileBySlug,
   fetchProfileByUserId as convexFetchProfileByUserId,
   createProfileMutation as convexCreateProfile,
+  updateProfileMutation as convexUpdateProfile,
 } from "./profileFetchers";
-import type { ProfileCreationInput } from "shared/profile/profileCreationSchema";
+import type {
+  ProfileCreationInput,
+  ProfileUpdateInput,
+} from "shared/profile/profileCreationSchema";
 
 /**
  * Abstraction over the data source powering profile reads.
@@ -16,6 +20,10 @@ export interface ProfileRepository {
   fetchProfileBySlug(slug: string): Promise<ProfileViewModel | null>;
   fetchProfileByUserId(userId: Id<"users">): Promise<ProfileViewModel | null>;
   createProfile(input: ProfileCreationInput): Promise<ProfileViewModel>;
+  updateProfile(
+    profileId: Id<"profiles">,
+    input: ProfileUpdateInput,
+  ): Promise<ProfileViewModel>;
 }
 
 /**
@@ -81,6 +89,20 @@ export class ConvexProfileRepository implements ProfileRepository {
       );
     }
   }
+
+  async updateProfile(
+    profileId: Id<"profiles">,
+    input: ProfileUpdateInput,
+  ): Promise<ProfileViewModel> {
+    try {
+      return convexUpdateProfile(profileId, input, this.options);
+    } catch (error) {
+      throw new ProfileDataAccessError(
+        `[ConvexProfileRepository] Failed to update profile "${profileId}"`,
+        { cause: error },
+      );
+    }
+  }
 }
 
 /**
@@ -102,6 +124,10 @@ export class InMemoryProfileRepository implements ProfileRepository {
   async createProfile(): Promise<ProfileViewModel> {
     return buildMockProfile("mock-user");
   }
+
+  async updateProfile(): Promise<ProfileViewModel> {
+    return buildMockProfile("mock-user");
+  }
 }
 
 export function createProfileRepository(
@@ -120,6 +146,7 @@ function buildMockProfile(slug: string): ProfileViewModel {
   return {
     summary: {
       userId: "user_mock_123",
+      profileRecordId: "profile_mock_123",
       slug,
       fullName: "Alex Morgan",
       headline: "Senior Frontend Engineer · Design Systems Specialist",

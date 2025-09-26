@@ -178,6 +178,144 @@ export function sanitizeProfileCreationInput(
   };
 }
 
+const NullableString = (length: { min?: number; max: number }) =>
+  z
+    .string()
+    .trim()
+    .min(
+      length.min ?? 0,
+      length.min ? `Must be at least ${length.min} characters` : undefined,
+    )
+    .max(length.max)
+    .optional()
+    .nullable();
+
+export const ProfileUpdateInputSchema = z
+  .object({
+    headline: NullableString({ min: 3, max: 120 }),
+    bio: NullableString({ min: 20, max: 500 }),
+    experienceLevel: z.enum(EXPERIENCE_LEVELS).optional(),
+    visibility: z.enum(VISIBILITY_LEVELS).optional(),
+    skills: z
+      .array(z.string().trim().min(1).max(50))
+      .max(20)
+      .optional()
+      .nullable(),
+    availability: AvailabilitySchema.nullable().optional(),
+    location: LocationSchema.nullable().optional(),
+    contactEmail: z.string().trim().email().optional().nullable(),
+  })
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    "At least one field must be provided for update",
+  );
+
+export type ProfileUpdateInput = z.infer<typeof ProfileUpdateInputSchema>;
+
+export interface SanitizedProfileUpdateInput {
+  headline?: string | null;
+  bio?: string | null;
+  experienceLevel?: ExperienceLevel;
+  visibility?: Visibility;
+  skills?: string[] | null;
+  availability?: {
+    hoursPerWeek: number;
+    contractType: ContractType;
+    availableFrom?: string;
+  } | null;
+  location?: {
+    country?: string;
+    city?: string;
+    timezone?: string;
+  } | null;
+  contactEmail?: string | null;
+}
+
+export function sanitizeProfileUpdateInput(
+  payload: ProfileUpdateInput,
+): SanitizedProfileUpdateInput {
+  const sanitized: SanitizedProfileUpdateInput = {};
+
+  if ("headline" in payload) {
+    if (payload.headline === null) {
+      sanitized.headline = null;
+    } else if (payload.headline && payload.headline.trim().length > 0) {
+      sanitized.headline = sanitizePlainText(payload.headline, 120);
+    } else {
+      sanitized.headline = null;
+    }
+  }
+
+  if ("bio" in payload) {
+    if (payload.bio === null) {
+      sanitized.bio = null;
+    } else if (payload.bio && payload.bio.trim().length > 0) {
+      sanitized.bio = sanitizeRichText(payload.bio, 500);
+    } else {
+      sanitized.bio = null;
+    }
+  }
+
+  if (payload.experienceLevel !== undefined) {
+    sanitized.experienceLevel = payload.experienceLevel;
+  }
+
+  if (payload.visibility !== undefined) {
+    sanitized.visibility = payload.visibility;
+  }
+
+  if ("skills" in payload) {
+    if (payload.skills === null) {
+      sanitized.skills = null;
+    } else if (Array.isArray(payload.skills)) {
+      const uniqueSkills = Array.from(
+        new Set(payload.skills.map((skill) => sanitizePlainText(skill, 50))),
+      ).filter(Boolean);
+      sanitized.skills = uniqueSkills;
+    }
+  }
+
+  if ("availability" in payload) {
+    if (payload.availability === null) {
+      sanitized.availability = null;
+    } else if (payload.availability) {
+      sanitized.availability = {
+        hoursPerWeek: payload.availability.hoursPerWeek,
+        contractType: payload.availability.contractType,
+        availableFrom: payload.availability.availableFrom
+          ? new Date(payload.availability.availableFrom).toISOString()
+          : undefined,
+      };
+    }
+  }
+
+  if ("location" in payload) {
+    if (payload.location === null) {
+      sanitized.location = null;
+    } else if (payload.location) {
+      sanitized.location = {
+        country: payload.location.country
+          ? sanitizePlainText(payload.location.country, 100)
+          : undefined,
+        city: payload.location.city
+          ? sanitizePlainText(payload.location.city, 100)
+          : undefined,
+        timezone: payload.location.timezone?.trim(),
+      };
+    }
+  }
+
+  if ("contactEmail" in payload) {
+    if (payload.contactEmail === null) {
+      sanitized.contactEmail = null;
+    } else if (payload.contactEmail) {
+      sanitized.contactEmail = payload.contactEmail.toLowerCase();
+    }
+  }
+
+  return sanitized;
+}
+
 export function normalizeSlug(input: string): string {
   return input
     .toLowerCase()

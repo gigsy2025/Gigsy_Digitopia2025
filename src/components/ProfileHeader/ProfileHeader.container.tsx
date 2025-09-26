@@ -10,7 +10,10 @@ export function ProfileHeaderContainer(props: ProfileHeaderProps) {
 
   const summary = useMemo(() => {
     if (!user) {
-      return props.summary;
+      return {
+        ...props.summary,
+        viewerCanEdit: props.summary.viewerCanEdit ?? false,
+      };
     }
 
     const normalizedSlug = user.username ?? user.id;
@@ -18,7 +21,10 @@ export function ProfileHeaderContainer(props: ProfileHeaderProps) {
       props.summary.userId === user.id || props.summary.slug === normalizedSlug;
 
     if (!isSelf) {
-      return props.summary;
+      return {
+        ...props.summary,
+        viewerCanEdit: false,
+      };
     }
 
     const clerkFullName = [user.firstName, user.lastName]
@@ -37,6 +43,7 @@ export function ProfileHeaderContainer(props: ProfileHeaderProps) {
       avatarUrl: user.avatar ?? props.summary.avatarUrl,
       userId: user.id,
       slug: normalizedSlug,
+      viewerCanEdit: true,
     };
   }, [props.summary, user]);
 

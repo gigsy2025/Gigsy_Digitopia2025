@@ -2,6 +2,7 @@ import type { ExperienceLevel, PortfolioProject } from "@/types/profile";
 
 export interface ProfileSummary {
   userId: string;
+  profileRecordId: string;
   slug: string;
   fullName: string;
   headline?: string;
@@ -29,6 +30,7 @@ export interface ProfileSummary {
     githubUrl?: string;
     linkedinUrl?: string;
   };
+  viewerCanEdit?: boolean;
 }
 
 export interface ProfileAboutSection {

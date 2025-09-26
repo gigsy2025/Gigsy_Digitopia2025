@@ -9,6 +9,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/public(.*)", // Allow public API routes
   "/trpc/public(.*)", // Allow public tRPC routes
   "/favicon.ico", // Allow favicon
+  "/", // Allow root route
+  "/app/profile/(.*)", // Allow profile routes
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
