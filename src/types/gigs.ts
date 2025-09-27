@@ -141,6 +141,7 @@ export interface GigListItem {
   title: string;
   description: string;
   category: GigCategory;
+  difficultyLevel: DifficultyLevel;
   status: GigStatus;
   budget: GigBudget;
   skills: string[];
@@ -150,6 +151,13 @@ export interface GigListItem {
   metadata?: GigMetadata;
   _creationTime: number;
   employerId: Id<"users">;
+}
+
+export interface GigDetail extends GigListItem {
+  longDescription: string;
+  responsibilities: string[];
+  requirements: string[];
+  perks?: string[];
 }
 
 // Gig statistics interface

@@ -404,8 +404,6 @@ const schema = defineSchema({
 
     // --- Standard System Fields ---
     updatedAt: v.number(), // Timestamp of the last modification.
-    createdBy: v.string(), // The clerkId of the user who created this record.
-    deletedAt: v.optional(v.number()), // Timestamp for soft deletes. Null if not deleted.
   })
     // --- Indexes for Performance ---
     // To quickly find all gigs posted by a specific employer.
@@ -444,33 +442,34 @@ const schema = defineSchema({
       "experienceRequired",
     ])
 
-    // Find non-deleted gigs efficiently
-    .index("by_active", ["deletedAt"])
-
     // Find featured gigs
     .index("by_featured", ["metadata.featuredUntil"]),
 
   applications: defineTable({
     // --- Core Relationships ---
-    gigId: v.id("gigs"), // The `_id` of the gig being applied to.
-    studentId: v.id("users"), // The `_id` of the student who is applying.
+    gigId: v.id("gigs"), // The gig being applied to.
+    userId: v.id("users"), // The user who is applying.
 
     // --- Application Content & State ---
-    coverLetter: v.string(), // The text content of the student's application.
-    status: v.string(), // The current state of the application, e.g., "submitted", "accepted", "rejected".
+    coverLetter: v.string(), // The text content of the application.
+    status: v.union(
+      v.literal("submitted"),
+      v.literal("in_review"),
+      v.literal("accepted"),
+      v.literal("rejected"),
+      v.literal("withdrawn"),
+    ),
 
     // --- Standard System Fields ---
     updatedAt: v.number(), // Timestamp of the last modification.
-    createdBy: v.string(), // The clerkId of the user who created this record.
-    deletedAt: v.optional(v.number()), // Timestamp for soft deletes (or for "withdrawn" status).
   })
     // --- Indexes for Performance ---
     // A compound index to quickly find a specific application and enforce uniqueness.
-    .index("by_gig_and_student", ["gigId", "studentId"])
+    .index("by_gig_and_user", ["gigId", "userId"])
     // To quickly find all applications for a specific gig.
     .index("by_gig", ["gigId"])
-    // To quickly find all applications submitted by a specific student.
-    .index("by_student", ["studentId"]),
+    // To quickly find all applications submitted by a specific user.
+    .index("by_user", ["userId"]),
 
   // --- LMS Core Content Tables ---
 

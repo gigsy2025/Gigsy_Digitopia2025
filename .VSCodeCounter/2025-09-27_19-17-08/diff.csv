@@ -1,0 +1,22 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "JSON with Comments", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.windsurf\mcp.json", "JSON with Comments", 0, 0, 7, 0, 0, 7
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\profile.ts", "TypeScript", -2, 0, 0, 0, 0, -2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\shared\profile\profileCreationSchema.ts", "TypeScript", -3, 0, 0, 0, 0, -3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\profile\[profileId]\edit\ProfileEditForm.tsx", "TypeScript JSX", 0, 90, 0, 0, 0, 90
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\detail\GigDetailContainer.tsx", "TypeScript JSX", 0, 141, 0, 0, 12, 153
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\form\GigFormContainer.tsx", "TypeScript JSX", 0, 245, 0, 0, 31, 276
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\form\GigFormStepBudget.tsx", "TypeScript JSX", 0, 150, 0, 0, 12, 162
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\form\GigFormStepGeneral.tsx", "TypeScript JSX", 0, 87, 0, 0, 10, 97
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\form\GigFormStepRequirements.tsx", "TypeScript JSX", 0, 153, 0, 0, 18, 171
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\form\GigFormStepReview.tsx", "TypeScript JSX", 0, 137, 0, 0, 21, 158
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\list\GigCard.tsx", "TypeScript JSX", 0, 149, 0, 0, 11, 160
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\list\GigFilters.tsx", "TypeScript JSX", 0, 297, 0, 0, 23, 320
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\list\GigList.tsx", "TypeScript JSX", 0, 36, 0, 0, 3, 39
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\list\GigListContainer.tsx", "TypeScript JSX", 0, 178, 0, 0, 33, 211
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\list\GigListPagination.tsx", "TypeScript JSX", 0, 100, 0, 0, 11, 111
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\shared\EmptyState.tsx", "TypeScript JSX", 0, 41, 0, 0, 4, 45
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\shared\LoadingSkeleton.tsx", "TypeScript JSX", 0, 18, 0, 0, 3, 21
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useGigData.ts", "TypeScript", 272, 0, 0, 1, 41, 314
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\mock\gigs.ts", "TypeScript", 195, 0, 0, 0, 15, 210
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\gigs.ts", "TypeScript", 7, 0, 0, 0, 1, 8
+"Total", "-", 469, 1822, 7, 1, 249, 2548

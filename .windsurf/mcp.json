@@ -1,0 +1,7 @@
+{
+    "servers": {
+        "memory": {
+            "path": "builtin:memory"
+        }
+    }
+}
