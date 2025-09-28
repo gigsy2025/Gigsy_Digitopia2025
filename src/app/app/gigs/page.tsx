@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const candidateNavItems = [
-  { href: "/gigs", label: "Browse gigs", active: true },
+  { href: "/app/gigs", label: "Browse gigs", active: true },
   { href: "/profile/applications", label: "My applications" },
   { href: "/profile/saved", label: "Saved gigs" },
 ];

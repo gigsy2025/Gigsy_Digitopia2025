@@ -4,9 +4,6 @@
  * Central hub for generating dynamic navigation based on user permissions,
  * feature flags, and business logic. Supports real-time updates and caching.
  *
- * PERFORMANCE: Memoized menu generation with selective invalidation.
- * SCALABILITY: Data-driven approach supports unlimited menu complexity.
- *
  * @author Principal Engineer
  * @version 1.0.0
  * @since 2025-01-14
@@ -14,10 +11,7 @@
 
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import {
-  useUserPermissions,
-  PermissionUtils,
-} from "@/hooks/useUserPermissions";
+import { useUserPermissions, PermissionUtils } from "@/hooks/useUserPermissions";
 import type {
   NavigationGroup,
   NavigationItem,
@@ -31,6 +25,51 @@ import { useUser } from "@/providers/UserContext";
  * Core navigation configuration for Gigsy platform
  * Organized by business domains for maintainability
  */
+function createGigMarketplaceItems(): NavigationItem[] {
+  return [
+    {
+      id: "gig-browse",
+      title: "Browse Gigs",
+      subtitle: "Curated opportunities",
+      href: "/app/gigs",
+      icon: "Compass",
+      type: "route",
+      priority: 1,
+      analyticsCategory: "gigs",
+    },
+    {
+      id: "gig-saved",
+      title: "Saved Gigs",
+      subtitle: "Bookmarked leads",
+      href: "/profile/saved",
+      icon: "Bookmark",
+      type: "route",
+      priority: 2,
+      analyticsCategory: "gigs",
+    },
+    {
+      id: "gig-applications",
+      title: "Applications",
+      subtitle: "Track submissions",
+      href: "/profile/applications",
+      icon: "ClipboardList",
+      type: "route",
+      priority: 3,
+      requiredRoles: ["freelancer"],
+      analyticsCategory: "gigs",
+    },
+  ];
+}
+
+function createGigMarketplaceGroup(): NavigationGroup {
+  return {
+    id: "gig-marketplace",
+    label: "Gigs",
+    priority: 3,
+    items: createGigMarketplaceItems(),
+  };
+}
+
 function createGigsyNavigation(): NavigationGroup[] {
   return [
     // MAIN NAVIGATION - Core platform features
@@ -126,7 +165,7 @@ function createGigsyNavigation(): NavigationGroup[] {
     {
       id: "work",
       label: "Work",
-      priority: 3,
+      priority: 4,
       items: [
         {
           id: "my-gigs",
@@ -185,10 +224,12 @@ function createGigsyNavigation(): NavigationGroup[] {
     },
 
     // GROWTH DOMAIN - Career development and mentorship
+    createGigMarketplaceGroup(),
+
     {
       id: "growth",
       label: "Grow",
-      priority: 4,
+      priority: 5,
       items: [
         {
           id: "profile",
@@ -239,7 +280,7 @@ function createGigsyNavigation(): NavigationGroup[] {
     {
       id: "community",
       label: "Connect",
-      priority: 5,
+      priority: 6,
       items: [
         {
           id: "messages",
@@ -279,7 +320,7 @@ function createGigsyNavigation(): NavigationGroup[] {
     {
       id: "gamification",
       label: "Play",
-      priority: 6,
+      priority: 7,
       requiredFlags: ["gamification_v2"],
       items: [
         {
@@ -320,7 +361,7 @@ function createGigsyNavigation(): NavigationGroup[] {
     {
       id: "admin",
       label: "Admin",
-      priority: 7,
+      priority: 8,
       requiredRoles: ["admin", "moderator"],
       items: [
         {
@@ -372,7 +413,7 @@ function createGigsyNavigation(): NavigationGroup[] {
     {
       id: "account",
       label: "Account",
-      priority: 8,
+      priority: 9,
       items: [
         {
           id: "settings",

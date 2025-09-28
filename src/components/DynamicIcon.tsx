@@ -74,6 +74,16 @@ const iconMap = {
     import("lucide-react").then((mod) => ({ default: mod.DollarSign })),
   ),
 
+  Compass: dynamic(() =>
+    import("lucide-react").then((mod) => ({ default: mod.Compass })),
+  ),
+  ClipboardList: dynamic(() =>
+    import("lucide-react").then((mod) => ({ default: mod.ClipboardList })),
+  ),
+  Bookmark: dynamic(() =>
+    import("lucide-react").then((mod) => ({ default: mod.Bookmark })),
+  ),
+
   // Growth Icons
   User: dynamic(() =>
     import("lucide-react").then((mod) => ({ default: mod.User })),

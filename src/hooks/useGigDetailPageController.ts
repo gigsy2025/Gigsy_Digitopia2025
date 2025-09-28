@@ -24,7 +24,7 @@ export function useGigDetailPageController(gigId: string | null): GigDetailContr
 
   useEffect(() => {
     if (!gigId) {
-      router.replace("/gigs");
+      router.replace("/app/gigs");
     }
   }, [gigId, router]);
 
@@ -44,7 +44,7 @@ export function useGigDetailPageController(gigId: string | null): GigDetailContr
     }
 
     if (error.message.toLowerCase().includes("not found")) {
-      router.replace("/gigs");
+      router.replace("/app/gigs");
     }
   }, [error, router]);
 
@@ -52,7 +52,7 @@ export function useGigDetailPageController(gigId: string | null): GigDetailContr
     if (!gigId) {
       return;
     }
-    router.push(`/gigs/${gigId}/apply`);
+    router.push(`/app/gigs/${gigId}/apply`);
   }, [router, gigId]);
 
   const handleSave = useCallback(() => {

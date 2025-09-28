@@ -21,7 +21,7 @@ export function GigDetailPageContent({ gig, relatedGigs = [] }: GigDetailPageCon
 
   const candidateNavItems = useMemo(
     () => [
-      { href: "/gigs", label: "Browse gigs", active: true },
+      { href: "/app/gigs", label: "Browse gigs", active: true },
       { href: "/profile/applications", label: "My applications" },
       { href: "/profile/saved", label: "Saved gigs" },
     ],
@@ -29,7 +29,7 @@ export function GigDetailPageContent({ gig, relatedGigs = [] }: GigDetailPageCon
   );
 
   const handleApply = useCallback(() => {
-    router.push(`/gigs/${gig._id}/apply`);
+    router.push(`/app/gigs/${gig._id}/apply`);
   }, [gig._id, router]);
 
   const handleSave = useCallback(() => {

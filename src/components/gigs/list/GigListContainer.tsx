@@ -139,7 +139,7 @@ export function GigListContainer({
 
   const handleApply = useCallback(
     (gigId: GigListItem["_id"]) => {
-      router.push(`/gigs/${gigId}/apply`);
+      router.push(`/app/gigs/${gigId}/apply`);
     },
     [router],
   );
@@ -150,7 +150,7 @@ export function GigListContainer({
 
   const handleSelect = useCallback(
     (gigId: GigListItem["_id"]) => {
-      router.push(`/gigs/${gigId}`);
+      router.push(`/app/gigs/${gigId}`);
     },
     [router],
   );

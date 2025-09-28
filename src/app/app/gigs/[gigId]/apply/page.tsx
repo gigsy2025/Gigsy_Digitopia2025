@@ -36,7 +36,7 @@ export const revalidate = 0;
 export default async function GigApplyPage({ params }: GigApplyPageProps) {
   const { gigId } = await params;
 
-  await requireUser({ returnTo: `/gigs/${gigId}/apply` });
+  await requireUser({ returnTo: `/app/gigs/${gigId}/apply` });
 
   const gig = await getGigDetail(gigId);
 
@@ -49,7 +49,7 @@ export default async function GigApplyPage({ params }: GigApplyPageProps) {
   const alreadyApplied = false;
 
   const navItems = [
-    { href: "/gigs", label: "Browse gigs" },
+    { href: "/app/gigs", label: "Browse gigs" },
     { href: "/profile/applications", label: "My applications" },
     { href: "/profile/saved", label: "Saved gigs" },
   ];
