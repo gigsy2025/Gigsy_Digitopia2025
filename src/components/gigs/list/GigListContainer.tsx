@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { cn } from "@/lib/utils";
 import { useGigListQuery } from "@/hooks/useGigData";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 const DEFAULT_PAGE_SIZE = 9;
 
@@ -34,14 +35,46 @@ type FilteredResult = {
   totalPages: number;
 };
 
+function areFiltersEqual(left: GigFilterState, right: GigFilterState): boolean {
+  return (
+    left.search === right.search &&
+    left.category === right.category &&
+    left.difficultyLevel === right.difficultyLevel &&
+    left.experienceRequired === right.experienceRequired &&
+    left.budgetType === right.budgetType &&
+    left.currency === right.currency &&
+    left.budgetMin === right.budgetMin &&
+    left.budgetMax === right.budgetMax &&
+    left.isRemoteOnly === right.isRemoteOnly &&
+    left.isUrgent === right.isUrgent
+  );
+}
+
 export function GigListContainer({
   initialGigs = [],
   pageSize = DEFAULT_PAGE_SIZE,
   className,
 }: GigListContainerProps) {
+  const [uiFilters, setUiFilters] = useState<GigFilterState>({});
   const [filters, setFilters] = useState<GigFilterState>({});
   const [page, setPage] = useState(1);
   const [isPending, startTransition] = useTransition();
+  const debouncedSearch = useDebouncedValue(uiFilters.search, 400);
+
+  useEffect(() => {
+    const nextFilters: GigFilterState = {
+      ...uiFilters,
+      search: debouncedSearch,
+    };
+
+    setFilters((previous) => {
+      if (areFiltersEqual(previous, nextFilters)) {
+        return previous;
+      }
+      return nextFilters;
+    });
+  }, [uiFilters, debouncedSearch]);
+
   const deferredFilters = useDeferredValue(filters);
 
   const {
@@ -54,9 +87,13 @@ export function GigListContainer({
   });
 
   const sourceGigs = remoteGigs ?? initialGigs;
+  const isDebouncePending = uiFilters.search !== filters.search;
+  const showLoadingPlaceholder =
+    isPending || queryStatus === "loading" || isDebouncePending;
 
   const filtered = useMemo<FilteredResult>(() => {
-    const items = remoteGigs ?? applyFilters(initialGigs, deferredFilters);
+    const baseGigs = remoteGigs ?? initialGigs;
+    const items = applyFilters(baseGigs, deferredFilters);
     const total = items.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -80,14 +117,14 @@ export function GigListContainer({
 
   const handleFiltersChange = useCallback((nextFilters: GigFilterState) => {
     startTransition(() => {
-      setFilters(nextFilters);
+      setUiFilters(nextFilters);
       setPage(1);
     });
   }, []);
 
   const handleReset = useCallback(() => {
     startTransition(() => {
-      setFilters({});
+      setUiFilters({});
       setPage(1);
     });
   }, []);
@@ -116,48 +153,61 @@ export function GigListContainer({
   return (
     <div className={cn("grid gap-6 lg:grid-cols-[280px_1fr]", className)}>
       <GigFilters
-        filters={filters}
+        filters={uiFilters}
         onChange={handleFiltersChange}
         onReset={handleReset}
         isBusy={isBusy}
       />
 
-      <div className="space-y-6">
-        {isPending || isQueryLoading ? (
-          <LoadingSkeleton lines={6} className="max-w-2xl" />
+      <div className="relative min-h-[320px]">
+        {showLoadingPlaceholder ? (
+          <div className="border-border bg-card/80 absolute inset-0 z-10 rounded-2xl border backdrop-blur-sm">
+            <div className="flex h-full w-full flex-col justify-center gap-4 p-6">
+              <LoadingSkeleton lines={5} />
+            </div>
+          </div>
         ) : null}
-        {queryError ? (
-          <EmptyState
-            title="We couldn't load gigs right now"
-            description="Please try again in a few moments or adjust your filters."
-            actionLabel="Retry"
-            onAction={handleReset}
-          />
-        ) : paginatedGigs.length > 0 ? (
-          <>
-            <GigList
-              gigs={paginatedGigs}
-              onApply={handleApply}
-              onSave={handleSave}
-              onSelect={handleSelect}
+        <div
+          className={cn(
+            "space-y-6 transition-opacity",
+            showLoadingPlaceholder
+              ? "pointer-events-none opacity-40"
+              : "opacity-100",
+          )}
+        >
+          {queryError ? (
+            <EmptyState
+              title="We couldn't load gigs right now"
+              description="Please try again in a few moments or adjust your filters."
+              actionLabel="Retry"
+              onAction={handleReset}
             />
-            <GigListPagination
-              currentPage={page}
-              totalPages={filtered.totalPages}
-              pageSize={pageSize}
-              totalItems={filtered.total}
-              onPageChange={handlePageChange}
-              disabled={isBusy}
+          ) : paginatedGigs.length > 0 ? (
+            <>
+              <GigList
+                gigs={paginatedGigs}
+                onApply={handleApply}
+                onSave={handleSave}
+                onSelect={handleSelect}
+              />
+              <GigListPagination
+                currentPage={page}
+                totalPages={filtered.totalPages}
+                pageSize={pageSize}
+                totalItems={filtered.total}
+                onPageChange={handlePageChange}
+                disabled={isBusy}
+              />
+            </>
+          ) : (
+            <EmptyState
+              title="No gigs found"
+              description="Try adjusting your filters or come back later for new opportunities."
+              actionLabel="Clear filters"
+              onAction={handleReset}
             />
-          </>
-        ) : (
-          <EmptyState
-            title="No gigs found"
-            description="Try adjusting your filters or come back later for new opportunities."
-            actionLabel="Clear filters"
-            onAction={handleReset}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

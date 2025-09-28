@@ -151,7 +151,6 @@ export function GigFilters({
             placeholder="Search gigs or skills"
             value={filters.search ?? ""}
             onChange={(event) => updateFilters("search", event.target.value)}
-            disabled={isBusy}
             autoComplete="off"
           />
         </div>
@@ -163,7 +162,6 @@ export function GigFilters({
             onValueChange={(value: GigCategory) =>
               updateFilters("category", value)
             }
-            disabled={isBusy}
           >
             <SelectTrigger id="gig-category">
               <SelectValue placeholder="All categories" />
@@ -189,7 +187,6 @@ export function GigFilters({
             onValueChange={(value: DifficultyLevel) =>
               updateFilters("difficultyLevel", value)
             }
-            disabled={isBusy}
           >
             <SelectTrigger id="gig-difficulty">
               <SelectValue placeholder="All levels" />
@@ -215,7 +212,6 @@ export function GigFilters({
             onValueChange={(value: ExperienceLevel) =>
               updateFilters("experienceRequired", value)
             }
-            disabled={isBusy}
           >
             <SelectTrigger id="gig-experience">
               <SelectValue placeholder="All experience levels" />
@@ -252,7 +248,6 @@ export function GigFilters({
                 inputMode="numeric"
                 value={filters.budgetMin ?? ""}
                 onChange={(event) => handleBudgetMinChange(event.target.value)}
-                disabled={isBusy}
               />
             </div>
             <div className="space-y-1">
@@ -270,7 +265,6 @@ export function GigFilters({
                 inputMode="numeric"
                 value={filters.budgetMax ?? ""}
                 onChange={(event) => handleBudgetMaxChange(event.target.value)}
-                disabled={isBusy}
               />
             </div>
           </div>
@@ -279,7 +273,6 @@ export function GigFilters({
             {filters.currency ?? "any currency"}
           </p>
         </div>
-
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label>Budget type</Label>
@@ -288,7 +281,7 @@ export function GigFilters({
               onValueChange={(value: BudgetType) =>
                 updateFilters("budgetType", value)
               }
-              disabled={isBusy}
+              disabled={false}
             >
               <SelectTrigger id="gig-budget-type">
                 <SelectValue placeholder="Any type" />
@@ -314,7 +307,7 @@ export function GigFilters({
               onValueChange={(value: Currency) =>
                 updateFilters("currency", value)
               }
-              disabled={isBusy}
+              disabled={false}
             >
               <SelectTrigger id="gig-currency">
                 <SelectValue placeholder="Any" />
@@ -349,7 +342,6 @@ export function GigFilters({
             onCheckedChange={(checked) =>
               updateFilters("isRemoteOnly", checked)
             }
-            disabled={isBusy}
             aria-label="Filter remote only gigs"
           />
         </div>
@@ -367,7 +359,6 @@ export function GigFilters({
             id="gig-urgent-toggle"
             checked={filters.isUrgent ?? false}
             onCheckedChange={(checked) => updateFilters("isUrgent", checked)}
-            disabled={isBusy}
             aria-label="Filter urgent gigs"
           />
         </div>
