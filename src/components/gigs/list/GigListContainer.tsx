@@ -8,6 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import type { GigListItem } from "@/types/gigs";
 import { GigList } from "@/components/gigs/list/GigList";
 import {
@@ -55,6 +56,7 @@ export function GigListContainer({
   pageSize = DEFAULT_PAGE_SIZE,
   className,
 }: GigListContainerProps) {
+  const router = useRouter();
   const [uiFilters, setUiFilters] = useState<GigFilterState>({});
   const [filters, setFilters] = useState<GigFilterState>({});
   const [page, setPage] = useState(1);
@@ -135,17 +137,23 @@ export function GigListContainer({
     });
   }, []);
 
-  const handleApply = useCallback((gigId: GigListItem["_id"]) => {
-    console.info(`Apply clicked for gig ${gigId}`);
-  }, []);
+  const handleApply = useCallback(
+    (gigId: GigListItem["_id"]) => {
+      router.push(`/gigs/${gigId}/apply`);
+    },
+    [router],
+  );
 
   const handleSave = useCallback((gigId: GigListItem["_id"]) => {
     console.info(`Save clicked for gig ${gigId}`);
   }, []);
 
-  const handleSelect = useCallback((gigId: GigListItem["_id"]) => {
-    console.info(`Select gig ${gigId}`);
-  }, []);
+  const handleSelect = useCallback(
+    (gigId: GigListItem["_id"]) => {
+      router.push(`/gigs/${gigId}`);
+    },
+    [router],
+  );
 
   const isQueryLoading = queryStatus === "loading" && sourceGigs.length === 0;
   const isBusy = isPending || queryStatus === "loading";

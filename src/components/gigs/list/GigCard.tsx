@@ -79,7 +79,7 @@ function GigCardComponent({
       role="article"
       aria-labelledby={`gig-card-${_id}-title`}
       className={cn(
-        "group focus-visible:border-primary flex h-full flex-col justify-between transition-shadow hover:shadow-md",
+        "group focus-visible:border-primary flex h-full cursor-pointer flex-col justify-between transition-shadow hover:shadow-md",
         variant === "compact" && "gap-3 p-4",
         className,
       )}
@@ -95,7 +95,7 @@ function GigCardComponent({
           <div className="space-y-1">
             <h3
               id={`gig-card-${_id}-title`}
-              className="text-foreground line-clamp-1 text-lg font-semibold"
+              className="text-foreground line-clamp-1 text-lg font-semibold transition-colors group-hover:text-primary"
             >
               {title}
             </h3>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CandidateLayout } from "@/components/layouts/CandidateLayout";
 import { GigListContainer } from "@/components/gigs/list/GigListContainer";
 import { Button } from "@/components/ui/button";
+import { getGigList } from "@/lib/server/gigs";
 
 export const metadata: Metadata = {
   title: "Browse gigs | Gigsy",
@@ -17,7 +18,11 @@ const candidateNavItems = [
   { href: "/profile/saved", label: "Saved gigs" },
 ];
 
-export default function GigsPage() {
+export const revalidate = 120;
+
+export default async function GigsPage() {
+  const initialGigs = await getGigList();
+
   return (
     <CandidateLayout
       title="Find your next opportunity"
@@ -31,14 +36,13 @@ export default function GigsPage() {
       contentClassName="space-y-8"
     >
       <section className="space-y-4">
-        <header className="border-border bg-muted/30 text-muted-foreground rounded-2xl border border-dashed p-4 text-sm">
+        <header className="rounded-2xl border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
           <p>
-            Use the filters on the left to refine by category, experience level,
-            or budget. Save gigs that catch your eye and apply when you&apos;re
-            ready.
+            Use the filters on the left to refine by category, experience level, or budget. Save gigs that catch your eye and
+            apply when you&apos;re ready.
           </p>
         </header>
-        <GigListContainer />
+        <GigListContainer initialGigs={initialGigs} />
       </section>
     </CandidateLayout>
   );
