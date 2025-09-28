@@ -5,7 +5,9 @@ interface RequireUserOptions {
   returnTo: string;
 }
 
-export async function requireUser({ returnTo }: RequireUserOptions): Promise<string> {
+export async function requireUser({
+  returnTo,
+}: RequireUserOptions): Promise<string> {
   const { userId } = await auth();
 
   if (!userId) {

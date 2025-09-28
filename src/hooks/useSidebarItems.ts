@@ -11,7 +11,10 @@
 
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { useUserPermissions, PermissionUtils } from "@/hooks/useUserPermissions";
+import {
+  useUserPermissions,
+  PermissionUtils,
+} from "@/hooks/useUserPermissions";
 import type {
   NavigationGroup,
   NavigationItem,
@@ -40,7 +43,6 @@ function createGigMarketplaceItems(): NavigationItem[] {
     {
       id: "gig-saved",
       title: "Saved Gigs",
-      subtitle: "Bookmarked leads",
       href: "/profile/saved",
       icon: "Bookmark",
       type: "route",
@@ -51,7 +53,7 @@ function createGigMarketplaceItems(): NavigationItem[] {
       id: "gig-applications",
       title: "Applications",
       subtitle: "Track submissions",
-      href: "/profile/applications",
+      href: "/app/profile/applications",
       icon: "ClipboardList",
       type: "route",
       priority: 3,

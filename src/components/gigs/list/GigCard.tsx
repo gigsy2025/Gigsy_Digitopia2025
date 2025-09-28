@@ -95,7 +95,7 @@ function GigCardComponent({
           <div className="space-y-1">
             <h3
               id={`gig-card-${_id}-title`}
-              className="text-foreground line-clamp-1 text-lg font-semibold transition-colors group-hover:text-primary"
+              className="text-foreground group-hover:text-primary line-clamp-1 text-lg font-semibold transition-colors"
             >
               {title}
             </h3>

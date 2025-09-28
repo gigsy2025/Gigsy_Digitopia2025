@@ -12,6 +12,6 @@ export function useSafeGigId(): string | null {
       return null;
     }
 
-    return Array.isArray(rawGigId) ? rawGigId[0] ?? null : rawGigId;
+    return Array.isArray(rawGigId) ? (rawGigId[0] ?? null) : rawGigId;
   }, [rawGigId]);
 }

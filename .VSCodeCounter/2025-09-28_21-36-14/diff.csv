@@ -1,0 +1,26 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts", "TypeScript", 2, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\applications.ts", "TypeScript", 80, 0, 5, 15, 100
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts", "TypeScript", 2, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\gigs\[gigId]\apply\page.tsx", "TypeScript JSX", 0, 2, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\gigs\[gigId]\page.tsx", "TypeScript JSX", 0, 2, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\gigs\page.tsx", "TypeScript JSX", 0, 1, 1, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\profile\applications\page.tsx", "TypeScript JSX", 0, 33, 0, 7, 40
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationCard.tsx", "TypeScript JSX", 0, 182, 0, 14, 196
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationCardSkeleton.tsx", "TypeScript JSX", 0, 32, 0, 2, 34
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationFilters.tsx", "TypeScript JSX", 0, 121, 0, 14, 135
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationList.container.tsx", "TypeScript JSX", 0, 104, 0, 13, 117
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationsContent.tsx", "TypeScript JSX", 0, 99, 0, 20, 119
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\applications\ApplicationsSkeleton.tsx", "TypeScript JSX", 0, 10, 0, 2, 12
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\feedback\InlineError.tsx", "TypeScript JSX", 0, 4, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\apply\GigApplyForm.tsx", "TypeScript JSX", 0, 17, 0, 0, 17
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\apply\GigApplyHeader.tsx", "TypeScript JSX", 0, 5, 0, 0, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\apply\GigApplySummary.tsx", "TypeScript JSX", 0, 11, 0, 0, 11
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\gigs\detail\GigDetailPageContent.tsx", "TypeScript JSX", 0, 11, 0, 0, 11
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useGigDetailPageController.ts", "TypeScript", 4, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\hooks\useSidebarItems.ts", "TypeScript", 2, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\auth\requireUser.ts", "TypeScript", 2, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\server\gigs.ts", "TypeScript", 13, 0, 0, 0, 13
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\applications.ts", "TypeScript", 6, 0, 0, 3, 9
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers-server.ts", "TypeScript", 20, 0, 3, 5, 28
+"Total", "-", 131, 634, 9, 95, 869

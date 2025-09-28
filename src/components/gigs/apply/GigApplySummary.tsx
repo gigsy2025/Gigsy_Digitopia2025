@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import type { GigDetail } from "@/types/gigs";
 
 export interface GigApplySummaryProps {
@@ -7,23 +12,29 @@ export interface GigApplySummaryProps {
   onViewApplications?: () => void;
 }
 
-export function GigApplySummary({ gig, onViewApplications }: GigApplySummaryProps) {
+export function GigApplySummary({
+  gig,
+  onViewApplications,
+}: GigApplySummaryProps) {
   return (
     <Card className="border-success/40 bg-success/5">
       <CardHeader>
-        <h2 className="text-xl font-semibold text-success-foreground">
+        <h2 className="text-success-foreground text-xl font-semibold">
           Application already submitted
         </h2>
-        <p className="text-sm text-muted-foreground">
-          You applied to {gig.title}. We&apos;ll notify you as soon as there&apos;s an update.
+        <p className="text-muted-foreground text-sm">
+          You applied to {gig.title}. We&apos;ll notify you as soon as
+          there&apos;s an update.
         </p>
       </CardHeader>
-      <CardContent className="space-y-4 text-sm text-muted-foreground">
+      <CardContent className="text-muted-foreground space-y-4 text-sm">
         <p>
-          When employers review applications, they see your profile, portfolio, and the cover letter you shared.
+          When employers review applications, they see your profile, portfolio,
+          and the cover letter you shared.
         </p>
         <p>
-          Need to tweak something? We&apos;re working on editable submissions. For now, reach out to support and we&apos;ll help.
+          Need to tweak something? We&apos;re working on editable submissions.
+          For now, reach out to support and we&apos;ll help.
         </p>
       </CardContent>
       <CardFooter>

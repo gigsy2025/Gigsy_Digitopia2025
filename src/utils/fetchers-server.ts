@@ -15,6 +15,7 @@ import { auth } from "@clerk/nextjs/server";
 import { api } from "convex/_generated/api";
 import type { Preloaded } from "convex/react";
 import type { Id } from "convex/_generated/dataModel";
+import type { ApplicationWithGig } from "@/types/applications";
 
 // Legacy types for backward compatibility
 import type {
@@ -34,6 +35,33 @@ interface ConvexRequestOptions {
   skipAuth?: boolean;
   url?: string;
 }
+
+// =============================================================================
+// APPLICATIONS FETCHERS
+// =============================================================================
+
+export const preloadApplications = cache(async () => {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  return preloadQuery(api.applications.listByCandidate, {}, { token });
+});
+
+export const fetchApplications = cache(async () => {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetchQuery(
+    api.applications.listByCandidate,
+    {},
+    { token },
+  );
+  return response as ApplicationWithGig[];
+});
 
 interface ConvexCourseData {
   _id: string;

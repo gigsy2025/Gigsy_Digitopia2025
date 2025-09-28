@@ -5,7 +5,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -60,7 +66,10 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
       <form onSubmit={handleSubmit} className="space-y-8">
         <section className="space-y-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-foreground">Tell {gig.employerId ? "the employer" : "the team"} why you're a fit</h2>
+            <h2 className="text-foreground text-lg font-semibold">
+              Tell {gig.employerId ? "the employer" : "the team"} why
+              you&apos;re a fit
+            </h2>
           </div>
 
           <FormField
@@ -72,7 +81,9 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
                   <Label htmlFor={field.name} className="text-sm font-medium">
                     Cover letter
                   </Label>
-                  <span className="text-xs text-muted-foreground">{characterCount}/2000</span>
+                  <span className="text-muted-foreground text-xs">
+                    {characterCount}/2000
+                  </span>
                 </div>
                 <FormControl>
                   <Textarea
@@ -85,7 +96,7 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
                     className="resize-none"
                   />
                 </FormControl>
-                <p className="text-xs text-muted-foreground">{helperText}</p>
+                <p className="text-muted-foreground text-xs">{helperText}</p>
                 <FormMessage />
               </FormItem>
             )}
@@ -94,9 +105,12 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
 
         <section className="space-y-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-foreground">Share the strongest example of your work</h2>
-            <p className="text-sm text-muted-foreground">
-              Paste a link to a case study, live site, or repo that best demonstrates your ability to deliver.
+            <h2 className="text-foreground text-lg font-semibold">
+              Share the strongest example of your work
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Paste a link to a case study, live site, or repo that best
+              demonstrates your ability to deliver.
             </p>
           </div>
 
@@ -123,12 +137,15 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
           />
         </section>
 
-        <footer className="sticky bottom-4 left-0 right-0 z-10 rounded-2xl border border-border bg-background/80 p-4 shadow-lg backdrop-blur">
+        <footer className="border-border bg-background/80 sticky right-0 bottom-4 left-0 z-10 rounded-2xl border p-4 shadow-lg backdrop-blur">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">You're about to apply to {gig.title}</p>
-              <p className="text-xs text-muted-foreground">
-                You'll receive a confirmation once we release the employer workflow.
+              <p className="text-foreground text-sm font-medium">
+                You&apos;re about to apply to {gig.title}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                You&apos;ll receive a confirmation once we release the employer
+                workflow.
               </p>
             </div>
             <Button type="submit" size="lg" className="sm:min-w-[220px]">

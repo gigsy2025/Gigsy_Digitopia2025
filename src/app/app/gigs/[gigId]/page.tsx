@@ -10,7 +10,9 @@ interface GigDetailPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: GigDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: GigDetailPageProps): Promise<Metadata> {
   const { gigId } = await params;
   const gig = await getGigDetail(gigId);
 

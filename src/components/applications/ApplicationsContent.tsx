@@ -1,0 +1,118 @@
+"use client";
+
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { usePreloadedQuery } from "convex/react";
+import type { Preloaded } from "convex/react";
+import { api } from "convex/_generated/api";
+
+import type { ApplicationStatus } from "@/types/applications";
+import type { ApplicationWithGig } from "@/types/applications";
+import {
+  ApplicationFilters,
+  type ApplicationFiltersState,
+} from "./ApplicationFilters";
+import { ApplicationListContainer } from "./ApplicationList.container";
+
+type ApplicationsContentProps = {
+  preloaded: Preloaded<typeof api.applications.listByCandidate>;
+};
+
+const DEFAULT_FILTERS: ApplicationFiltersState = {
+  status: "all",
+  sort: "recent",
+};
+
+const PAGE_SIZE = 5;
+
+const STATUS_SORT_ORDER: Record<ApplicationStatus, number> = {
+  submitted: 1,
+  in_review: 2,
+  shortlisted: 3,
+  hired: 4,
+  rejected: 5,
+  withdrawn: 6,
+};
+
+export function ApplicationsContent({ preloaded }: ApplicationsContentProps) {
+  const [filters, setFilters] =
+    useState<ApplicationFiltersState>(DEFAULT_FILTERS);
+  const [page, setPage] = useState(1);
+
+  const data = usePreloadedQuery(preloaded) as ApplicationWithGig[];
+  const [applications, setApplications] = useState<ApplicationWithGig[]>(data);
+
+  useEffect(() => {
+    setApplications(data);
+  }, [data]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters.status, filters.sort]);
+
+  const filteredApplications = useMemo(() => {
+    if (filters.status === "all") {
+      return applications;
+    }
+
+    return applications.filter(
+      (item) => item.application.status === filters.status,
+    );
+  }, [applications, filters.status]);
+
+  const sortedApplications = useMemo(() => {
+    switch (filters.sort) {
+      case "oldest":
+        return [...filteredApplications].sort(
+          (a, b) => a.application._creationTime - b.application._creationTime,
+        );
+      case "status":
+        return [...filteredApplications].sort((a, b) => {
+          const left =
+            STATUS_SORT_ORDER[a.application.status] ?? Number.MAX_SAFE_INTEGER;
+          const right =
+            STATUS_SORT_ORDER[b.application.status] ?? Number.MAX_SAFE_INTEGER;
+          return left - right;
+        });
+      case "recent":
+      default:
+        return [...filteredApplications].sort(
+          (a, b) => b.application._creationTime - a.application._creationTime,
+        );
+    }
+  }, [filteredApplications, filters.sort]);
+
+  const visibleApplications = useMemo(() => {
+    return sortedApplications.slice(0, page * PAGE_SIZE);
+  }, [sortedApplications, page]);
+
+  const hasMore = visibleApplications.length < sortedApplications.length;
+
+  const handleLoadMore = useCallback(() => {
+    setPage((prev) => prev + 1);
+  }, []);
+
+  const enableAiInsights =
+    process.env.NEXT_PUBLIC_ENABLE_APPLICATION_AI_INSIGHTS === "true";
+
+  return (
+    <div className="flex flex-col gap-6">
+      <ApplicationFilters
+        value={filters}
+        onChange={setFilters}
+        total={applications.length}
+      />
+
+      <ApplicationListContainer
+        applications={visibleApplications}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        showInsights={enableAiInsights}
+        onWithdrawSuccess={(applicationId) =>
+          setApplications((prev) =>
+            prev.filter((item) => item.application._id !== applicationId),
+          )
+        }
+      />
+    </div>
+  );
+}

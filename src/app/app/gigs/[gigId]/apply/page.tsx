@@ -14,7 +14,9 @@ interface GigApplyPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: GigApplyPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: GigApplyPageProps): Promise<Metadata> {
   const { gigId } = await params;
   const gig = await getGigDetail(gigId);
 

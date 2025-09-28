@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 
 const candidateNavItems = [
   { href: "/app/gigs", label: "Browse gigs", active: true },
-  { href: "/profile/applications", label: "My applications" },
-  { href: "/profile/saved", label: "Saved gigs" },
+  // http://localhost:3000/app/profile/applications
+  { href: "/app/profile/applications", label: "My applications" },
+  { href: "/app/profile/saved", label: "Saved gigs" },
 ];
 
 export const revalidate = 120;
@@ -36,10 +37,11 @@ export default async function GigsPage() {
       contentClassName="space-y-8"
     >
       <section className="space-y-4">
-        <header className="rounded-2xl border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+        <header className="border-border bg-muted/30 text-muted-foreground rounded-2xl border border-dashed p-4 text-sm">
           <p>
-            Use the filters on the left to refine by category, experience level, or budget. Save gigs that catch your eye and
-            apply when you&apos;re ready.
+            Use the filters on the left to refine by category, experience level,
+            or budget. Save gigs that catch your eye and apply when you&apos;re
+            ready.
           </p>
         </header>
         <GigListContainer initialGigs={initialGigs} />

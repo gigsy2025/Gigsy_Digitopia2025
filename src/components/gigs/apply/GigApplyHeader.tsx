@@ -17,18 +17,25 @@ export function GigApplyHeader({ gig }: GigApplyHeaderProps) {
   ];
 
   return (
-    <header className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <header className="border-border bg-card space-y-4 rounded-2xl border p-6 shadow-sm">
       <div className="flex flex-wrap items-center gap-4">
-        <AvatarStackWrapper authors={authors} size="md" maxVisible={1} showTooltip={false} />
+        <AvatarStackWrapper
+          authors={authors}
+          size="md"
+          maxVisible={1}
+          showTooltip={false}
+        />
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
+          <p className="text-muted-foreground text-xs tracking-wider uppercase">
             Applying for
           </p>
-          <h1 className="text-2xl font-semibold text-foreground">{gig.title}</h1>
+          <h1 className="text-foreground text-2xl font-semibold">
+            {gig.title}
+          </h1>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-sm">
         <Badge variant="secondary" className="capitalize">
           {gig.category}
         </Badge>
@@ -40,9 +47,7 @@ export function GigApplyHeader({ gig }: GigApplyHeaderProps) {
         </Badge>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        {gig.description}
-      </p>
+      <p className="text-muted-foreground text-sm">{gig.description}</p>
     </header>
   );
 }

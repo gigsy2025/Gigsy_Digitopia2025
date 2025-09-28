@@ -18,7 +18,9 @@ export interface GigDetailController {
   handleShare: () => Promise<void>;
 }
 
-export function useGigDetailPageController(gigId: string | null): GigDetailController {
+export function useGigDetailPageController(
+  gigId: string | null,
+): GigDetailController {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -84,7 +86,9 @@ export function useGigDetailPageController(gigId: string | null): GigDetailContr
       showToast("Link copied", "success");
     } catch (shareError) {
       const fallbackMessage =
-        shareError instanceof Error ? shareError.message : "Unable to share right now.";
+        shareError instanceof Error
+          ? shareError.message
+          : "Unable to share right now.";
       showToast(fallbackMessage, "error");
     }
   }, [gig, showToast]);

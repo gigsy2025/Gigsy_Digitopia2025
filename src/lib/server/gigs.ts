@@ -13,7 +13,9 @@ async function fetchGigListFromMock(): Promise<GigListItem[]> {
   return getMockGigList();
 }
 
-async function fetchGigDetailFromMock(gigId: string): Promise<GigDetail | null> {
+async function fetchGigDetailFromMock(
+  gigId: string,
+): Promise<GigDetail | null> {
   return getMockGigDetail(gigId);
 }
 
@@ -26,24 +28,30 @@ async function fetchRecommendedFromMock(
 
 export const getGigList = cache(async (): Promise<GigListItem[]> => {
   if (GIGS_DATASOURCE === "convex") {
-    console.warn("Convex server-side gig list fetch not implemented; falling back to mock data.");
+    console.warn(
+      "Convex server-side gig list fetch not implemented; falling back to mock data.",
+    );
   }
 
   return fetchGigListFromMock();
 });
 
-export const getGigDetail = cache(async (gigId: string): Promise<GigDetail | null> => {
-  if (!gigId) {
-    return null;
-  }
+export const getGigDetail = cache(
+  async (gigId: string): Promise<GigDetail | null> => {
+    if (!gigId) {
+      return null;
+    }
 
-  if (GIGS_DATASOURCE === "convex") {
-    // TODO: Replace with Convex server-side fetching when available.
-    console.warn("Convex server-side gig detail fetch not implemented; falling back to mock data.");
-  }
+    if (GIGS_DATASOURCE === "convex") {
+      // TODO: Replace with Convex server-side fetching when available.
+      console.warn(
+        "Convex server-side gig detail fetch not implemented; falling back to mock data.",
+      );
+    }
 
-  return fetchGigDetailFromMock(gigId);
-});
+    return fetchGigDetailFromMock(gigId);
+  },
+);
 
 export const getRelatedGigs = cache(
   async (gigId: string, limit = 3): Promise<GigListItem[]> => {
@@ -52,7 +60,9 @@ export const getRelatedGigs = cache(
     }
 
     if (GIGS_DATASOURCE === "convex") {
-      console.warn("Convex server-side related gigs fetch not implemented; falling back to mock data.");
+      console.warn(
+        "Convex server-side related gigs fetch not implemented; falling back to mock data.",
+      );
     }
 
     return fetchRecommendedFromMock(gigId, limit);
@@ -60,7 +70,10 @@ export const getRelatedGigs = cache(
 );
 
 export const getGigDetailWithRelated = cache(
-  async (gigId: string, limit = 3): Promise<{
+  async (
+    gigId: string,
+    limit = 3,
+  ): Promise<{
     gig: GigDetail | null;
     relatedGigs: GigListItem[];
   }> => {

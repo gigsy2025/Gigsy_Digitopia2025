@@ -15,7 +15,10 @@ export interface GigDetailPageContentProps {
   relatedGigs?: GigListItem[];
 }
 
-export function GigDetailPageContent({ gig, relatedGigs = [] }: GigDetailPageContentProps) {
+export function GigDetailPageContent({
+  gig,
+  relatedGigs = [],
+}: GigDetailPageContentProps) {
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -80,14 +83,22 @@ export function GigDetailPageContent({ gig, relatedGigs = [] }: GigDetailPageCon
       navItems={candidateNavItems}
       contentClassName="mx-auto w-full max-w-3xl space-y-8 pb-24"
     >
-      <GigDetailContainer gig={gig} relatedGigs={relatedGigs} onApply={handleApply} onSave={handleSave} />
+      <GigDetailContainer
+        gig={gig}
+        relatedGigs={relatedGigs}
+        onApply={handleApply}
+        onSave={handleSave}
+      />
 
-      <div className="sticky bottom-6 left-0 right-0 z-20 rounded-2xl border border-border bg-background/95 p-4 shadow-xl backdrop-blur">
+      <div className="border-border bg-background/95 sticky right-0 bottom-6 left-0 z-20 rounded-2xl border p-4 shadow-xl backdrop-blur">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Ready to make a move?</p>
-            <p className="text-sm text-muted-foreground">
-              Applying takes less than 5 minutes and keeps you top of mind with the employer.
+            <p className="text-foreground text-sm font-medium">
+              Ready to make a move?
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Applying takes less than 5 minutes and keeps you top of mind with
+              the employer.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

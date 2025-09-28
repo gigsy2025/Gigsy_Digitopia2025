@@ -15,7 +15,11 @@ export function InlineError({ title, description, action }: InlineErrorProps) {
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="space-y-1">
         {title ? <p className="font-medium">{title}</p> : null}
-        {description ? <div className="text-destructive/80 text-sm leading-relaxed">{description}</div> : null}
+        {description ? (
+          <div className="text-destructive/80 text-sm leading-relaxed">
+            {description}
+          </div>
+        ) : null}
         {action ? <div>{action}</div> : null}
       </div>
     </div>

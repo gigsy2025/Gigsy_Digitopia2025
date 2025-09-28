@@ -448,15 +448,17 @@ const schema = defineSchema({
   applications: defineTable({
     // --- Core Relationships ---
     gigId: v.id("gigs"), // The gig being applied to.
-    userId: v.id("users"), // The user who is applying.
+    candidateId: v.id("users"), // The candidate who is applying.
 
     // --- Application Content & State ---
-    coverLetter: v.string(), // The text content of the application.
+    coverLetter: v.optional(v.string()), // Optional pitch text for flexible apply flows.
+    portfolioLinks: v.optional(v.array(v.string())), // Supplemental work samples.
     status: v.union(
       v.literal("submitted"),
       v.literal("in_review"),
-      v.literal("accepted"),
+      v.literal("shortlisted"),
       v.literal("rejected"),
+      v.literal("hired"),
       v.literal("withdrawn"),
     ),
 
@@ -465,11 +467,11 @@ const schema = defineSchema({
   })
     // --- Indexes for Performance ---
     // A compound index to quickly find a specific application and enforce uniqueness.
-    .index("by_gig_and_user", ["gigId", "userId"])
+    .index("by_gig_and_candidate", ["gigId", "candidateId"])
     // To quickly find all applications for a specific gig.
     .index("by_gig", ["gigId"])
-    // To quickly find all applications submitted by a specific user.
-    .index("by_user", ["userId"]),
+    // To quickly find all applications submitted by a specific candidate.
+    .index("by_candidate", ["candidateId"]),
 
   // --- LMS Core Content Tables ---
 
