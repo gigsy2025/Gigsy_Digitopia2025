@@ -10,6 +10,8 @@ import type {
   GigDetail,
 } from "@/types/gigs";
 
+// NOTE: Set `NEXT_PUBLIC_GIGS_DATASOURCE="mock"` to continue using these stubs; otherwise data loads from Convex.
+
 export type GigDetailStub = GigDetail;
 
 export type GigApplicationStatus =

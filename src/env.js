@@ -33,6 +33,7 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
+    NEXT_PUBLIC_GIGS_DATASOURCE: z.enum(["mock", "convex"]).default("mock"),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_CLERK_FRONTEND_API_URL: z.string().optional(),
     NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN: z.string().optional(),
@@ -58,6 +59,7 @@ export const env = createEnv({
     APP_NAME: process.env.APP_NAME,
     APP_VERSION: process.env.APP_VERSION,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
+    NEXT_PUBLIC_GIGS_DATASOURCE: process.env.NEXT_PUBLIC_GIGS_DATASOURCE,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     NEXT_PUBLIC_CLERK_FRONTEND_API_URL:

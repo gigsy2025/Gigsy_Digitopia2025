@@ -5,7 +5,9 @@ import { CandidateLayout } from "@/components/layouts/CandidateLayout";
 import { GigApplyForm } from "@/components/gigs/apply/GigApplyForm";
 import { GigApplyHeader } from "@/components/gigs/apply/GigApplyHeader";
 import { InlineError } from "@/components/feedback/InlineError";
+import { applyToGigAction } from "./actions";
 import { getGigDetail } from "@/lib/server/gigs";
+import { getGigApplicationStatus } from "@/lib/server/applications";
 import { requireUser } from "@/lib/auth/requireUser";
 
 interface GigApplyPageProps {
@@ -46,9 +48,9 @@ export default async function GigApplyPage({ params }: GigApplyPageProps) {
     notFound();
   }
 
-  // TODO: Replace with actual status checks once backend integration is ready.
+  const applicationStatus = await getGigApplicationStatus(gig._id);
   const gigIsOpen = gig.status === "open";
-  const alreadyApplied = false;
+  const alreadyApplied = applicationStatus?.hasApplied ?? false;
 
   const navItems = [
     { href: "/app/gigs", label: "Browse gigs" },
@@ -76,7 +78,11 @@ export default async function GigApplyPage({ params }: GigApplyPageProps) {
           description="We're finalizing the application summary view. Until then, keep an eye on your inbox for updates."
         />
       ) : (
-        <GigApplyForm gig={gig} />
+        <GigApplyForm
+          gig={gig}
+          applyAction={applyToGigAction}
+          existingApplication={applicationStatus}
+        />
       )}
     </CandidateLayout>
   );

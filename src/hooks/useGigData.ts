@@ -13,6 +13,11 @@ import {
   type GigApplicationStub,
 } from "@/lib/mock/gigs";
 import type { GigFilterState } from "@/components/gigs/list/GigFilters";
+import {
+  mapGigRecordToDetail,
+  mapGigRecordToListItem,
+  type ConvexGigRecord,
+} from "@/utils/gig-mappers";
 
 const GIGS_DATASOURCE = process.env.NEXT_PUBLIC_GIGS_DATASOURCE ?? "mock";
 const SHOULD_USE_CONVEX = GIGS_DATASOURCE === "convex";
@@ -172,8 +177,15 @@ export function useGigListQuery(
         const response = await convexExecutor.query("gigs:list", {
           filters,
         });
-        if (Array.isArray(response)) {
-          return response as GigListItem[];
+        if (
+          response &&
+          typeof response === "object" &&
+          "items" in (response as Record<string, unknown>)
+        ) {
+          const items = (response as { items?: unknown }).items;
+          if (Array.isArray(items)) {
+            return (items as ConvexGigRecord[]).map(mapGigRecordToListItem);
+          }
         }
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {
@@ -211,7 +223,7 @@ export function useGigDetailQuery(
           gigId,
         });
         if (response) {
-          return response as GigDetail;
+          return mapGigRecordToDetail(response as ConvexGigRecord);
         }
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {

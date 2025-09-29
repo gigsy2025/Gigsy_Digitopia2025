@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CandidateLayout } from "@/components/layouts/CandidateLayout";
 import { GigListContainer } from "@/components/gigs/list/GigListContainer";
 import { Button } from "@/components/ui/button";
-import { getGigList } from "@/lib/server/gigs";
+import { getGigList, preloadGigList } from "@/lib/server/gigs";
 
 export const metadata: Metadata = {
   title: "Browse gigs | Gigsy",
@@ -22,6 +22,7 @@ const candidateNavItems = [
 export const revalidate = 120;
 
 export default async function GigsPage() {
+  await preloadGigList();
   const initialGigs = await getGigList();
 
   return (

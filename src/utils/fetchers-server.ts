@@ -14,8 +14,9 @@ import { preloadQuery, fetchQuery } from "convex/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { api } from "convex/_generated/api";
 import type { Preloaded } from "convex/react";
-import type { Id } from "convex/_generated/dataModel";
+import type { Doc, Id } from "convex/_generated/dataModel";
 import type { ApplicationWithGig } from "@/types/applications";
+import type { GigListItem, GigStats } from "@/types/gigs";
 
 // Legacy types for backward compatibility
 import type {
@@ -35,6 +36,208 @@ interface ConvexRequestOptions {
   skipAuth?: boolean;
   url?: string;
 }
+
+// =============================================================================
+// EMPLOYER DASHBOARD FETCHERS
+// =============================================================================
+
+type EmployerGigRecord = Doc<"gigs">;
+
+interface EmployerGigListResult {
+  items: EmployerGigRecord[];
+  continueCursor: string | null;
+  isDone: boolean;
+}
+
+interface EmployerGigListResponse {
+  items: GigListItem[];
+  continueCursor: string | null;
+  isDone: boolean;
+}
+
+type EmployerGigDetail = EmployerGigRecord;
+
+interface EmployerMetricsResult {
+  totalGigs: number;
+  activeGigs: number;
+  totalApplicants: number;
+  applicationsThisWeek: number;
+}
+
+interface EmployerApplicationsResult {
+  items: Array<{
+    application: Doc<"applications">;
+    candidate: Doc<"users"> | null;
+  }>;
+  continueCursor: string | null;
+  isDone: boolean;
+}
+
+export interface EmployerApplicationsResponse {
+  items: EmployerApplicationsResult["items"];
+  continueCursor: string | null;
+  isDone: boolean;
+}
+
+async function requireConvexToken(): Promise<string> {
+  const token = await getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return token;
+}
+
+export const preloadEmployerGigs = cache(
+  async (
+    args: {
+      status?: GigListItem["status"];
+      cursor?: string | null;
+      limit?: number;
+    } = {},
+  ): Promise<Preloaded<typeof api.employerGigs.listByEmployer>> => {
+    const token = await requireConvexToken();
+    const { status, cursor, limit } = args;
+    return preloadQuery(
+      api.employerGigs.listByEmployer,
+      {
+        ...(status ? { status } : {}),
+        ...(cursor !== undefined && cursor !== null ? { cursor } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+      },
+      { token },
+    );
+  },
+);
+
+export const fetchEmployerGigs = cache(
+  async (
+    args: {
+      status?: GigListItem["status"];
+      cursor?: string | null;
+      limit?: number;
+    } = {},
+  ): Promise<EmployerGigListResponse> => {
+    const token = await requireConvexToken();
+    const { status, cursor, limit } = args;
+    const result = (await fetchQuery(
+      api.employerGigs.listByEmployer,
+      {
+        ...(status ? { status } : {}),
+        ...(cursor !== undefined && cursor !== null ? { cursor } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+      },
+      { token },
+    )) as EmployerGigListResult;
+
+    const items = result.items.map((gig) => ({
+      _id: gig._id,
+      title: gig.title,
+      description: gig.description,
+      category: gig.category,
+      difficultyLevel: gig.difficultyLevel,
+      status: gig.status,
+      budget: gig.budget,
+      skills: gig.skills,
+      deadline: gig.deadline,
+      experienceRequired: gig.experienceRequired,
+      location: gig.location,
+      metadata: gig.metadata,
+      _creationTime: gig._creationTime,
+      employerId: gig.employerId,
+    })) satisfies GigListItem[];
+
+    return {
+      items,
+      continueCursor: result.continueCursor ?? null,
+      isDone: result.isDone ?? true,
+    } satisfies EmployerGigListResponse;
+  },
+);
+
+export const fetchEmployerGigDetail = cache(
+  async (gigId: Id<"gigs">): Promise<EmployerGigDetail> => {
+    const token = await requireConvexToken();
+    const gig = await fetchQuery(
+      api.employerGigs.getEmployerGig,
+      { gigId },
+      { token },
+    );
+
+    if (!gig) {
+      throw new Error(`Gig ${gigId} not found`);
+    }
+
+    return gig;
+  },
+);
+
+export const fetchEmployerMetrics = cache(
+  async (): Promise<EmployerMetricsResult & Pick<GigStats, "totalGigs">> => {
+    const token = await requireConvexToken();
+    const result = (await fetchQuery(
+      api.employerGigs.getEmployerMetrics,
+      {},
+      { token },
+    )) as EmployerMetricsResult;
+
+    return {
+      ...result,
+      totalGigs: result.totalGigs,
+    };
+  },
+);
+
+export const preloadGigApplications = cache(
+  async (args: {
+    gigId: Id<"gigs">;
+    status?: Doc<"applications">["status"];
+    cursor?: string | null;
+    limit?: number;
+  }): Promise<Preloaded<typeof api.employerGigs.listApplicationsByGig>> => {
+    const token = await requireConvexToken();
+    const { gigId, status, cursor, limit } = args;
+    return preloadQuery(
+      api.employerGigs.listApplicationsByGig,
+      {
+        gigId,
+        ...(status ? { status } : {}),
+        ...(cursor !== undefined && cursor !== null ? { cursor } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+      },
+      {
+        token,
+      },
+    );
+  },
+);
+
+export const fetchGigApplications = cache(
+  async (args: {
+    gigId: Id<"gigs">;
+    status?: Doc<"applications">["status"];
+    cursor?: string | null;
+    limit?: number;
+  }): Promise<EmployerApplicationsResponse> => {
+    const token = await requireConvexToken();
+    const { gigId, status, cursor, limit } = args;
+    const result = (await fetchQuery(
+      api.employerGigs.listApplicationsByGig,
+      {
+        gigId,
+        ...(status ? { status } : {}),
+        ...(cursor !== undefined && cursor !== null ? { cursor } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+      },
+      { token },
+    )) as EmployerApplicationsResult;
+
+    return {
+      items: result.items,
+      continueCursor: result.continueCursor ?? null,
+      isDone: result.isDone ?? true,
+    } satisfies EmployerApplicationsResponse;
+  },
+);
 
 // =============================================================================
 // APPLICATIONS FETCHERS

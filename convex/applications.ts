@@ -5,7 +5,7 @@
  */
 
 import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { getUserId } from "./users";
 
@@ -53,6 +53,114 @@ export const listByCandidate = query({
     }
 
     return hydrated;
+  },
+});
+
+export interface ApplicationStatusByGigResult {
+  hasApplied: boolean;
+  applicationId: Id<"applications"> | null;
+  status: ApplicationStatus | null;
+}
+
+export const statusForGig = query({
+  args: {
+    gigId: v.id("gigs"),
+  },
+  handler: async (ctx, { gigId }): Promise<ApplicationStatusByGigResult> => {
+    const candidateId = await getUserId(ctx);
+    if (!candidateId) {
+      return {
+        hasApplied: false,
+        applicationId: null,
+        status: null,
+      };
+    }
+
+    const existing = await ctx.db
+      .query("applications")
+      .withIndex("by_gig_and_candidate", (q) =>
+        q.eq("gigId", gigId).eq("candidateId", candidateId),
+      )
+      .unique();
+
+    if (!existing) {
+      return {
+        hasApplied: false,
+        applicationId: null,
+        status: null,
+      };
+    }
+
+    return {
+      hasApplied: true,
+      applicationId: existing._id,
+      status: existing.status as ApplicationStatus,
+    };
+  },
+});
+
+export interface SubmitApplicationResult {
+  applicationId: Id<"applications"> | null;
+  status: ApplicationStatus | null;
+  isDuplicate: boolean;
+}
+
+export const submit = mutation({
+  args: {
+    gigId: v.id("gigs"),
+    coverLetter: v.string(),
+    portfolioUrl: v.string(),
+  },
+  handler: async (
+    ctx,
+    { gigId, coverLetter, portfolioUrl },
+  ): Promise<SubmitApplicationResult> => {
+    const candidateId = await getUserId(ctx);
+
+    if (!candidateId) {
+      throw new ConvexError("You must be signed in to apply to a gig.");
+    }
+
+    const gig = await ctx.db.get(gigId);
+    if (!gig || gig.status !== "open") {
+      throw new ConvexError("This gig is not accepting applications.");
+    }
+
+    const existing = await ctx.db
+      .query("applications")
+      .withIndex("by_gig_and_candidate", (q) =>
+        q.eq("gigId", gigId).eq("candidateId", candidateId),
+      )
+      .unique();
+
+    if (existing) {
+      return {
+        applicationId: existing._id,
+        status: existing.status as ApplicationStatus,
+        isDuplicate: true,
+      } satisfies SubmitApplicationResult;
+    }
+
+    const normalizedCoverLetter = coverLetter.trim();
+    const normalizedPortfolioUrl = portfolioUrl.trim();
+    const now = Date.now();
+
+    const applicationId = await ctx.db.insert("applications", {
+      gigId,
+      candidateId,
+      coverLetter: normalizedCoverLetter,
+      portfolioLinks: normalizedPortfolioUrl
+        ? [normalizedPortfolioUrl]
+        : undefined,
+      status: "submitted",
+      updatedAt: now,
+    });
+
+    return {
+      applicationId,
+      status: "submitted",
+      isDuplicate: false,
+    } satisfies SubmitApplicationResult;
   },
 });
 

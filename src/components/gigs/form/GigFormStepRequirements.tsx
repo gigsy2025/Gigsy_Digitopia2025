@@ -76,10 +76,18 @@ export function GigFormStepRequirements({ className }: { className?: string }) {
     });
   };
 
-  const handleCustomSkillSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleCustomSkillSubmit = () => {
     handleAddSkill(customSkill);
     setCustomSkill("");
+  };
+
+  const handleCustomSkillKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleCustomSkillSubmit();
+    }
   };
 
   const toggleSuggestedSkill = (skill: string, isSelected: boolean) => {
@@ -123,19 +131,17 @@ export function GigFormStepRequirements({ className }: { className?: string }) {
           <p className="text-destructive text-sm">{errors.skills.message}</p>
         ) : null}
 
-        <form
-          onSubmit={handleCustomSkillSubmit}
-          className="flex items-center gap-2"
-        >
+        <div className="flex items-center gap-2">
           <Input
             value={customSkill}
             placeholder="Add custom skill and press Enter"
             onChange={(event) => setCustomSkill(event.target.value)}
+            onKeyDown={handleCustomSkillKeyDown}
           />
-          <Button type="submit" size="sm">
+          <Button type="button" size="sm" onClick={handleCustomSkillSubmit}>
             Add
           </Button>
-        </form>
+        </div>
       </div>
 
       <div className="grid gap-3">

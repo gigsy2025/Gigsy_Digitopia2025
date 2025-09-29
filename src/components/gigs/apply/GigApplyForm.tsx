@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { GigDetail } from "@/types/gigs";
+import { toast } from "sonner";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import type {
+  ApplyToGigInput,
+  ApplyToGigResult,
+} from "@/app/app/gigs/[gigId]/apply/actions";
+import type {
+  ApplicationStatus,
+  ApplicationStatusSummary,
+} from "@/types/applications";
+import type { Id } from "convex/_generated/dataModel";
 
 const applySchema = z.object({
   coverLetter: z
@@ -33,10 +44,26 @@ export type GigApplyFormValues = z.infer<typeof applySchema>;
 
 export interface GigApplyFormProps {
   gig: GigDetail;
-  onSubmit?: (values: GigApplyFormValues) => Promise<void> | void;
+  applyAction: (input: ApplyToGigInput) => Promise<ApplyToGigResult>;
+  existingApplication?: ApplicationStatusSummary | null;
 }
 
-export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
+const APPLICATION_VIEW_PATH = "/app/profile/applications";
+
+const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  submitted: "Submitted",
+  in_review: "In review",
+  shortlisted: "Shortlisted",
+  rejected: "Rejected",
+  hired: "Hired",
+  withdrawn: "Withdrawn",
+};
+
+export function GigApplyForm({
+  gig,
+  applyAction,
+  existingApplication,
+}: GigApplyFormProps) {
   const form = useForm<GigApplyFormValues>({
     resolver: zodResolver(applySchema),
     defaultValues: {
@@ -46,6 +73,23 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
   });
 
   const characterCount = form.watch("coverLetter").length;
+  const [isPending, startTransition] = useTransition();
+  const [applicationStatus, setApplicationStatus] =
+    useState<ApplicationStatusSummary | null>(existingApplication ?? null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setApplicationStatus(existingApplication ?? null);
+  }, [existingApplication]);
+
+  useEffect(() => {
+    return () => {
+      if (confettiTimeoutRef.current) {
+        clearTimeout(confettiTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const helperText = useMemo(() => {
     if (characterCount < 50) {
@@ -57,13 +101,98 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
     return "Highlight relevant experience, recent wins, and why you're the right partner.";
   }, [characterCount]);
 
-  const handleSubmit = form.handleSubmit(async (values) => {
-    await onSubmit?.(values);
+  const statusLabel = applicationStatus?.status
+    ? (STATUS_LABELS[applicationStatus.status] ?? applicationStatus.status)
+    : null;
+
+  const isApplicationLocked = applicationStatus?.hasApplied;
+
+  const navigateToApplications = () => {
+    window.location.assign(APPLICATION_VIEW_PATH);
+  };
+
+  const handleSubmit = form.handleSubmit((values) => {
+    if (isApplicationLocked) {
+      toast.info("You already submitted an application for this gig.", {
+        description: statusLabel
+          ? `Current status: ${statusLabel}.`
+          : undefined,
+        action: {
+          label: "View application",
+          onClick: navigateToApplications,
+        },
+      });
+      return;
+    }
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          const result = await applyAction({
+            gigId: gig._id,
+            ...values,
+          });
+
+          if (result.success) {
+            setApplicationStatus({
+              hasApplied: true,
+              applicationId: (result.applicationId ??
+                null) as Id<"applications"> | null,
+              status: (result.status ?? null) as ApplicationStatus | null,
+            });
+            toast.success(
+              result.message || "Your application has been submitted!",
+              {
+                action: {
+                  label: "View application",
+                  onClick: navigateToApplications,
+                },
+              },
+            );
+            setShowConfetti(true);
+            if (confettiTimeoutRef.current) {
+              clearTimeout(confettiTimeoutRef.current);
+            }
+            confettiTimeoutRef.current = setTimeout(
+              () => setShowConfetti(false),
+              1600,
+            );
+            form.reset();
+            return;
+          }
+
+          if (result.isDuplicate) {
+            setApplicationStatus({
+              hasApplied: true,
+              applicationId: (result.applicationId ??
+                null) as Id<"applications"> | null,
+              status: (result.status ?? null) as ApplicationStatus | null,
+            });
+            toast.info(result.message, {
+              description: result.duplicateMessage,
+              action: {
+                label: "View application",
+                onClick: navigateToApplications,
+              },
+            });
+            return;
+          }
+
+          toast.error(result.message || "Unable to submit application.");
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unexpected error while submitting.";
+          toast.error(message);
+        }
+      })();
+    });
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="relative space-y-8">
         <section className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-foreground text-lg font-semibold">
@@ -138,6 +267,7 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
         </section>
 
         <footer className="border-border bg-background/80 sticky right-0 bottom-4 left-0 z-10 rounded-2xl border p-4 shadow-lg backdrop-blur">
+          <ConfettiBurst active={showConfetti} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="text-foreground text-sm font-medium">
@@ -147,13 +277,130 @@ export function GigApplyForm({ gig, onSubmit }: GigApplyFormProps) {
                 You&apos;ll receive a confirmation once we release the employer
                 workflow.
               </p>
+              {isApplicationLocked && (
+                <p className="text-success text-xs font-medium">
+                  {statusLabel
+                    ? `Application already submitted (${statusLabel}).`
+                    : "Application already submitted."}
+                </p>
+              )}
             </div>
-            <Button type="submit" size="lg" className="sm:min-w-[220px]">
-              Submit application
+            <Button
+              type="submit"
+              size="lg"
+              className="sm:min-w-[220px]"
+              disabled={isPending || isApplicationLocked}
+            >
+              {isApplicationLocked ? (
+                <span className="flex items-center gap-2">
+                  <CheckCircle2
+                    className="text-success h-4 w-4"
+                    aria-hidden="true"
+                  />
+                  Application submitted
+                </span>
+              ) : isPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                  Submitting...
+                </span>
+              ) : (
+                "Submit application"
+              )}
             </Button>
           </div>
         </footer>
       </form>
     </Form>
+  );
+}
+
+interface ConfettiPiece {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  color: string;
+}
+
+const CONFETTI_COLORS = ["#4ade80", "#38bdf8", "#facc15", "#fb7185", "#a855f7"];
+
+function ConfettiBurst({ active }: { active: boolean }) {
+  const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
+
+  useEffect(() => {
+    if (active) {
+      const generated = Array.from({ length: 14 }).map((_, index) => {
+        const color =
+          CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)] ??
+          "#38bdf8";
+
+        return {
+          id: index,
+          left: Math.random() * 100,
+          delay: Math.random() * 150,
+          duration: 900 + Math.random() * 600,
+          color,
+        } satisfies ConfettiPiece;
+      });
+      setPieces(generated);
+    } else {
+      setPieces([]);
+    }
+  }, [active]);
+
+  if (!active || pieces.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-visible">
+      {pieces.map((piece) => (
+        <span
+          key={piece.id}
+          className="confetti-piece"
+          style={{
+            left: `${piece.left}%`,
+            animationDelay: `${piece.delay}ms`,
+            animationDuration: `${piece.duration}ms`,
+            backgroundColor: piece.color,
+          }}
+        />
+      ))}
+
+      <style jsx>{`
+        .confetti-piece {
+          position: absolute;
+          top: -10px;
+          width: 8px;
+          height: 14px;
+          border-radius: 2px;
+          opacity: 0;
+          animation-name: confetti-fall;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+        }
+
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(0) rotate(0deg) scale(1);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          80% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(140px) rotate(240deg) scale(0.9);
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

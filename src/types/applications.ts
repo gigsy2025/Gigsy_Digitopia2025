@@ -6,3 +6,9 @@ export interface ApplicationWithGig {
   application: Doc<"applications">;
   gig: Doc<"gigs">;
 }
+
+export interface ApplicationStatusSummary {
+  hasApplied: boolean;
+  applicationId: Doc<"applications">["_id"] | null;
+  status: ApplicationStatus | null;
+}
