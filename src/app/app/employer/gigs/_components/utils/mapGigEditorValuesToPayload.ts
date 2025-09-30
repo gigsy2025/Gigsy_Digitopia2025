@@ -1,4 +1,7 @@
-import type { GigEditorFormValues, GigEditorPayload } from "@/lib/validations/gigEditor";
+import type {
+  GigEditorFormValues,
+  GigEditorPayload,
+} from "@/lib/validations/gigEditor";
 import type { EmployerGigDetail } from "@/utils/fetchers-server";
 
 const toTimestamp = (value?: string) => {
@@ -24,8 +27,8 @@ export function mapGigEditorValuesToPayload(
       ? { type: locationType }
       : {
           type: locationType,
-          city: values.locationCity?.trim() || undefined,
-          country: values.locationCountry?.trim() || undefined,
+          city: values.locationCity?.trim() ?? undefined,
+          country: values.locationCountry?.trim() ?? undefined,
         };
 
   return {
