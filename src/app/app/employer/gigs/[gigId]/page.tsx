@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 import { EmployerLayout } from "@/components/layouts/EmployerLayout";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import {
   fetchEmployerGigDetail,
   fetchEmployerMetrics,
   fetchGigApplications,
+  fetchConvexUserByClerkId,
 } from "@/utils/fetchers-server";
 import type { Id } from "convex/_generated/dataModel";
 import { buildEmployerNavItems } from "../../_utils/nav";
@@ -18,9 +20,9 @@ const BASE_PATH = "/app/employer" as const;
 const GIGS_PATH = `${BASE_PATH}/gigs` as const;
 
 interface EmployerGigDetailPageProps {
-  params: {
+  params: Promise<{
     gigId: string;
-  };
+  }>;
 }
 
 export const metadata = {
@@ -30,9 +32,12 @@ export const metadata = {
 export default async function EmployerGigDetailPage({
   params,
 }: EmployerGigDetailPageProps) {
-  const gigId = params.gigId as Id<"gigs">;
+  const resolvedParams = await params;
+  const gigIdString = resolvedParams.gigId;
+  const gigId = gigIdString as Id<"gigs">;
 
-  const [metrics, gig, applications] = await Promise.all([
+  const [{ userId }, metrics, gig, applications] = await Promise.all([
+    auth(),
     fetchEmployerMetrics(),
     fetchEmployerGigDetail(gigId),
     fetchGigApplications({ gigId, limit: 10 }),
@@ -42,11 +47,16 @@ export default async function EmployerGigDetailPage({
     notFound();
   }
 
-  const navItems = buildEmployerNavItems(`${GIGS_PATH}/${params.gigId}`, {
+  const convexUser = userId
+    ? await fetchConvexUserByClerkId(userId)
+    : null;
+
+  const isGigOwner = Boolean(convexUser && gig.employerId === convexUser._id);
+
+  const navItems = buildEmployerNavItems(`${GIGS_PATH}/${gigIdString}`, {
     activeGigs: metrics.activeGigs,
     totalApplicants: metrics.totalApplicants,
   });
-
   return (
     <EmployerLayout
       title={gig.title}
@@ -56,8 +66,13 @@ export default async function EmployerGigDetailPage({
           <Button variant="outline" asChild>
             <Link href={`${GIGS_PATH}`}>Back to gigs</Link>
           </Button>
+          {isGigOwner ? (
+            <Button variant="secondary" asChild>
+              <Link href={`${GIGS_PATH}/${gigIdString}/edit`}>Edit gig</Link>
+            </Button>
+          ) : null}
           <Button asChild>
-            <Link href={`${GIGS_PATH}/${params.gigId}/applications`}>
+            <Link href={`${GIGS_PATH}/${gigIdString}/applications`}>
               View applications
             </Link>
           </Button>
@@ -134,7 +149,7 @@ export default async function EmployerGigDetailPage({
             </p>
           </div>
           <Button variant="outline" asChild>
-            <Link href={`${GIGS_PATH}/${params.gigId}/applications`}>
+            <Link href={`${GIGS_PATH}/${gigIdString}/applications`}>
               Manage applications
             </Link>
           </Button>

@@ -1,0 +1,21 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "JSON", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 3, 0, 0, 0, 3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 87, 0, 10, 97
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\edit\actions.ts", "TypeScript", 81, 0, 0, 0, 0, 13, 94
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\edit\page.tsx", "TypeScript JSX", 0, 62, 0, 0, 0, 12, 74
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\page.tsx", "TypeScript JSX", 0, 14, 0, 0, 0, 1, 15
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\GigEditorForm.tsx", "TypeScript JSX", 0, 76, 0, 0, 0, 13, 89
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\hooks\useGigSkillManager.ts", "TypeScript", 73, 0, 0, 0, 0, 15, 88
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigBudgetTimelineSection.tsx", "TypeScript JSX", 0, 235, 0, 0, 0, 12, 247
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigLocationVisibilitySection.tsx", "TypeScript JSX", 0, 139, 0, 0, 0, 10, 149
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigOverviewSection.tsx", "TypeScript JSX", 0, 194, 0, 0, 0, 13, 207
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigPublishingControls.tsx", "TypeScript JSX", 0, 22, 0, 0, 0, 5, 27
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigSnapshotCard.tsx", "TypeScript JSX", 0, 33, 0, 0, 0, 5, 38
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\utils\deriveGigEditorDefaults.ts", "TypeScript", 33, 0, 0, 0, 0, 3, 36
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\utils\mapGigEditorValuesToPayload.ts", "TypeScript", 50, 0, 0, 0, 0, 5, 55
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\calendar.tsx", "TypeScript JSX", 0, 203, 0, 0, 0, 11, 214
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\checkbox.tsx", "TypeScript JSX", 0, 28, 0, 0, 0, 5, 33
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\ui\popover.tsx", "TypeScript JSX", 0, 41, 0, 0, 0, 8, 49
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\validations\gigEditor.ts", "TypeScript", 98, 0, 0, 0, 0, 6, 104
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers-server.ts", "TypeScript", 13, 0, 0, 0, 0, 3, 16
+"Total", "-", 348, 1047, 3, 87, 0, 150, 1635

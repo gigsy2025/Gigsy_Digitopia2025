@@ -42,6 +42,7 @@ interface ConvexRequestOptions {
 // =============================================================================
 
 type EmployerGigRecord = Doc<"gigs">;
+type ConvexUserRecord = Doc<"users">;
 
 interface EmployerGigListResult {
   items: EmployerGigRecord[];
@@ -55,7 +56,7 @@ interface EmployerGigListResponse {
   isDone: boolean;
 }
 
-type EmployerGigDetail = EmployerGigRecord;
+export type EmployerGigDetail = EmployerGigRecord;
 
 interface EmployerMetricsResult {
   totalGigs: number;
@@ -232,6 +233,21 @@ export const fetchEmployerGigs = cache(
     } satisfies EmployerGigListResponse;
   },
 );
+
+export async function fetchConvexUserByClerkId(
+  clerkId: string,
+): Promise<ConvexUserRecord | null> {
+  if (!clerkId) {
+    return null;
+  }
+
+  const token = await requireConvexToken();
+  const user = await fetchQuery(api.users.getUserByClerkId, { clerkId }, {
+    token,
+  });
+
+  return user ?? null;
+}
 
 export const fetchEmployerGigDetail = cache(
   async (gigId: Id<"gigs">): Promise<EmployerGigDetail> => {
