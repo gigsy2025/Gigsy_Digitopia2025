@@ -7,6 +7,7 @@ import { api } from "convex/_generated/api";
 
 import type { ApplicationStatus } from "@/types/applications";
 import type { ApplicationWithGig } from "@/types/applications";
+import { APPLICATION_STATUS_ORDER } from "@/types/applications";
 import {
   ApplicationFilters,
   type ApplicationFiltersState,
@@ -24,14 +25,26 @@ const DEFAULT_FILTERS: ApplicationFiltersState = {
 
 const PAGE_SIZE = 5;
 
-const STATUS_SORT_ORDER: Record<ApplicationStatus, number> = {
-  submitted: 1,
-  in_review: 2,
-  shortlisted: 3,
-  hired: 4,
-  rejected: 5,
-  withdrawn: 6,
-};
+const STATUS_SORT_ORDER: Record<ApplicationStatus, number> =
+  APPLICATION_STATUS_ORDER.reduce<Record<ApplicationStatus, number>>(
+    (acc, status, index) => {
+      acc[status] = index + 1;
+      return acc;
+    },
+    {
+      pending: 1,
+      viewed: 2,
+      submitted: 3,
+      in_review: 4,
+      shortlisted: 5,
+      interview_requested: 6,
+      hired: 7,
+      assigned: 8,
+      rejected: 9,
+      withdrawn: 10,
+      closed: 11,
+    },
+  );
 
 export function ApplicationsContent({ preloaded }: ApplicationsContentProps) {
   const [filters, setFilters] =

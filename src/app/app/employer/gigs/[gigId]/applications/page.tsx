@@ -9,7 +9,7 @@ import type { GigListItem } from "@/types/gigs";
 import {
   fetchEmployerGigDetail,
   fetchEmployerMetrics,
-  fetchGigApplications,
+  fetchEmployerApplications,
   type EmployerApplicationsResponse,
 } from "@/utils/fetchers-server";
 import type { Id } from "convex/_generated/dataModel";
@@ -21,12 +21,17 @@ const BASE_PATH = "/app/employer" as const;
 const GIGS_PATH = `${BASE_PATH}/gigs` as const;
 
 const APPLICATION_STATUS_FILTERS: ApplicationStatus[] = [
+  "pending",
+  "viewed",
   "submitted",
   "in_review",
   "shortlisted",
+  "interview_requested",
   "rejected",
-  "hired",
   "withdrawn",
+  "hired",
+  "assigned",
+  "closed",
 ];
 
 interface EmployerGigApplicationsPageProps {
@@ -79,7 +84,7 @@ export default async function EmployerGigApplicationsPage({
   const [metrics, gig, applications] = await Promise.all([
     fetchEmployerMetrics(),
     fetchEmployerGigDetail(gigId),
-    fetchGigApplications({ gigId, status, cursor, limit }),
+    fetchEmployerApplications({ gigId, status, cursor, limit }),
   ]);
 
   if (!gig) {
@@ -94,7 +99,7 @@ export default async function EmployerGigApplicationsPage({
     },
   );
 
-  const tableData = enrichApplicationsWithActions(applications);
+  const tableData = enrichApplicationsWithActions(applications, params.gigId);
 
   return (
     <EmployerLayout
@@ -133,9 +138,11 @@ export default async function EmployerGigApplicationsPage({
 
 function enrichApplicationsWithActions(
   applications: EmployerApplicationsResponse,
+  gigId: string,
 ) {
   return applications.items.map((record) => ({
     ...record,
+    detailHref: `${GIGS_PATH}/${gigId}/applications/${record.application._id}`,
     actions: (
       <ApplicationActions
         applicationId={record.application._id}

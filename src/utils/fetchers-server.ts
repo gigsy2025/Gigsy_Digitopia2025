@@ -10,7 +10,7 @@
 
 import "server-only";
 import { cache } from "react";
-import { preloadQuery, fetchQuery } from "convex/nextjs";
+import { preloadQuery, fetchQuery, fetchMutation } from "convex/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { api } from "convex/_generated/api";
 import type { Preloaded } from "convex/react";
@@ -79,6 +79,13 @@ export interface EmployerApplicationsResponse {
   isDone: boolean;
 }
 
+export interface EmployerApplicationDetail {
+  application: Doc<"applications">;
+  candidate: Doc<"users"> | null;
+  events: Doc<"applicationStatusEvents">[];
+  notes: Array<Doc<"employerNotes"> & { authorClerkId: string | null }>;
+}
+
 async function requireConvexToken(): Promise<string> {
   const token = await getAuthToken();
   if (!token) {
@@ -108,6 +115,78 @@ export const preloadEmployerGigs = cache(
     );
   },
 );
+
+export const fetchEmployerApplications = cache(
+  async (args: {
+    gigId: Id<"gigs">;
+    status?: Doc<"applications">["status"];
+    cursor?: string | null;
+    limit?: number;
+  }): Promise<EmployerApplicationsResponse> => {
+    const token = await requireConvexToken();
+    const { gigId, status, cursor, limit } = args;
+
+    const result = await fetchQuery(
+      api.employerApplications.listByGig,
+      {
+        gigId,
+        ...(status ? { status } : {}),
+        ...(cursor !== undefined && cursor !== null ? { cursor } : {}),
+        ...(limit !== undefined ? { limit } : {}),
+      },
+      { token },
+    );
+
+    return result as EmployerApplicationsResponse;
+  },
+);
+
+export async function fetchEmployerApplicationDetail(args: {
+  gigId: Id<"gigs">;
+  applicationId: Id<"applications">;
+}): Promise<EmployerApplicationDetail> {
+  const token = await requireConvexToken();
+  const { gigId, applicationId } = args;
+
+  const detail = await fetchQuery(
+    api.employerApplications.getApplication,
+    {
+      gigId,
+      applicationId,
+    },
+    { token },
+  );
+
+  return detail as EmployerApplicationDetail;
+}
+
+export async function markEmployerApplicationViewed(
+  applicationId: Id<"applications">,
+): Promise<void> {
+  const token = await requireConvexToken();
+  await fetchMutation(
+    api.employerApplications.markViewed,
+    {
+      applicationId,
+    },
+    { token },
+  );
+}
+
+export async function addEmployerApplicationNote(args: {
+  applicationId: Id<"applications">;
+  body: string;
+}): Promise<void> {
+  const token = await requireConvexToken();
+  await fetchMutation(
+    api.employerApplications.addNote,
+    {
+      applicationId: args.applicationId,
+      body: args.body,
+    },
+    { token },
+  );
+}
 
 export const fetchEmployerGigs = cache(
   async (

@@ -404,6 +404,17 @@ const schema = defineSchema({
 
     // --- Standard System Fields ---
     updatedAt: v.number(), // Timestamp of the last modification.
+    statusUpdatedAt: v.optional(v.number()),
+    coverLetterPreview: v.optional(v.string()),
+    applicantSnapshot: v.optional(
+      v.object({
+        name: v.string(),
+        avatarUrl: v.optional(v.string()),
+        headline: v.optional(v.string()),
+        reputationScore: v.optional(v.number()),
+      }),
+    ),
+    indexedAt: v.optional(v.number()),
   })
     // --- Indexes for Performance ---
     // To quickly find all gigs posted by a specific employer.
@@ -447,31 +458,98 @@ const schema = defineSchema({
 
   applications: defineTable({
     // --- Core Relationships ---
-    gigId: v.id("gigs"), // The gig being applied to.
-    candidateId: v.id("users"), // The candidate who is applying.
+    gigId: v.id("gigs"),
+    candidateId: v.id("users"),
 
-    // --- Application Content & State ---
-    coverLetter: v.optional(v.string()), // Optional pitch text for flexible apply flows.
-    portfolioLinks: v.optional(v.array(v.string())), // Supplemental work samples.
+    // --- Application Content & Financials ---
+    coverLetter: v.optional(v.string()),
+    coverLetterPreview: v.optional(v.string()),
+    portfolioLinks: v.optional(v.array(v.string())),
+    attachments: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          url: v.string(),
+        }),
+      ),
+    ),
+    expectedBudget: v.optional(v.number()),
+    referralSource: v.optional(v.string()),
+
+    // --- Denormalized Applicant Snapshot ---
+    applicantSnapshot: v.optional(
+      v.object({
+        name: v.string(),
+        avatarUrl: v.optional(v.string()),
+        headline: v.optional(v.string()),
+        reputationScore: v.optional(v.number()),
+        location: v.optional(v.string()),
+      }),
+    ),
+
+    // --- Status Tracking ---
     status: v.union(
       v.literal("submitted"),
       v.literal("in_review"),
       v.literal("shortlisted"),
+      v.literal("interview_requested"),
       v.literal("rejected"),
       v.literal("hired"),
       v.literal("withdrawn"),
+      v.literal("assigned"),
+      v.literal("closed"),
+      v.literal("viewed"),
+      v.literal("pending"),
     ),
+    statusUpdatedAt: v.optional(v.number()),
+    viewedAt: v.optional(v.number()),
 
-    // --- Standard System Fields ---
-    updatedAt: v.number(), // Timestamp of the last modification.
+    // --- Metadata ---
+    createdBy: v.optional(v.string()),
+    updatedAt: v.number(),
+    indexedAt: v.optional(v.number()),
   })
-    // --- Indexes for Performance ---
-    // A compound index to quickly find a specific application and enforce uniqueness.
     .index("by_gig_and_candidate", ["gigId", "candidateId"])
-    // To quickly find all applications for a specific gig.
     .index("by_gig", ["gigId"])
-    // To quickly find all applications submitted by a specific candidate.
-    .index("by_candidate", ["candidateId"]),
+    .index("by_candidate", ["candidateId"])
+    .index("by_status", ["status"]),
+
+  applicationStatusEvents: defineTable({
+    applicationId: v.id("applications"),
+    status: v.union(
+      v.literal("submitted"),
+      v.literal("in_review"),
+      v.literal("shortlisted"),
+      v.literal("interview_requested"),
+      v.literal("rejected"),
+      v.literal("hired"),
+      v.literal("withdrawn"),
+      v.literal("assigned"),
+      v.literal("closed"),
+      v.literal("viewed"),
+      v.literal("pending"),
+    ),
+    changedBy: v.id("users"),
+    reason: v.optional(v.string()),
+    meta: v.optional(v.any()),
+    createdAt: v.number(),
+  }).index("by_application", ["applicationId", "createdAt"]),
+
+  employerNotes: defineTable({
+    applicationId: v.id("applications"),
+    authorId: v.id("users"),
+    body: v.string(),
+    createdAt: v.number(),
+    editedAt: v.optional(v.number()),
+  }).index("by_application", ["applicationId", "createdAt"]),
+
+  analyticsEvents: defineTable({
+    name: v.string(),
+    properties: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_name", ["name", "createdAt"])
+    .index("by_created_at", ["createdAt"]),
 
   // --- LMS Core Content Tables ---
 

@@ -166,12 +166,17 @@ const PaginationArgs = {
 };
 
 const APPLICATION_STATUS = [
+  "pending",
+  "viewed",
   "submitted",
   "in_review",
   "shortlisted",
+  "interview_requested",
   "rejected",
-  "hired",
   "withdrawn",
+  "hired",
+  "assigned",
+  "closed",
 ] as const;
 
 function assertBudget(input: { min: number; max: number }) {

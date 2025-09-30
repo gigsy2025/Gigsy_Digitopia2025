@@ -10,6 +10,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import type { ApplicationStatus } from "@/types/applications";
+import {
+  APPLICATION_STATUS_LABELS,
+  APPLICATION_STATUS_ORDER,
+} from "@/types/applications";
 import { cn } from "@/lib/utils";
 
 export type ApplicationSortOption = "recent" | "oldest" | "status";
@@ -25,23 +29,9 @@ interface ApplicationFiltersProps {
   total: number;
 }
 
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  submitted: "Submitted",
-  in_review: "In review",
-  shortlisted: "Shortlisted",
-  rejected: "Rejected",
-  hired: "Hired",
-  withdrawn: "Withdrawn",
-};
-
 const STATUS_ORDER: Array<ApplicationStatus | "all"> = [
   "all",
-  "submitted",
-  "in_review",
-  "shortlisted",
-  "hired",
-  "rejected",
-  "withdrawn",
+  ...APPLICATION_STATUS_ORDER,
 ];
 
 const SORT_LABELS: Record<ApplicationSortOption, string> = {
@@ -61,7 +51,10 @@ export function ApplicationFilters({
     () =>
       STATUS_ORDER.map((status) => ({
         value: status,
-        label: status === "all" ? "All statuses" : STATUS_LABELS[status],
+        label:
+          status === "all"
+            ? "All statuses"
+            : (APPLICATION_STATUS_LABELS[status] ?? status),
       })),
     [],
   );

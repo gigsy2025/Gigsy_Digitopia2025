@@ -15,6 +15,7 @@ import type {
   ApplicationStatus,
   ApplicationWithGig,
 } from "@/types/applications";
+import { APPLICATION_STATUS_LABELS } from "@/types/applications";
 
 interface ApplicationCardProps {
   item: ApplicationWithGig;
@@ -28,23 +29,19 @@ interface ApplicationCardProps {
 
 const STATUS_VARIANTS: Record<
   ApplicationStatus,
-  "default" | "secondary" | "destructive"
+  "default" | "secondary" | "destructive" | "outline"
 > = {
+  pending: "secondary",
+  viewed: "secondary",
   submitted: "secondary",
   in_review: "default",
   shortlisted: "default",
+  interview_requested: "default",
   rejected: "destructive",
-  hired: "default",
   withdrawn: "secondary",
-};
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  submitted: "Submitted",
-  in_review: "In review",
-  shortlisted: "Shortlisted",
-  rejected: "Rejected",
-  hired: "Hired",
-  withdrawn: "Withdrawn",
+  hired: "default",
+  assigned: "default",
+  closed: "destructive",
 };
 
 function formatTimeline(timestamp: number) {
@@ -77,8 +74,9 @@ export function ApplicationCard({
   const employerName = employerNameFromGig ?? employerNameFromMetadata;
 
   const appliedAt = formatTimeline(application._creationTime ?? Date.now());
-  const statusLabel = STATUS_LABELS[application.status];
-  const badgeVariant = STATUS_VARIANTS[application.status];
+  const statusLabel =
+    APPLICATION_STATUS_LABELS[application.status] ?? application.status;
+  const badgeVariant = STATUS_VARIANTS[application.status] ?? "outline";
 
   const handleViewGig = () => {
     onViewGig?.(gig._id);

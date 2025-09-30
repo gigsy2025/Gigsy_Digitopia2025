@@ -27,6 +27,7 @@ import type {
   ApplicationStatus,
   ApplicationStatusSummary,
 } from "@/types/applications";
+import { APPLICATION_STATUS_LABELS } from "@/types/applications";
 import type { Id } from "convex/_generated/dataModel";
 
 const applySchema = z.object({
@@ -49,15 +50,6 @@ export interface GigApplyFormProps {
 }
 
 const APPLICATION_VIEW_PATH = "/app/profile/applications";
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  submitted: "Submitted",
-  in_review: "In review",
-  shortlisted: "Shortlisted",
-  rejected: "Rejected",
-  hired: "Hired",
-  withdrawn: "Withdrawn",
-};
 
 export function GigApplyForm({
   gig,
@@ -102,7 +94,8 @@ export function GigApplyForm({
   }, [characterCount]);
 
   const statusLabel = applicationStatus?.status
-    ? (STATUS_LABELS[applicationStatus.status] ?? applicationStatus.status)
+    ? (APPLICATION_STATUS_LABELS[applicationStatus.status] ??
+      applicationStatus.status)
     : null;
 
   const isApplicationLocked = applicationStatus?.hasApplied;

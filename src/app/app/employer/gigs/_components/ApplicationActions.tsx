@@ -25,12 +25,17 @@ const STATUS_OPTIONS: ReadonlyArray<{
   value: ApplicationStatus;
   label: string;
 }> = [
+  { value: "pending", label: "Pending" },
+  { value: "viewed", label: "Viewed" },
   { value: "submitted", label: "Submitted" },
   { value: "in_review", label: "In review" },
   { value: "shortlisted", label: "Shortlisted" },
+  { value: "interview_requested", label: "Interview requested" },
   { value: "rejected", label: "Rejected" },
-  { value: "hired", label: "Hired" },
   { value: "withdrawn", label: "Withdrawn" },
+  { value: "hired", label: "Hired" },
+  { value: "assigned", label: "Assigned" },
+  { value: "closed", label: "Closed" },
 ] as const;
 
 export function ApplicationActions({
@@ -39,7 +44,7 @@ export function ApplicationActions({
 }: ApplicationActionsProps) {
   const router = useRouter();
   const toast = useToast();
-  const updateStatus = useMutation(api.employerGigs.updateApplicationStatus);
+  const updateStatus = useMutation(api.employerApplications.updateStatus);
 
   const [value, setValue] = useState<ApplicationStatus>(currentStatus);
   const [isPending, startTransition] = useTransition();
