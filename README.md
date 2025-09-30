@@ -1,7 +1,7 @@
 # Gigsy - Next.js Application
 
-[![Build and Publish Docker Image](https://github.com/YOUR_USERNAME/gigsy/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/YOUR_USERNAME/gigsy/actions/workflows/docker-publish.yml)
-[![Docker Pulls](https://img.shields.io/docker/pulls/YOUR_DOCKERHUB_USERNAME/gigsy)](https://hub.docker.com/r/YOUR_DOCKERHUB_USERNAME/gigsy)
+[![Build and Publish Docker Image](https://github.com/gigsy2025/Gigsy_Digitopia2025/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/gigsy2025/Gigsy_Digitopia2025/actions/workflows/docker-publish.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mostafayaser/gigsy_digitopia2025)](https://hub.docker.com/r/mostafayaser/gigsy_digitopia2025)
 
 A modern, production-ready Next.js application built with the T3 Stack, featuring automated CI/CD, containerization, and comprehensive security scanning.
 
@@ -20,9 +20,9 @@ A modern, production-ready Next.js application built with the T3 Stack, featurin
 ### Using Docker (Recommended)
 
 ```bash
-# Pull and run the latest image
-docker pull YOUR_DOCKERHUB_USERNAME/gigsy:latest
-docker run -p 3000:3000 YOUR_DOCKERHUB_USERNAME/gigsy:latest
+# Pull and run the production image
+docker pull mostafayaser/gigsy_digitopia2025:prod
+docker run -p 3000:3000 mostafayaser/gigsy_digitopia2025:prod
 
 # Open in browser
 open http://localhost:3000
@@ -32,7 +32,7 @@ open http://localhost:3000
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/gigsy.git
+git clone https://github.com/gigsy2025/Gigsy_Digitopia2025.git
 cd gigsy
 
 # Install dependencies
@@ -44,6 +44,53 @@ pnpm run dev
 # Open in browser
 open http://localhost:3000
 ```
+
+## ⚙️ Environment Setup
+
+1. **Duplicate `.env.example`** → `cp .env.example .env` (keep secrets out of version control).
+2. **Populate required values** using the tables below. Validation lives in `src/env.js`, so missing or invalid values will fail the app start.
+
+### Server-side variables
+
+| Variable | Required | Description | Reference |
+| --- | --- | --- | --- |
+| `NODE_ENV` | Auto | Runtime environment (`development`, `test`, `production`). Defaults to `development`. | `src/env.js` |
+| `CONVEX_DEPLOYMENT` | Optional | Convex deployment slug for production/staging builds. Required when deploying off localhost. | `src/env.js` |
+| `CLERK_SECRET_KEY` | Required for server auth flows | Backend Clerk key enabling secure session validation. | `src/env.js` |
+| `CLERK_JWKS_Endpoint` | Optional | Override JWKS endpoint when using custom Clerk domains. | `src/env.js` |
+| `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` | Required for release automation | Unlocks source map uploads and release tracking. | `src/env.js`, `sentry.server.config.ts` |
+| `BETTER_STACK_SOURCE_TOKEN` / `BETTER_STACK_INGESTING_HOST` | Optional | Enables Logtail/Better Stack pipeline for observability. | `src/env.js`, `@logtail` integration |
+| `LOG_LEVEL` | Optional | Sets Pino log verbosity (`trace` → `fatal`). Defaults to `info`. | `src/env.js` |
+| `APP_NAME` / `APP_VERSION` | Optional | Overrides metadata returned by health endpoints. | `src/env.js`, `debug-api.ts` |
+
+### Client-side variables
+
+| Variable | Required | Description | Reference |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Required for browser auth | Public Clerk key consumed by Next.js middleware and client components. | `src/env.js`, `src/app/(auth)/` |
+| `NEXT_PUBLIC_CLERK_FRONTEND_API_URL` | Optional | Custom Clerk Frontend API URL for multi-region routing. | `src/env.js` |
+| `NEXT_PUBLIC_CONVEX_URL` | Optional (defaults to generated value) | Convex deployment endpoint; required for non-local environments. | `src/env.js`, Convex hooks under `convex/_generated` |
+| `NEXT_PUBLIC_GIGS_DATASOURCE` | Optional (`mock` \/ `convex`) | Selects the gig data backend. Defaults to `mock` for local dev; switch to `convex` when seeding Convex data. | `src/env.js`, `shared/profile/profileCreationSchema.ts` |
+| `NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN` / `NEXT_PUBLIC_BETTER_STACK_INGESTING_URL` | Optional | Enables client-side telemetry forwarding to Better Stack. | `src/env.js` |
+
+> 🔐 **Tip:** Use environment-specific `.env.local`, `.env.production`, or CI secrets to prevent accidental credential leaks.
+
+## 🛠️ Local Development Workflow
+
+- **Install dependencies**: `pnpm install` after pulling new changes or lockfile updates.
+- **Standard frontend loop**: `pnpm dev` starts Next.js on `http://localhost:3000` using the mock data source by default.
+- **End-to-end webhook testing**: `pnpm dev:all` runs `pnpm dev` and `pnpm dev:webhook` concurrently, exposing your local server through ngrok (see `package.json`). Use this when validating Clerk webhooks or external integrations.
+- **Convex backend**:
+  ```bash
+  # Authenticate once
+  pnpm convex login
+
+  # Start local Convex functions; requires CONVEX_DEPLOYMENT when targeting remote data
+  pnpm convex dev
+  ```
+  Configure `CONVEX_DEPLOYMENT` and `NEXT_PUBLIC_CONVEX_URL` when you need to work against a team deployment instead of the mock data source.
+- **Switching data sources**: Set `NEXT_PUBLIC_GIGS_DATASOURCE=convex` and ensure Convex seed data exists for features under `shared/profile/profileCreationSchema.ts`.
+- **Environment validation**: run with `SKIP_ENV_VALIDATION=false` (default) so invalid configuration fails fast during `pnpm dev`/`pnpm build`.
 
 ## 📋 Available Scripts
 
@@ -75,15 +122,17 @@ pnpm run check        # Run linting and type checking
 # Build locally
 docker build -t gigsy .
 
-# Run with Docker Compose
-docker compose up
+# Run with Docker Compose (builds from local Dockerfile)
+docker compose up --build
 
 # Run in production mode
-docker compose -f docker-compose.yml up
+docker compose -f docker-compose.yml up --build
 
 # Stop containers
 docker compose down
 ```
+
+> 🗒️ **Compose environments**: The bundled `docker-compose.yml` builds the image locally using the Dockerfile. For deployments that should pull the published artifact (`mostafayaser/gigsy_digitopia2025:prod`), add an override file such as `docker-compose.prod.yml` with `image: mostafayaser/gigsy_digitopia2025:prod` and load credentials via an `.env.prod` file (see `deployment/docker-compose/.env.prod.template`).
 
 ## 🔄 CI/CD Pipeline
 
@@ -105,9 +154,12 @@ This project features a comprehensive CI/CD pipeline that automatically:
 
 ### Quick Setup
 
-1. **Set DockerHub Secrets**: Add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` to repository secrets
-2. **Push to Main**: Workflow automatically builds and publishes Docker images
-3. **Monitor**: Check GitHub Actions tab for build status
+1. **Configure CI secrets** in repository settings:
+   - `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`
+   - `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT`
+   - Optional observability keys: `BETTER_STACK_SOURCE_TOKEN`, `BETTER_STACK_INGESTING_HOST`
+2. **Push to `main`**: [docker-publish workflow](deployment/docker-publish.yml) builds the multi-arch image, runs tests, security scans, and publishes tags (`prod`, `latest`, `main-<SHA>`).
+3. **Review pipeline artifacts**: SBOM, Trivy scan, and build logs are attached to the workflow run for compliance and troubleshooting.
 
 📖 **Detailed Setup**: See [CI/CD Setup Guide](.github/SETUP.md)
 
@@ -170,23 +222,24 @@ This project implements comprehensive security practices:
 
 ### Docker Hub
 
-Images are automatically published to Docker Hub with multiple tags:
+Images are automatically published to Docker Hub with the following tags:
 
-- `latest` - Latest main branch build
-- `main` - Latest main branch (same as latest)
-- `main-COMMIT_SHA` - Specific commit version
+- `prod` – Stable production release build (main branch)
+- `latest` – Alias of `prod` for convenience
+- `main-<COMMIT_SHA>` – Immutable artifact for traceability
+- `pr-<PR_NUMBER>` – Preview image for pull requests
 
 ### Production Deployment
 
 ```bash
-# Pull specific version
-docker pull YOUR_DOCKERHUB_USERNAME/gigsy:main-abc123
+# Pull production image
+docker pull mostafayaser/gigsy_digitopia2025:prod
 
 # Deploy with Docker Compose
 version: '3.8'
 services:
   app:
-    image: YOUR_DOCKERHUB_USERNAME/gigsy:latest
+    image: mostafayaser/gigsy_digitopia2025:prod
     ports:
       - "3000:3000"
     environment:
@@ -213,7 +266,7 @@ spec:
     spec:
       containers:
       - name: gigsy
-        image: YOUR_DOCKERHUB_USERNAME/gigsy:latest
+        image: mostafayaser/gigsy_digitopia2025:prod
         ports:
         - containerPort: 3000
 ```
