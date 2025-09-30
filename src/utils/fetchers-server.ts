@@ -242,9 +242,13 @@ export async function fetchConvexUserByClerkId(
   }
 
   const token = await requireConvexToken();
-  const user = await fetchQuery(api.users.getUserByClerkId, { clerkId }, {
-    token,
-  });
+  const user = await fetchQuery(
+    api.users.getUserByClerkId,
+    { clerkId },
+    {
+      token,
+    },
+  );
 
   return user ?? null;
 }

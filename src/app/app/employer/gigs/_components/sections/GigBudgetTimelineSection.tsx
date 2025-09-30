@@ -21,7 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   GIG_EDITOR_BUDGET_TYPES,
@@ -151,12 +155,18 @@ export function GigBudgetTimelineSection() {
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date ? date.toISOString().slice(0, 10) : "")}
+                    onSelect={(date) =>
+                      field.onChange(
+                        date ? date.toISOString().slice(0, 10) : "",
+                      )
+                    }
                     disabled={(date) => date < new Date()}
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>Leave empty for rolling applications.</FormDescription>
+              <FormDescription>
+                Leave empty for rolling applications.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -192,7 +202,11 @@ export function GigBudgetTimelineSection() {
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => field.onChange(date ? date.toISOString().slice(0, 10) : "")}
+                    onSelect={(date) =>
+                      field.onChange(
+                        date ? date.toISOString().slice(0, 10) : "",
+                      )
+                    }
                     disabled={(date) => date < new Date()}
                   />
                 </PopoverContent>
@@ -210,7 +224,13 @@ export function GigBudgetTimelineSection() {
               <Label htmlFor={field.name}>Estimated duration</Label>
               <div className="flex items-center gap-2">
                 <FormControl>
-                  <Input type="number" min={1} max={365} placeholder="e.g. 6" {...field} />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={365}
+                    placeholder="e.g. 6"
+                    {...field}
+                  />
                 </FormControl>
                 <FormField
                   control={form.control}
@@ -218,7 +238,10 @@ export function GigBudgetTimelineSection() {
                   render={({ field: unitField }) => (
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Select onValueChange={unitField.onChange} value={unitField.value}>
+                        <Select
+                          onValueChange={unitField.onChange}
+                          value={unitField.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Unit" />
                           </SelectTrigger>

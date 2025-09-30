@@ -25,9 +25,7 @@ export interface GigSkillManagerResult {
 
 export function useGigSkillManager<
   TFormValues extends FieldValues & { skills: string[] },
->(
-  options: GigSkillManagerOptions<TFormValues>,
-): GigSkillManagerResult {
+>(options: GigSkillManagerOptions<TFormValues>): GigSkillManagerResult {
   const { form, maxSkills = 15, pendingSkillInitialValue = "" } = options;
   const [pendingSkill, setPendingSkill] = useState(pendingSkillInitialValue);
 
@@ -65,10 +63,9 @@ export function useGigSkillManager<
 
   const handleRemoveSkill = useCallback(
     (skill: string) => {
-      const updatedSkills = skills.filter((item) => item !== skill) as PathValue<
-        TFormValues,
-        typeof skillsPath
-      >;
+      const updatedSkills = skills.filter(
+        (item) => item !== skill,
+      ) as PathValue<TFormValues, typeof skillsPath>;
 
       form.setValue(skillsPath, updatedSkills, {
         shouldDirty: true,

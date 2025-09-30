@@ -27,7 +27,10 @@ import { mapGigEditorValuesToPayload } from "./utils/mapGigEditorValuesToPayload
 
 export interface GigEditorFormProps {
   gig: EmployerGigDetail;
-  onSubmit: (input: { gigId: Id<"gigs">; values: GigEditorPayload }) => Promise<{
+  onSubmit: (input: {
+    gigId: Id<"gigs">;
+    values: GigEditorPayload;
+  }) => Promise<{
     success: boolean;
     message?: string;
   }>;

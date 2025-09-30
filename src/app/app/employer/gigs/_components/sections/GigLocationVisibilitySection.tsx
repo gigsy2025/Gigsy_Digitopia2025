@@ -108,7 +108,9 @@ export function GigLocationVisibilitySection() {
                 <FormControl>
                   <Checkbox
                     checked={field.value}
-                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    onCheckedChange={(checked) =>
+                      field.onChange(Boolean(checked))
+                    }
                   />
                 </FormControl>
                 <div>
@@ -129,7 +131,9 @@ export function GigLocationVisibilitySection() {
                 <FormControl>
                   <Checkbox
                     checked={field.value}
-                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    onCheckedChange={(checked) =>
+                      field.onChange(Boolean(checked))
+                    }
                   />
                 </FormControl>
                 <div>

@@ -75,7 +75,8 @@ export function GigOverviewSection() {
                 />
               </FormControl>
               <FormDescription>
-                Provide enough context for freelancers to evaluate the opportunity.
+                Provide enough context for freelancers to evaluate the
+                opportunity.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -167,7 +168,11 @@ export function GigOverviewSection() {
               <Label>Required skills</Label>
               <div className="flex flex-wrap items-center gap-2">
                 {skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     <span>{skill}</span>
                     <button
                       type="button"
@@ -192,7 +197,11 @@ export function GigOverviewSection() {
                     }
                   }}
                 />
-                <Button type="button" variant="outline" onClick={handleAddSkill}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddSkill}
+                >
                   Add
                 </Button>
               </div>

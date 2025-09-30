@@ -17,10 +17,7 @@ interface UpdateGigActionInput {
   values: GigEditorPayload;
 }
 
-export async function updateGigAction({
-  gigId,
-  values,
-}: UpdateGigActionInput) {
+export async function updateGigAction({ gigId, values }: UpdateGigActionInput) {
   const token = await getAuthToken();
 
   if (!token) {

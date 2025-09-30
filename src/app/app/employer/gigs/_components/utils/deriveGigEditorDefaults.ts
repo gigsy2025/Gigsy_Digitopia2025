@@ -24,7 +24,8 @@ export function deriveGigEditorDefaultValues(
     budgetType: gig.budget?.type ?? "fixed",
     applicationDeadline: toDateInput(gig.applicationDeadline ?? undefined),
     projectDeadline: toDateInput(gig.deadline ?? undefined),
-    locationType: gig.location?.type ?? (gig.metadata?.isRemoteOnly ? "remote" : "onsite"),
+    locationType:
+      gig.location?.type ?? (gig.metadata?.isRemoteOnly ? "remote" : "onsite"),
     locationCity: gig.location?.city ?? "",
     locationCountry: gig.location?.country ?? "",
     isRemoteOnly: gig.metadata?.isRemoteOnly ?? gig.location?.type === "remote",

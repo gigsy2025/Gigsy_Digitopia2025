@@ -34,7 +34,9 @@ export default async function EmployerGigEditPage({
   const clerkUser = await auth();
 
   if (!clerkUser.userId) {
-    redirect(`/sign-in?returnTo=${encodeURIComponent(`${GIGS_PATH}/${resolvedParams.gigId}/edit`)}`);
+    redirect(
+      `/sign-in?returnTo=${encodeURIComponent(`${GIGS_PATH}/${resolvedParams.gigId}/edit`)}`,
+    );
   }
 
   const [convexUser, metrics, gig] = await Promise.all([
@@ -51,10 +53,13 @@ export default async function EmployerGigEditPage({
     redirect(`${GIGS_PATH}/${resolvedParams.gigId}`);
   }
 
-  const navItems = buildEmployerNavItems(`${GIGS_PATH}/${resolvedParams.gigId}/edit`, {
-    activeGigs: metrics.activeGigs,
-    totalApplicants: metrics.totalApplicants,
-  });
+  const navItems = buildEmployerNavItems(
+    `${GIGS_PATH}/${resolvedParams.gigId}/edit`,
+    {
+      activeGigs: metrics.activeGigs,
+      totalApplicants: metrics.totalApplicants,
+    },
+  );
 
   return (
     <EmployerLayout

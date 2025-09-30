@@ -47,9 +47,7 @@ export default async function EmployerGigDetailPage({
     notFound();
   }
 
-  const convexUser = userId
-    ? await fetchConvexUserByClerkId(userId)
-    : null;
+  const convexUser = userId ? await fetchConvexUserByClerkId(userId) : null;
 
   const isGigOwner = Boolean(convexUser && gig.employerId === convexUser._id);
 

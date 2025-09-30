@@ -50,7 +50,10 @@ export const GigEditorSchema = z
   .refine(
     (value) => {
       if (value.locationType === "onsite" || value.locationType === "hybrid") {
-        return Boolean(value.locationCity?.trim()) && Boolean(value.locationCountry?.trim());
+        return (
+          Boolean(value.locationCity?.trim()) &&
+          Boolean(value.locationCountry?.trim())
+        );
       }
       return true;
     },
@@ -89,7 +92,10 @@ export type GigEditorPayload = {
   };
   applicationDeadline: number | null;
   deadline: number | null;
-  estimatedDuration: { value: number; unit: (typeof GIG_EDITOR_DURATION_UNITS)[number] } | null;
+  estimatedDuration: {
+    value: number;
+    unit: (typeof GIG_EDITOR_DURATION_UNITS)[number];
+  } | null;
   location: {
     type: (typeof GIG_EDITOR_LOCATION_TYPES)[number];
     city?: string;

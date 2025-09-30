@@ -6,7 +6,9 @@ interface GigPublishingControlsProps {
   isSaving: boolean;
 }
 
-export function GigPublishingControls({ isSaving }: GigPublishingControlsProps) {
+export function GigPublishingControls({
+  isSaving,
+}: GigPublishingControlsProps) {
   return (
     <section className="border-border rounded-2xl border p-6 shadow-sm">
       <header className="space-y-1">

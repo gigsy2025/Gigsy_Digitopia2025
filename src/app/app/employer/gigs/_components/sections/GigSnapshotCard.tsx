@@ -11,7 +11,9 @@ export function GigSnapshotCard({ gig }: GigSnapshotCardProps) {
     <section className="border-border rounded-2xl border p-6 shadow-sm">
       <header className="space-y-1">
         <h2 className="text-lg font-semibold">Gig snapshot</h2>
-        <p className="text-muted-foreground text-sm">Key metrics from the current gig.</p>
+        <p className="text-muted-foreground text-sm">
+          Key metrics from the current gig.
+        </p>
       </header>
 
       <dl className="mt-4 space-y-3 text-sm">
@@ -29,7 +31,9 @@ export function GigSnapshotCard({ gig }: GigSnapshotCardProps) {
         </div>
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Last updated</dt>
-          <dd>{new Date(gig.updatedAt ?? gig._creationTime).toLocaleDateString()}</dd>
+          <dd>
+            {new Date(gig.updatedAt ?? gig._creationTime).toLocaleDateString()}
+          </dd>
         </div>
       </dl>
     </section>
