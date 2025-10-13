@@ -68,7 +68,7 @@ type ListItemData = {
   readonly setSize: (id: string, size: number) => void;
 };
 
-type VirtualListHandle = {
+type VariableListHandle = {
   readonly scrollToItem: (
     index: number,
     align?: "auto" | "smart" | "center" | "end" | "start",
@@ -116,6 +116,9 @@ function MessageBubble({
     if (typeof ResizeObserver !== "undefined") {
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
+        if (!entry) {
+          return;
+        }
         registerSize(entry.contentRect.height + 16);
       });
       observer.observe(node);
@@ -171,10 +174,17 @@ function MessageRow({ data, index, style }: MessageRowProps) {
   const message = data.messages[index];
   const registerSize = useCallback(
     (height: number) => {
+      if (!message) {
+        return;
+      }
       data.setSize(message.id, height);
     },
-    [data, message.id],
+    [data, message],
   );
+
+  if (!message) {
+    return null;
+  }
 
   return (
     <div style={style} className="outline-none">
@@ -204,7 +214,10 @@ export default function MessageListClient({
   const [listHeight, setListHeight] = useState<number>(0);
   const convex = useConvexClient();
   const sizeMapRef = useRef<Map<string, number>>(new Map());
-  const listRef = useRef<VirtualListHandle | null>(null);
+  const listRef = useRef<VariableListHandle | null>(null);
+  const assignListRef = useCallback((instance: VariableListHandle | null) => {
+    listRef.current = instance;
+  }, []);
   const outerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingScrollBottomRef = useRef<number | null>(null);
@@ -374,6 +387,9 @@ export default function MessageListClient({
   const getItemSize = useCallback(
     (index: number) => {
       const message = messages[index];
+      if (!message) {
+        return 88;
+      }
       return sizeMapRef.current.get(message.id) ?? 88;
     },
     [messages],
@@ -466,7 +482,7 @@ export default function MessageListClient({
             </div>
           ) : (
             <VariableSizeList<ListItemData>
-              ref={listRef}
+              ref={assignListRef}
               outerRef={outerRef}
               className="message-list"
               height={listHeight}
