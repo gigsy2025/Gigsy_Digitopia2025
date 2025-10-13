@@ -1,5 +1,8 @@
 # Gigsy - Next.js Application
 
+https://gigsy-digitopia2025.vercel.app/app
+
+
 [![Build and Publish Docker Image](https://github.com/gigsy2025/Gigsy_Digitopia2025/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/gigsy2025/Gigsy_Digitopia2025/actions/workflows/docker-publish.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/mostafayaser/gigsy_digitopia2025)](https://hub.docker.com/r/mostafayaser/gigsy_digitopia2025)
 
