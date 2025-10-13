@@ -1,4 +1,3 @@
-import { internalQuery, internalMutation } from "../_generated/server";
 import { getWalletTransactions } from "./walletTransactions";
 import { getWalletBalance } from "./walletBalances";
 import { updateWalletBalance, createTransaction } from "./walletMutations";
@@ -9,6 +8,7 @@ import {
 } from "./reconcileQueries";
 import { getHealthCheckCounts } from "./healthQueries";
 import { initializeUserWallets, needsWalletInitialization } from "./walletInit";
+import { ensureAssignmentConversation } from "./chatAssignments";
 
 // Export the internal queries to be registered with Convex
 const walletBalances = {
@@ -34,6 +34,10 @@ const healthQueries = {
   getHealthCheckCounts,
 } as const;
 
+const chatAssignments = {
+  ensureAssignmentConversation,
+} as const;
+
 // This is the object that will be imported by other files
 // to access the internal queries and mutations
 export const internal = {
@@ -46,4 +50,5 @@ export const internal = {
     initializeUserWallets,
     needsWalletInitialization,
   },
+  chatAssignments,
 } as const;

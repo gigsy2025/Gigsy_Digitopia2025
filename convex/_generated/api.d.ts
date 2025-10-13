@@ -15,6 +15,8 @@ import type {
 } from "convex/server";
 import type * as analytics from "../analytics.js";
 import type * as applications from "../applications.js";
+import type * as chatConversations from "../chatConversations.js";
+import type * as chatMessages from "../chatMessages.js";
 import type * as courses from "../courses.js";
 import type * as coursesMutations from "../coursesMutations.js";
 import type * as employerApplications from "../employerApplications.js";
@@ -23,6 +25,7 @@ import type * as files from "../files.js";
 import type * as finance from "../finance.js";
 import type * as gigs from "../gigs.js";
 import type * as index from "../index.js";
+import type * as internal_chatAssignments from "../internal/chatAssignments.js";
 import type * as internal_healthQueries from "../internal/healthQueries.js";
 import type * as internal_index from "../internal/index.js";
 import type * as internal_reconcileQueries from "../internal/reconcileQueries.js";
@@ -52,6 +55,8 @@ import type * as walletApi from "../walletApi.js";
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   applications: typeof applications;
+  chatConversations: typeof chatConversations;
+  chatMessages: typeof chatMessages;
   courses: typeof courses;
   coursesMutations: typeof coursesMutations;
   employerApplications: typeof employerApplications;
@@ -60,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   finance: typeof finance;
   gigs: typeof gigs;
   index: typeof index;
+  "internal/chatAssignments": typeof internal_chatAssignments;
   "internal/healthQueries": typeof internal_healthQueries;
   "internal/index": typeof internal_index;
   "internal/reconcileQueries": typeof internal_reconcileQueries;

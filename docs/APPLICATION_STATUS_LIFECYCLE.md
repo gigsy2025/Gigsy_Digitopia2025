@@ -14,19 +14,19 @@ This document defines the single source of truth for the Gigsy application lifec
 
 ## 🔁 Status Lifecycle
 
-| Status | Label | Description |
-| --- | --- | --- |
-| `pending` | Pending | Application was created but not yet viewed by the employer. |
-| `viewed` | Viewed | Employer reviewed the application without changing its decision state. |
-| `submitted` | Submitted | Candidate submitted the application; default entry state in legacy flows. |
-| `in_review` | In review | Employer or hiring team is actively assessing the application. |
-| `shortlisted` | Shortlisted | Candidate was shortlisted and moved forward in the funnel. |
-| `interview_requested` | Interview requested | Employer requested an interview or further screening. |
-| `hired` | Hired | Candidate was hired for the gig. |
-| `assigned` | Assigned | Candidate has been assigned specific work or milestones. |
-| `rejected` | Rejected | Employer declined the application. |
-| `withdrawn` | Withdrawn | Candidate retracted their application. |
-| `closed` | Closed | Application was closed administratively (e.g., gig cancelled). |
+| Status                | Label               | Description                                                               |
+| --------------------- | ------------------- | ------------------------------------------------------------------------- |
+| `pending`             | Pending             | Application was created but not yet viewed by the employer.               |
+| `viewed`              | Viewed              | Employer reviewed the application without changing its decision state.    |
+| `submitted`           | Submitted           | Candidate submitted the application; default entry state in legacy flows. |
+| `in_review`           | In review           | Employer or hiring team is actively assessing the application.            |
+| `shortlisted`         | Shortlisted         | Candidate was shortlisted and moved forward in the funnel.                |
+| `interview_requested` | Interview requested | Employer requested an interview or further screening.                     |
+| `hired`               | Hired               | Candidate was hired for the gig.                                          |
+| `assigned`            | Assigned            | Candidate has been assigned specific work or milestones.                  |
+| `rejected`            | Rejected            | Employer declined the application.                                        |
+| `withdrawn`           | Withdrawn           | Candidate retracted their application.                                    |
+| `closed`              | Closed              | Application was closed administratively (e.g., gig cancelled).            |
 
 > **Ordering:** `APPLICATION_STATUS_ORDER` preserves the sequence above. Use it when sorting pipelines, grouping analytics, or rendering filter menus.
 
@@ -42,6 +42,7 @@ This document defines the single source of truth for the Gigsy application lifec
   ```
 - **UI components:** Always derive labels (`APPLICATION_STATUS_LABELS[status]`) and badge variants from the canonical constants. Never inline user-facing copy for statuses.
 - **Convex modules:** Validate incoming status transitions against `APPLICATION_STATUS_ORDER` rather than ad-hoc unions.
+- **Automation:** Transitioning an application to `assigned` now triggers the Convex internal mutation `internal/chatAssignments:ensureAssignmentConversation`, bootstrapping a contract conversation between employer and assignee. Ensure any alternate assignment flows either reuse the same mutation or call the exported `ensureAssignmentConversationRef` helper to maintain chat idempotency.
 - **Analytics:** When aggregating metrics, rely on the exported order to ensure consistent charts and comparisons.
 
 ## 🔄 Change Management

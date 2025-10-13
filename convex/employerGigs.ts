@@ -3,6 +3,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { getUserId } from "./users";
+import { internal } from "./_generated/api";
 
 const GIG_STATUS = [
   "draft",
@@ -258,7 +259,7 @@ export const updateApplicationStatus = mutation({
       throw new Error("Application not found");
     }
 
-    await requireEmployer(ctx, application.gigId);
+    const { employerId } = await requireEmployer(ctx, application.gigId);
 
     if (application.status === status) {
       return status;
@@ -268,6 +269,18 @@ export const updateApplicationStatus = mutation({
       status,
       updatedAt: Date.now(),
     });
+
+    if (status === "assigned") {
+      await ctx.runMutation(
+        internal.internal.chatAssignments.ensureAssignmentConversation,
+        {
+          gigId: application.gigId,
+          employerId,
+          candidateId: application.candidateId,
+          applicationId: application._id,
+        },
+      );
+    }
 
     return status;
   },

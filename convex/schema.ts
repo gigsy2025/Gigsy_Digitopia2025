@@ -946,28 +946,96 @@ const schema = defineSchema({
   // --- Chat Service Tables ---
 
   conversations: defineTable({
-    // A canonical key made by sorting and joining participant user IDs to prevent duplicate conversations.
-    // e.g., "user_abc...#user_xyz..."
+    gigId: v.optional(v.id("gigs")),
+    type: v.union(
+      v.literal("application"),
+      v.literal("contract"),
+      v.literal("support"),
+      v.literal("mentor"),
+      v.literal("direct"),
+    ),
+    title: v.string(),
+    participants: v.array(v.id("users")),
     canonicalKey: v.string(),
-    participants: v.array(v.id("users")), // An array of the `_id`s of the participating users.
-    lastMessageAt: v.optional(v.number()), // Timestamp of the last message sent, for sorting conversation lists.
-  }).index("by_canonical_key", ["canonicalKey"]),
+    createdBy: v.id("users"),
+    meta: v.optional(
+      v.object({
+        applicationId: v.optional(v.id("applications")),
+        deliverableId: v.optional(v.string()),
+      }),
+    ),
+    createdAt: v.number(),
+    lastMessageAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_canonical_key", ["canonicalKey"])
+    .index("by_gig_recent", ["gigId", "lastMessageAt"])
+    .index("by_type", ["gigId", "type"]),
 
   messages: defineTable({
     conversationId: v.id("conversations"),
-    authorId: v.id("users"),
-    body: v.string(), // The text content of the message.
-    // Standard System Fields are implicitly handled by Convex (_id, _creationTime)
-  }).index("by_conversation", ["conversationId"]),
+    senderId: v.id("users"),
+    messageType: v.union(
+      v.literal("text"),
+      v.literal("file"),
+      v.literal("system"),
+    ),
+    systemEvent: v.optional(
+      v.union(
+        v.literal("work.submitted"),
+        v.literal("work.approved"),
+        v.literal("work.revision_requested"),
+      ),
+    ),
+    body: v.optional(v.string()),
+    attachments: v.optional(
+      v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          url: v.string(),
+          name: v.string(),
+          contentType: v.string(),
+          size: v.number(),
+        }),
+      ),
+    ),
+    meta: v.optional(
+      v.object({
+        deliveryId: v.optional(v.string()),
+        readBy: v.optional(v.array(v.id("users"))),
+      }),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_conversation_desc", ["conversationId", "createdAt"])
+    .index("by_conversation_type", ["conversationId", "messageType"])
+    .index("by_conversation_sender", ["conversationId", "senderId"]),
 
-  // Join table for efficient lookup of a user's conversations
   userConversations: defineTable({
     userId: v.id("users"),
     conversationId: v.id("conversations"),
-    lastReadAt: v.optional(v.number()), // To track unread messages.
+    lastReadMessageId: v.optional(v.id("messages")),
+    lastReadAt: v.optional(v.number()),
   })
-    .index("by_user", ["userId"])
-    .index("by_user_and_conversation", ["userId", "conversationId"]),
+    .index("by_user_recent", ["userId", "lastReadAt"])
+    .index("by_user_conversation", ["userId", "conversationId"])
+    .index("by_conversation", ["conversationId"]),
+
+  chatAuditLogs: defineTable({
+    conversationId: v.id("conversations"),
+    messageId: v.optional(v.id("messages")),
+    gigId: v.optional(v.id("gigs")),
+    actorId: v.id("users"),
+    eventType: v.union(
+      v.literal("conversation.created"),
+      v.literal("work.submitted"),
+      v.literal("work.approved"),
+      v.literal("work.revision_requested"),
+      v.literal("conversation.archived"),
+    ),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  }).index("by_conversation_event", ["conversationId", "eventType"]),
 
   // Table for managing ephemeral real-time status
   userStatus: defineTable({

@@ -1,0 +1,45 @@
+"filename", "language", "Markdown", "TypeScript", "TypeScript JSX", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\README.md", "Markdown", 42, 0, 0, 0, 0, 11, 53
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\_generated\api.d.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\chatConversations.ts", "TypeScript", 0, 284, 0, 0, 26, 49, 359
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\chatMessages.ts", "TypeScript", 0, 136, 0, 0, 0, 28, 164
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\employerApplications.ts", "TypeScript", 0, 13, 0, 0, 0, 1, 14
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\employerGigs.ts", "TypeScript", 0, 12, 0, 0, 0, 1, 13
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\chatAssignments.ts", "TypeScript", 0, 99, 0, 0, 0, 17, 116
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\index.ts", "TypeScript", 0, 4, 0, 0, 0, 1, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\internal\walletMutations.ts", "TypeScript", 0, 4, 0, 0, 0, 1, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\convex\schema.ts", "TypeScript", 0, 71, 0, 0, -4, 1, 68
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\APPLICATION_STATUS_LIFECYCLE.md", "Markdown", 1, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 6, 0, 2, 8
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\applications\[applicationId]\page.tsx", "TypeScript JSX", 0, 0, 1, 0, 0, 1, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\edit\actions.ts", "TypeScript", 0, -3, 0, 0, 0, 0, -3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\edit\page.tsx", "TypeScript JSX", 0, 0, 5, 0, 0, 0, 5
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\[gigId]\page.tsx", "TypeScript JSX", 0, 0, -2, 0, 0, 0, -2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\GigEditorForm.tsx", "TypeScript JSX", 0, 0, 3, 0, 0, 0, 3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\hooks\useGigSkillManager.ts", "TypeScript", 0, -3, 0, 0, 0, 0, -3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigBudgetTimelineSection.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 23
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigLocationVisibilitySection.tsx", "TypeScript JSX", 0, 0, 4, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigOverviewSection.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 9
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigPublishingControls.tsx", "TypeScript JSX", 0, 0, 2, 0, 0, 0, 2
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\sections\GigSnapshotCard.tsx", "TypeScript JSX", 0, 0, 4, 0, 0, 0, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\utils\deriveGigEditorDefaults.ts", "TypeScript", 0, 1, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\app\employer\gigs\_components\utils\mapGigEditorValuesToPayload.ts", "TypeScript", 0, 3, 0, 0, 0, 0, 3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\[conversationId]\components\ConversationHeader.tsx", "TypeScript JSX", 0, 0, 34, 0, 0, 4, 38
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\[conversationId]\components\ConversationMeta.tsx", "TypeScript JSX", 0, 0, 50, 0, 0, 4, 54
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\[conversationId]\components\MessageComposer.tsx", "TypeScript JSX", 0, 0, 119, 0, 0, 15, 134
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\[conversationId]\components\MessageListClient.tsx", "TypeScript JSX", 0, 0, 439, 0, 0, 58, 497
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\[conversationId]\page.tsx", "TypeScript JSX", 0, 0, 52, 0, 0, 9, 61
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\components\Sidebar.tsx", "TypeScript JSX", 0, 0, 133, 0, 0, 16, 149
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\components\SidebarItem.tsx", "TypeScript JSX", 0, 0, 61, 0, 0, 7, 68
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\layout.tsx", "TypeScript JSX", 0, 0, 34, 0, 0, 7, 41
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\app\conversations\page.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 1, 16
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\client-react.tsx", "TypeScript JSX", 0, 0, 44, 0, 0, 10, 54
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\client.ts", "TypeScript", 0, 98, 0, 0, 0, 13, 111
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\merges.ts", "TypeScript", 0, 108, 0, 0, 0, 19, 127
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\references.ts", "TypeScript", 0, 63, 0, 0, 0, 6, 69
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\transformers.ts", "TypeScript", 0, 76, 0, 0, 0, 10, 86
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\convex\types\convo.ts", "TypeScript", 0, 77, 0, 0, 0, 15, 92
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\lib\validations\gigEditor.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\types\chat.ts", "TypeScript", 0, 75, 0, 0, 0, 9, 84
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\utils\fetchers-server.ts", "TypeScript", 0, 4, 0, 0, 0, 0, 4
+"Total", "-", 43, 1134, 1030, 6, 22, 316, 2551

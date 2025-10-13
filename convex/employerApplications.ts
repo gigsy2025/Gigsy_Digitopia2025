@@ -7,6 +7,7 @@ import {
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { getUserId } from "./users";
+import { internal } from "./_generated/api";
 
 const APPLICATION_STATUS = [
   "pending",
@@ -239,6 +240,19 @@ export const updateStatus = mutation({
       statusUpdatedAt: timestamp,
       updatedAt: timestamp,
     });
+
+    if (status === "assigned") {
+      console.log("Ensuring assignment conversation");
+      await ctx.runMutation(
+        internal.internal.chatAssignments.ensureAssignmentConversation,
+        {
+          gigId: application.gigId,
+          employerId,
+          candidateId: application.candidateId,
+          applicationId: application._id,
+        },
+      );
+    }
 
     return status;
   },

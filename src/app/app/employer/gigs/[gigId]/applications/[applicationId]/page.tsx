@@ -26,10 +26,10 @@ const BASE_PATH = "/app/employer" as const;
 const GIGS_PATH = `${BASE_PATH}/gigs` as const;
 
 interface EmployerApplicationDetailPageProps {
-  params: {
+  params: Promise<{
     gigId: string;
     applicationId: string;
-  };
+  }>;
 }
 
 export const metadata = {
@@ -39,8 +39,10 @@ export const metadata = {
 export default async function EmployerApplicationDetailPage({
   params,
 }: EmployerApplicationDetailPageProps) {
-  const gigId = params.gigId as Id<"gigs">;
-  const applicationId = params.applicationId as Id<"applications">;
+  const { gigId: gigIdParam, applicationId: applicationIdParam } = await params;
+
+  const gigId = gigIdParam as Id<"gigs">;
+  const applicationId = applicationIdParam as Id<"applications">;
 
   const [metrics, gig, detail] = await Promise.all([
     fetchEmployerMetrics(),
@@ -102,7 +104,7 @@ export default async function EmployerApplicationDetailPage({
   await markEmployerApplicationViewed(applicationId);
 
   const navItems = buildEmployerNavItems(
-    `${GIGS_PATH}/${params.gigId}/applications/${params.applicationId}`,
+    `${GIGS_PATH}/${gigIdParam}/applications/${applicationIdParam}`,
     {
       activeGigs: metrics.activeGigs,
       totalApplicants: metrics.totalApplicants,
@@ -116,12 +118,12 @@ export default async function EmployerApplicationDetailPage({
       actions={
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href={`${GIGS_PATH}/${params.gigId}/applications`}>
+            <Link href={`${GIGS_PATH}/${gigIdParam}/applications`}>
               Back to applications
             </Link>
           </Button>
           <Button variant="secondary" asChild>
-            <Link href={`${GIGS_PATH}/${params.gigId}`}>View gig</Link>
+            <Link href={`${GIGS_PATH}/${gigIdParam}`}>View gig</Link>
           </Button>
         </div>
       }

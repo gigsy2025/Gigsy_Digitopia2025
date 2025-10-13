@@ -16,7 +16,12 @@ const CreateTransactionArgs = {
     v.literal("TRANSFER"),
   ),
   status: v.optional(
-    v.union(v.literal("COMPLETED"), v.literal("PENDING"), v.literal("FAILED")),
+    v.union(
+      v.literal("COMPLETED"),
+      v.literal("PENDING"),
+      v.literal("FAILED"),
+      v.literal("CANCELLED"),
+    ),
   ),
   description: v.optional(v.string()),
   idempotencyKey: v.optional(v.string()),
@@ -33,6 +38,7 @@ export const createTransaction = internalMutation({
       amount,
       currency,
       type,
+      status,
       description,
       idempotencyKey,
       relatedEntityType,
@@ -61,22 +67,21 @@ export const createTransaction = internalMutation({
     }
 
     // Create transaction
+    const resolvedStatus: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" =
+      status ?? "COMPLETED";
+
     const transactionId = await ctx.db.insert("transactions", {
       walletId,
       amount,
       currency,
       type,
-      status: (status ?? "COMPLETED") as
-        | "PENDING"
-        | "COMPLETED"
-        | "FAILED"
-        | "CANCELLED", // Use provided status or default to "COMPLETED"
+      status: resolvedStatus,
       description,
       idempotencyKey,
       relatedEntityType,
       relatedEntityId,
       createdAt: Date.now(),
-      createdBy: args.createdBy || "system", // Default to 'system' if not provided
+      createdBy: args.createdBy ?? "system", // Default to 'system' if not provided
     });
 
     // Update wallet balance in walletBalances collection
