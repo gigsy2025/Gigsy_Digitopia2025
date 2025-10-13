@@ -10,6 +10,7 @@ import type {
   ConversationId,
   ConversationListResult,
   ConversationMeta,
+  ConversationParticipantProfile,
   MessagePage,
 } from "./types/convo";
 import { chatConversations, chatMessages, users } from "./references";
@@ -33,6 +34,9 @@ export interface ServerConvexClient {
     cursor?: string | null;
   }): Promise<MessagePage>;
   resolveViewerUserId(clerkId: string): Promise<Id<"users">>;
+  getUserProfiles(
+    userIds: ReadonlyArray<Id<"users">>,
+  ): Promise<ConversationParticipantProfile[]>;
 }
 
 function buildFetchOptions(config: ServerConvexConfig) {
@@ -98,6 +102,23 @@ export function getConvexServer(
       }
 
       return result._id;
+    },
+    async getUserProfiles(userIds) {
+      if (userIds.length === 0) {
+        return [];
+      }
+
+      const payload = await fetchQuery(
+        users.getPublicProfiles,
+        { userIds: Array.from(userIds) },
+        options,
+      );
+
+      return payload.map((profile) => ({
+        id: profile._id,
+        name: profile.name,
+        avatarUrl: profile.avatarUrl ?? null,
+      }));
     },
   };
 }

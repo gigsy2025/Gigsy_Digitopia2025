@@ -33,7 +33,10 @@ function clampLimit(limit?: number | null): number {
   return Math.max(1, Math.min(limit, MAX_PAGE_SIZE));
 }
 
-function ensureParticipant(conversation: Doc<"conversations">, userId: Id<"users">) {
+function ensureParticipant(
+  conversation: Doc<"conversations">,
+  userId: Id<"users">,
+) {
   if (!conversation.participants.includes(userId)) {
     throw new ConvexError("Unauthorized");
   }
@@ -55,7 +58,10 @@ export const getMessages = query({
     cursor: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { conversationId, cursor, limit }): Promise<PaginatedMessages> => {
+  handler: async (
+    ctx,
+    { conversationId, cursor, limit },
+  ): Promise<PaginatedMessages> => {
     const viewerId = await getUserId(ctx);
     if (!viewerId) {
       throw new ConvexError("Not authenticated");

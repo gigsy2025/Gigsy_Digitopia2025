@@ -55,6 +55,16 @@ interface UsersModule {
     { clerkId: string },
     { _id: Id<"users"> } | null
   >;
+  readonly getPublicProfiles: FunctionReference<
+    "query",
+    "public",
+    { userIds: ReadonlyArray<Id<"users">> },
+    ReadonlyArray<{
+      _id: Id<"users">;
+      name: string;
+      avatarUrl?: string;
+    }>
+  >;
 }
 
 const enhancedApi = api as unknown as {

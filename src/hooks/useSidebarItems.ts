@@ -288,7 +288,7 @@ function createGigsyNavigation(): NavigationGroup[] {
           id: "messages",
           title: "Messages",
           subtitle: "Chat with clients & mentors",
-          href: "/app/messages",
+          href: "/app/conversations",
           icon: "MessageSquare",
           type: "route",
           priority: 1,

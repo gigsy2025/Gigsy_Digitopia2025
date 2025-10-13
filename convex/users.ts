@@ -251,9 +251,7 @@ export const initializeUser = mutation({
         const walletInitArgs = {
           userId,
           clerkId: validatedData.clerkId,
-          currencies: initialBalances.map(
-            (b) => b.currency as "EGP" | "USD" | "EUR",
-          ),
+          currencies: initialBalances.map((b) => b.currency),
           initialBalances: initialBalances.reduce<Record<string, number>>(
             (acc, balance) => {
               acc[balance.currency] = balance.amount;
@@ -374,6 +372,67 @@ export const getUserByClerkId = query({
       .first();
 
     return user;
+  },
+});
+
+/**
+ * Fetch lightweight public profiles for a list of user IDs.
+ * Ensures the requester is authenticated and filters out deleted users.
+ */
+export const getPublicProfiles = query({
+  args: {
+    userIds: v.array(v.id("users")),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("users"),
+      name: v.string(),
+      avatarUrl: v.optional(v.string()),
+    }),
+  ),
+  handler: async (ctx, { userIds }) => {
+    const viewerId = await getUserId(ctx);
+    if (!viewerId) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    if (userIds.length === 0) {
+      return [];
+    }
+
+    const uniqueIds = Array.from(
+      new Map(userIds.map((id) => [id.toString(), id])).values(),
+    );
+
+    const profiles = await Promise.all(
+      uniqueIds.map(async (userId) => {
+        const user = await ctx.db.get(userId);
+        if (!user || user.deletedAt) {
+          return null;
+        }
+
+        const fallbackName =
+          user.name?.trim() ??
+          user.email?.trim() ??
+          `User ${userId.toString()}`;
+
+        return {
+          _id: user._id,
+          name: fallbackName,
+          avatarUrl: user.avatarUrl ?? undefined,
+        };
+      }),
+    );
+
+    return profiles
+      .filter(
+        (profile): profile is NonNullable<typeof profile> => profile !== null,
+      )
+      .map((profile) => ({
+        _id: profile._id,
+        name: profile.name,
+        avatarUrl: profile.avatarUrl,
+      }));
   },
 });
 

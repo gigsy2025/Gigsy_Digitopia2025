@@ -220,6 +220,7 @@ export default function MessageListClient({
   }, []);
   const outerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const pendingScrollBottomRef = useRef<number | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const messagesRef = useRef<Message[]>(initialMessages.slice());
@@ -288,11 +289,11 @@ export default function MessageListClient({
   }, [subscription]);
 
   useLayoutEffect(() => {
-    if (!containerRef.current) {
+    if (!viewportRef.current) {
       return;
     }
 
-    const node = containerRef.current;
+    const node = viewportRef.current;
     const measure = () => {
       setListHeight(node.getBoundingClientRect().height);
       listRef.current?.resetAfterIndex(0, false);
@@ -474,7 +475,7 @@ export default function MessageListClient({
   return (
     <MessageListContext.Provider value={contextValue}>
       <div ref={containerRef} className="flex min-h-0 flex-1 flex-col">
-        <div className="relative flex-1 overflow-hidden">
+        <div ref={viewportRef} className="relative flex-1 overflow-hidden">
           {listHeight === 0 ? (
             <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />

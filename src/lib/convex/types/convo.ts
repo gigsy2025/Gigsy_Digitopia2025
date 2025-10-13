@@ -18,6 +18,12 @@ export interface ConversationMeta {
   readonly archivedAt?: number;
 }
 
+export interface ConversationParticipantProfile {
+  readonly id: UserId;
+  readonly name: string;
+  readonly avatarUrl: string | null;
+}
+
 export interface ConversationListResult {
   readonly conversations: ConversationMeta[];
   readonly continueCursor: string | null;

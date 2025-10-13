@@ -67,10 +67,7 @@ export const ChatAuditEventSchema = z.object({
   messageId: z.string().optional(),
   gigId: z.string().optional(),
   actorId: z.string(),
-  eventType: z.union([
-    SystemEventSchema,
-    z.literal("conversation.archived"),
-  ]),
+  eventType: z.union([SystemEventSchema, z.literal("conversation.archived")]),
   metadata: z.unknown().optional(),
   createdAt: z.number(),
 });

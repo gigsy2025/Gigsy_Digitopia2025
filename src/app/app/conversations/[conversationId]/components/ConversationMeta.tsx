@@ -13,7 +13,7 @@ export default function ConversationMeta({
   conversation,
 }: ConversationMetaProps) {
   return (
-    <aside className="w-full shrink-0 space-y-4 lg:w-80">
+    <aside className="hidden w-full shrink-0 space-y-4 lg:w-80">
       <Card>
         <CardHeader>
           <CardTitle className="text-foreground text-sm font-semibold">
