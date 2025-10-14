@@ -53,3 +53,5 @@ yarn-error.log*
 
 setup-vercel-env.ps1
 setup-vercel-env.sh
+*storybook.log
+storybook-static

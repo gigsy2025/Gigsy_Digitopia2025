@@ -6,29 +6,12 @@
  */
 
 import React from "react";
+import type { Meta } from "@storybook/nextjs";
 import { LessonPlayer } from "@/components/lesson/LessonPlayer";
 import type {
   LessonWithNavigation,
   PlayerEvent as PlayerEventType,
 } from "@/types/course";
-import type PlayerEvent from "@/components/lesson/LessonPlayer"; // Import PlayerEvent type explicitly
-
-// Mock progress hook for examples
-jest.mock("@/hooks/useProgress", () => ({
-  useProgress: () => ({
-    updateProgress: (...args: unknown[]) => {
-      // Mock implementation for Storybook/Jest
-      console.log("Mock updateProgress called", ...args);
-    },
-    markCompleted: () => {
-      // Mock implementation for Storybook/Jest
-      console.log("Mock markCompleted called");
-    },
-    progressSeconds: 0,
-    completed: false,
-    watchedPercentage: 0,
-  }),
-}));
 
 // Base lesson data
 const baseLesson: LessonWithNavigation = {
@@ -213,6 +196,39 @@ export const MobileLessonPlayer = () => (
     <LessonPlayer lesson={baseLesson} userId="user-123" className="w-full" />
   </div>
 );
+
+const meta: Meta<typeof LessonPlayer> = {
+  title: "Components/Lesson/LessonPlayer",
+  component: LessonPlayer,
+  parameters: {
+    // More on how to position stories at: https://storybook.js.org/docs/react/configure/story-layout
+    layout: "fullscreen",
+    // Mock the useProgress hook for all stories in this file
+    jest: ["@/hooks/useProgress"],
+  },
+  decorators: [
+    (Story, { parameters }) => {
+      // Mock implementation for useProgress
+      jest.mock("@/hooks/useProgress", () => ({
+        useProgress: () => ({
+          updateProgress: (...args: unknown[]) => {
+            console.log("Mock updateProgress called", ...args);
+          },
+          markCompleted: () => {
+            console.log("Mock markCompleted called");
+          },
+          progressSeconds: 0,
+          completed: false,
+          watchedPercentage: 0,
+        }),
+      }));
+
+      return <Story />;
+    },
+  ],
+};
+
+export default meta;
 
 // Export all examples for easy import
 export const LessonPlayerExamples = {

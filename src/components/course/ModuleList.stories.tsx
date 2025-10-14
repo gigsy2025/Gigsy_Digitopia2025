@@ -1,15 +1,7 @@
-/**
- * MODULE LIST COMPONENT EXAMPLES
- *
- * Component examples and variations for the ModuleList component.
- * These can be used as a reference for Storybook stories when Storybook is set up.
- */
-
-import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ModuleList } from "@/components/course/ModuleList";
 import type { Module } from "@/types/course";
 
-// Sample modules data
 const sampleModules: Module[] = [
   {
     id: "module-1",
@@ -121,162 +113,128 @@ const sampleModules: Module[] = [
   },
 ];
 
-// Example component variations
-export const DefaultModuleList = () => (
-  <div className="mx-auto max-w-4xl p-4">
-    <ModuleList modules={sampleModules} courseId="course-1" isEnrolled={true} />
-  </div>
-);
-
-export const ModuleListWithProgress = () => (
-  <div className="mx-auto max-w-4xl p-4">
-    <ModuleList
-      modules={sampleModules}
-      courseId="course-1"
-      isEnrolled={true}
-      completedLessons={["lesson-1", "lesson-2", "lesson-4"]}
-      userProgress={{
-        "lesson-3": 75,
-        "lesson-5": 30,
-      }}
-      currentLessonId="lesson-5"
-    />
-  </div>
-);
-
-export const ModuleListNotEnrolled = () => (
-  <div className="mx-auto max-w-4xl p-4">
-    <ModuleList
-      modules={sampleModules}
-      courseId="course-1"
-      isEnrolled={false}
-    />
-  </div>
-);
-
-export const ModuleListFullyCompleted = () => (
-  <div className="mx-auto max-w-4xl p-4">
-    <ModuleList
-      modules={sampleModules}
-      courseId="course-1"
-      isEnrolled={true}
-      completedLessons={[
-        "lesson-1",
-        "lesson-2",
-        "lesson-3",
-        "lesson-4",
-        "lesson-5",
-        "lesson-6",
-        "lesson-7",
-        "lesson-8",
-      ]}
-      currentLessonId="lesson-8"
-    />
-  </div>
-);
-
-export const ModuleListWithCallbacks = () => {
-  const handleLessonSelect = (lessonId: string) => {
-    console.log("Selected lesson:", lessonId);
-  };
-
-  return (
-    <div className="mx-auto max-w-4xl p-4">
-      <ModuleList
-        modules={sampleModules}
-        courseId="course-1"
-        isEnrolled={true}
-        onLessonSelect={handleLessonSelect}
-      />
-    </div>
-  );
+const moduleWithManyLessons: Module = {
+  id: "module-large",
+  title: "Comprehensive React Course",
+  description: "Everything you need to know about React.",
+  sequenceIndex: 0,
+  lessons: Array.from({ length: 15 }, (_, index) => ({
+    id: `lesson-${index + 1}`,
+    title: `Lesson ${index + 1}: React Topic ${index + 1}`,
+    description: `Learn about React topic ${index + 1} in detail.`,
+    sequenceIndex: index,
+    durationSeconds: 300 + index * 60,
+    videoUrl: `https://example.com/video${index + 1}.mp4`,
+    isLocked: index > 2,
+    isFree: index < 3,
+  })),
 };
 
-export const SingleModuleList = () => {
-  const firstModule = sampleModules[0];
-  if (!firstModule) return <div>No modules available</div>;
-
-  return (
-    <div className="mx-auto max-w-4xl p-4">
-      <ModuleList
-        modules={[firstModule]}
-        courseId="course-1"
-        isEnrolled={true}
-        completedLessons={["lesson-1"]}
-        currentLessonId="lesson-2"
-      />
-    </div>
-  );
+const meta: Meta<typeof ModuleList> = {
+  title: "Course/ModuleList",
+  component: ModuleList,
+  tags: ["autodocs"],
+  decorators: [
+    (Story) => (
+      <div className="mx-auto max-w-4xl p-4">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    modules: sampleModules,
+    courseId: "course-1",
+    isEnrolled: true,
+    completedLessons: [],
+    userProgress: {},
+    onLessonSelect: () => undefined,
+  },
 };
 
-export const EmptyModuleList = () => (
-  <div className="mx-auto max-w-4xl p-4">
-    <ModuleList modules={[]} courseId="course-1" isEnrolled={true} />
-  </div>
-);
+export default meta;
 
-export const ModuleListWithManyLessons = () => {
-  const moduleWithManyLessons: Module = {
-    id: "module-large",
-    title: "Comprehensive React Course",
-    description: "Everything you need to know about React.",
-    sequenceIndex: 0,
-    lessons: Array.from({ length: 15 }, (_, i) => ({
-      id: `lesson-${i + 1}`,
-      title: `Lesson ${i + 1}: React Topic ${i + 1}`,
-      description: `Learn about React topic ${i + 1} in detail.`,
-      sequenceIndex: i,
-      durationSeconds: 300 + i * 60,
-      videoUrl: `https://example.com/video${i + 1}.mp4`,
-      isLocked: i > 2, // First 3 lessons are free
-      isFree: i < 3,
-    })),
-  };
+type Story = StoryObj<typeof ModuleList>;
 
-  return (
-    <div className="mx-auto max-w-4xl p-4">
-      <ModuleList
-        modules={[moduleWithManyLessons]}
-        courseId="course-1"
-        isEnrolled={false}
-      />
-    </div>
-  );
+export const Default: Story = {};
+
+export const WithProgress: Story = {
+  args: {
+    completedLessons: ["lesson-1", "lesson-2", "lesson-4"],
+    userProgress: {
+      "lesson-3": 75,
+      "lesson-5": 30,
+    },
+    currentLessonId: "lesson-5",
+  },
 };
 
-export const MobileModuleList = () => (
-  <div className="mx-auto max-w-sm p-2">
-    <ModuleList
-      modules={sampleModules}
-      courseId="course-1"
-      isEnrolled={true}
-      completedLessons={["lesson-1"]}
-      currentLessonId="lesson-2"
-    />
-  </div>
-);
+export const NotEnrolled: Story = {
+  args: {
+    isEnrolled: false,
+  },
+};
 
-export const CompactModuleList = () => (
-  <div className="mx-auto max-w-2xl p-4">
-    <ModuleList
-      modules={sampleModules}
-      courseId="course-1"
-      isEnrolled={true}
-      className="text-sm"
-    />
-  </div>
-);
+export const FullyCompleted: Story = {
+  args: {
+    completedLessons: [
+      "lesson-1",
+      "lesson-2",
+      "lesson-3",
+      "lesson-4",
+      "lesson-5",
+      "lesson-6",
+      "lesson-7",
+      "lesson-8",
+    ],
+    currentLessonId: "lesson-8",
+  },
+};
 
-// Export all examples for easy import
-export const ModuleListExamples = {
-  Default: DefaultModuleList,
-  WithProgress: ModuleListWithProgress,
-  NotEnrolled: ModuleListNotEnrolled,
-  FullyCompleted: ModuleListFullyCompleted,
-  WithCallbacks: ModuleListWithCallbacks,
-  SingleModule: SingleModuleList,
-  Empty: EmptyModuleList,
-  ManyLessons: ModuleListWithManyLessons,
-  Mobile: MobileModuleList,
-  Compact: CompactModuleList,
+export const WithCallbacks: Story = {
+  args: {
+    onLessonSelect: (lessonId: string) => {
+      console.info(`[ModuleList] Selected lesson: ${lessonId}`);
+    },
+  },
+};
+
+export const SingleModule: Story = {
+  args: {
+    modules: [sampleModules[0]!],
+    completedLessons: ["lesson-1"],
+    currentLessonId: "lesson-2",
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    modules: [],
+  },
+};
+
+export const ManyLessons: Story = {
+  args: {
+    modules: [moduleWithManyLessons],
+    isEnrolled: false,
+  },
+};
+
+export const Mobile: Story = {
+  decorators: [
+    (Story) => (
+      <div className="mx-auto max-w-sm p-2">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    completedLessons: ["lesson-1"],
+    currentLessonId: "lesson-2",
+  },
+};
+
+export const Compact: Story = {
+  args: {
+    className: "text-sm",
+  },
 };

@@ -1,15 +1,7 @@
-/**
- * COURSE HERO COMPONENT EXAMPLES
- *
- * Component examples and variations for the CourseHero component.
- * These can be used as a reference for Storybook stories when Storybook is set up.
- */
-
-import React from "react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { CourseHero } from "@/components/course/CourseHero";
 import type { Course } from "@/types/course";
 
-// Base course data
 const baseCourse: Course = {
   id: "course-1",
   title: "Complete React Developer Course",
@@ -35,7 +27,7 @@ const baseCourse: Course = {
       role: "Tech Lead",
     },
   ],
-  estimatedDurationMinutes: 1440, // 24 hours
+  estimatedDurationMinutes: 1440,
   difficulty: "intermediate",
   modules: [],
   totalLessons: 42,
@@ -60,47 +52,70 @@ const baseCourse: Course = {
   },
 };
 
-// Example component variations
-export const DefaultCourseHero = () => <CourseHero course={baseCourse} />;
+const meta: Meta<typeof CourseHero> = {
+  title: "Course/CourseHero",
+  component: CourseHero,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "fullscreen",
+  },
+  args: {
+    course: baseCourse,
+    isEnrolled: false,
+    userProgress: 0,
+    onEnroll: () => undefined,
+    onContinue: () => undefined,
+    onShare: () => undefined,
+    onWishlist: () => undefined,
+  },
+};
 
-export const FreeCourseHero = () => (
-  <CourseHero
-    course={{
+export default meta;
+
+type Story = StoryObj<typeof CourseHero>;
+
+export const Default: Story = {};
+
+export const Free: Story = {
+  args: {
+    course: {
       ...baseCourse,
       title: "Introduction to Web Development",
       price: 0,
       isFree: true,
       difficulty: "beginner",
-      estimatedDurationMinutes: 360, // 6 hours
+      estimatedDurationMinutes: 360,
       totalLessons: 15,
       enrolledCount: 45230,
-    }}
-  />
-);
+    },
+  },
+};
 
-export const AdvancedCourseHero = () => (
-  <CourseHero
-    course={{
+export const Advanced: Story = {
+  args: {
+    course: {
       ...baseCourse,
       title: "Advanced React Patterns & Architecture",
       difficulty: "advanced",
       price: 149.99,
-      estimatedDurationMinutes: 2160, // 36 hours
+      estimatedDurationMinutes: 2160,
       totalLessons: 68,
       enrolledCount: 4350,
-      stats: {
-        ...baseCourse.stats!,
-        enrolledCount: 4350,
-        averageRating: 4.9,
-        totalReviews: 890,
-      },
-    }}
-  />
-);
+      stats: baseCourse.stats
+        ? {
+            ...baseCourse.stats,
+            enrolledCount: 4350,
+            averageRating: 4.9,
+            totalReviews: 890,
+          }
+        : undefined,
+    },
+  },
+};
 
-export const SingleAuthorCourseHero = () => (
-  <CourseHero
-    course={{
+export const SingleAuthor: Story = {
+  args: {
+    course: {
       ...baseCourse,
       title: "JavaScript Fundamentals",
       authors: [
@@ -112,28 +127,19 @@ export const SingleAuthorCourseHero = () => (
           role: "JavaScript Expert",
         },
       ],
-    }}
-  />
-);
+    },
+  },
+};
 
-export const MinimalCourseHero = () => (
-  <CourseHero
-    course={{
+export const Minimal: Story = {
+  args: {
+    course: {
       id: "course-minimal",
       title: "Basic Course",
       authors: [],
       modules: [],
       totalLessons: 5,
       isFree: true,
-    }}
-  />
-);
-
-// Export all examples for easy import
-export const CourseHeroExamples = {
-  Default: DefaultCourseHero,
-  Free: FreeCourseHero,
-  Advanced: AdvancedCourseHero,
-  SingleAuthor: SingleAuthorCourseHero,
-  Minimal: MinimalCourseHero,
+    },
+  },
 };
