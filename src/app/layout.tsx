@@ -1,9 +1,6 @@
 import "@/styles/globals.css";
 
 import { Providers } from "@/components/jotai-provider";
-import ConvexClientProvider from "@/providers/ConvexClientProvider";
-import { env } from "@/env";
-import { ClerkProvider } from "@clerk/nextjs";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
@@ -29,32 +26,23 @@ type RootLayoutProps = Readonly<{
 }>;
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  const publishableKey =
-    env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ??
-    "pk_test_placeholder";
-
   return (
-    <ClerkProvider publishableKey={publishableKey}>
-      <ConvexClientProvider>
-        <html lang="en" className={geist.variable} suppressHydrationWarning>
-          <body
-            className="bg-slate-950 text-slate-100 antialiased"
-            suppressHydrationWarning
+    <html lang="en" className={geist.variable} suppressHydrationWarning>
+      <body
+        className="bg-slate-950 text-slate-100 antialiased"
+        suppressHydrationWarning
+      >
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
           >
-            <Providers>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-              </ThemeProvider>
-            </Providers>
-          </body>
-        </html>
-      </ConvexClientProvider>
-    </ClerkProvider>
+            {children}
+          </ThemeProvider>
+        </Providers>
+      </body>
+    </html>
   );
 }

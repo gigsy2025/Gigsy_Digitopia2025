@@ -16,6 +16,7 @@
  */
 
 import { currentUser, type User } from "@clerk/nextjs/server";
+import { env } from "@/env";
 import {
   type Role,
   type UserProfile,
@@ -46,6 +47,16 @@ export class UserResolutionError extends Error {
  */
 export async function resolveCurrentUser(): Promise<UserProfile | null> {
   try {
+    if (!env.CLERK_SECRET_KEY) {
+      console.warn(
+        "[UserResolver] Clerk secret key missing; treating user as anonymous",
+        {
+          timestamp: new Date().toISOString(),
+        },
+      );
+      return null;
+    }
+
     const user = await currentUser();
 
     if (!user) {
@@ -59,7 +70,10 @@ export async function resolveCurrentUser(): Promise<UserProfile | null> {
       timestamp: new Date().toISOString(),
     });
 
-    // Re-throw as UserResolutionError for proper handling
+    if (process.env.NODE_ENV !== "production") {
+      return null;
+    }
+
     if (error instanceof UserResolutionError) {
       throw error;
     }

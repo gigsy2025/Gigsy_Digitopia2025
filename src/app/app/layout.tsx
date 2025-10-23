@@ -19,6 +19,7 @@
 import { type Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import {
   SidebarInset,
@@ -32,6 +33,7 @@ import { SkillsCheck } from "@/components/SkillsCheck";
 import { ClientBalanceBadge } from "@/components/ui/ClientBalanceBadge";
 import Providers from "@/providers/Providers";
 import { resolveCurrentUser } from "@/lib/auth/userResolver.server";
+import { getClerkPublishableKey } from "@/lib/clerk/publishable-key";
 
 // Force dynamic rendering since we need to access user session
 export const dynamic = "force-dynamic";
@@ -67,11 +69,14 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
 
+  const publishableKey = getClerkPublishableKey();
+
   return (
-    <Providers initialUser={initialUser}>
-      <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar />
-        <SidebarInset>
+    <ClerkProvider publishableKey={publishableKey}>
+      <Providers initialUser={initialUser}>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <AppSidebar />
+          <SidebarInset>
           {/* Main App Header */}
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex w-full items-center justify-between px-4">
@@ -99,10 +104,11 @@ export default async function AppLayout({ children }: AppLayoutProps) {
             {children}
           </div>
 
-          {/* Skills Onboarding Check */}
-          <SkillsCheck />
-        </SidebarInset>
-      </SidebarProvider>
-    </Providers>
+            {/* Skills Onboarding Check */}
+            <SkillsCheck />
+          </SidebarInset>
+        </SidebarProvider>
+      </Providers>
+    </ClerkProvider>
   );
 }

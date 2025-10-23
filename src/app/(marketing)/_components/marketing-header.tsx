@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  ClerkLoaded,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 const NAV_ITEMS: ReadonlyArray<{
   readonly label: string;
@@ -21,9 +14,13 @@ const NAV_ITEMS: ReadonlyArray<{
 
 /**
  * MarketingHeader renders a sticky navigation bar tailored for the marketing
- * experience with Clerk-powered authentication entry points.
+ * experience. It uses server-side auth context to switch between acquisition
+ * and return-user CTAs without shipping Clerk's browser bundle to the page.
  */
-export function MarketingHeader() {
+export async function MarketingHeader() {
+  const { userId } = await auth();
+  const isSignedIn = Boolean(userId);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-white lg:px-8">
@@ -54,31 +51,31 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        <ClerkLoaded>
-          <div className="flex items-center gap-3">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="hidden rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-indigo-100 transition hover:border-white/40 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:inline-flex">
-                  Sign in
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="inline-flex items-center justify-center rounded-full bg-indigo-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200">
-                  Get started
-                </button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: "h-10 w-10", // maintain strong visual hierarchy
-                  },
-                }}
-              />
-            </SignedIn>
-          </div>
-        </ClerkLoaded>
+        <div className="flex items-center gap-3">
+          {isSignedIn ? (
+            <Link
+              href="/app"
+              className="inline-flex items-center justify-center rounded-full bg-indigo-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200"
+            >
+              Open workspace
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="hidden rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-indigo-100 transition hover:border-white/40 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:inline-flex"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center justify-center rounded-full bg-indigo-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200"
+              >
+                Get started
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
