@@ -1,0 +1,67 @@
+Date : 2025-10-17 19:15:43
+Directory : c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy
+Total : 26 files,  3611 codes, 7 comments, 769 blanks, all 4387 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| YAML           |          1 |      3,138 |          0 |        703 |      3,841 |
+| TypeScript JSX |          6 |        183 |        -12 |         15 |        186 |
+| TypeScript     |          8 |        151 |         18 |         32 |        201 |
+| PostCSS        |          3 |        117 |          0 |         16 |        133 |
+| JSON           |          1 |         14 |          0 |          0 |         14 |
+| XML            |          5 |          5 |          0 |          0 |          5 |
+| JavaScript     |          1 |          2 |          1 |          1 |          4 |
+| Markdown       |          1 |          1 |          0 |          2 |          3 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                    | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                       |         26 |      3,611 |          7 |        769 |      4,387 |
+| . (Files)                                                                                               |          5 |      3,184 |          5 |        710 |      3,899 |
+| .storybook                                                                                              |          3 |         36 |          5 |          8 |         49 |
+| docs                                                                                                    |          1 |          1 |          0 |          2 |          3 |
+| src                                                                                                     |         17 |        390 |         -3 |         49 |        436 |
+| src\components                                                                                          |          3 |         -4 |        -18 |          2 |        -20 |
+| src\components\course                                                                                   |          2 |        -18 |        -18 |          0 |        -36 |
+| src\components\lesson                                                                                   |          1 |         14 |          0 |          2 |         16 |
+| src\stories                                                                                             |         14 |        394 |         15 |         47 |        456 |
+| src\stories (Files)                                                                                     |          9 |        389 |         15 |         47 |        451 |
+| src\stories\assets                                                                                      |          5 |          5 |          0 |          0 |          5 |
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                | language       | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\main.ts                             | TypeScript     |         17 |          0 |          2 |         19 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\preview.ts                          | TypeScript     |         15 |          3 |          4 |         22 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\vitest.setup.ts                     | TypeScript     |          4 |          2 |          2 |          8 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\README.md                                 | Markdown       |          1 |          0 |          2 |          3 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\eslint.config.js                               | JavaScript     |          2 |          1 |          1 |          4 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json                                   | JSON           |         14 |          0 |          0 |         14 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml                                 | YAML           |      3,138 |          0 |        703 |      3,841 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseHero.stories.tsx   | TypeScript JSX |         14 |         -9 |          1 |          6 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\ModuleList.stories.tsx   | TypeScript JSX |        -32 |         -9 |         -1 |        -42 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonPlayer.stories.tsx | TypeScript JSX |         14 |          0 |          2 |         16 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Button.stories.ts                  | TypeScript     |         39 |          6 |          7 |         52 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Button.tsx                         | TypeScript JSX |         35 |          6 |          3 |         44 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Header.stories.ts                  | TypeScript     |         25 |          2 |          5 |         32 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Header.tsx                         | TypeScript JSX |         66 |          0 |          4 |         70 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Page.stories.ts                    | TypeScript     |         21 |          1 |          6 |         28 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Page.tsx                           | TypeScript JSX |         86 |          0 |          6 |         92 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\accessibility.svg           | XML            |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\discord.svg                 | XML            |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\github.svg                  | XML            |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\tutorials.svg               | XML            |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\youtube.svg                 | XML            |          1 |          0 |          0 |          1 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\button.css                         | PostCSS        |         30 |          0 |          1 |         31 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\header.css                         | PostCSS        |         28 |          0 |          5 |         33 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\page.css                           | PostCSS        |         59 |          0 |         10 |         69 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\vitest.config.ts                               | TypeScript     |         30 |          3 |          5 |         38 |
+| c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\vitest.shims.d.ts                              | TypeScript     |          0 |          1 |          1 |          2 |
+| Total                                                                                                   |                |      3,611 |          7 |        769 |      4,387 |
++---------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

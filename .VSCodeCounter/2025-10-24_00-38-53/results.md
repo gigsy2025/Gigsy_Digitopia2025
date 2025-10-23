@@ -1,68 +1,80 @@
 # Summary
 
-Date : 2025-09-29 23:14:15
+Date : 2025-10-24 00:38:53
 
 Directory c:\\Users\\dell\\WebstormProjects\\Gigsy_Digitopia2025\\gigsy
 
-Total : 398 files,  77204 codes, 7716 comments, 13992 blanks, all 98912 lines
+Total : 471 files,  85675 codes, 7655 comments, 15237 blanks, all 108567 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| TypeScript | 139 | 25,473 | 4,967 | 4,066 | 34,506 |
-| TypeScript JSX | 158 | 24,583 | 2,150 | 2,737 | 29,470 |
-| Markdown | 71 | 13,702 | 5 | 3,957 | 17,664 |
-| YAML | 6 | 11,163 | 148 | 2,721 | 14,032 |
+| TypeScript JSX | 191 | 28,176 | 2,170 | 3,067 | 33,413 |
+| TypeScript | 164 | 27,358 | 4,885 | 4,308 | 36,551 |
+| YAML | 6 | 14,394 | 148 | 3,436 | 17,978 |
+| Markdown | 78 | 13,325 | 5 | 3,898 | 17,228 |
 | Shell Script | 5 | 1,637 | 257 | 417 | 2,311 |
-| JavaScript | 10 | 227 | 152 | 53 | 432 |
-| JSON | 3 | 135 | 0 | 3 | 138 |
-| PostCSS | 1 | 119 | 0 | 7 | 126 |
+| PostCSS | 4 | 236 | 0 | 23 | 259 |
+| JavaScript | 10 | 227 | 153 | 54 | 434 |
+| JSON | 3 | 152 | 0 | 3 | 155 |
 | JSON with Comments | 3 | 80 | 10 | 2 | 92 |
 | Docker | 1 | 51 | 17 | 19 | 87 |
 | Ignore | 1 | 34 | 10 | 10 | 54 |
+| XML | 5 | 5 | 0 | 0 | 5 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 398 | 77,204 | 7,716 | 13,992 | 98,912 |
-| . (Files) | 35 | 13,325 | 113 | 3,521 | 16,959 |
+| . | 471 | 85,675 | 7,655 | 15,237 | 108,567 |
+| . (Files) | 21 | 13,975 | 118 | 3,347 | 17,440 |
 | .github | 28 | 5,939 | 105 | 1,443 | 7,487 |
 | .github (Files) | 4 | 624 | 0 | 228 | 852 |
 | .github\\instructions | 22 | 4,643 | 5 | 1,064 | 5,712 |
 | .github\\instructions (Files) | 13 | 1,755 | 3 | 499 | 2,257 |
 | .github\\instructions\\draft | 9 | 2,888 | 2 | 565 | 3,455 |
 | .github\\workflows | 2 | 672 | 100 | 151 | 923 |
+| .storybook | 3 | 36 | 5 | 8 | 49 |
 | .windsurf | 9 | 679 | 0 | 200 | 879 |
 | .windsurf (Files) | 1 | 7 | 0 | 0 | 7 |
 | .windsurf\\workflows | 8 | 672 | 0 | 200 | 872 |
 | __mocks__ | 1 | 1 | 0 | 1 | 2 |
-| convex | 41 | 10,087 | 1,616 | 1,434 | 13,137 |
-| convex (Files) | 27 | 9,069 | 1,262 | 1,259 | 11,590 |
+| convex | 44 | 10,506 | 1,516 | 1,479 | 13,501 |
+| convex (Files) | 29 | 9,375 | 1,162 | 1,285 | 11,822 |
 | convex\\__tests__ | 1 | 440 | 79 | 85 | 604 |
-| convex\\_generated | 5 | 128 | 243 | 35 | 406 |
-| convex\\internal | 7 | 414 | 32 | 53 | 499 |
+| convex\\_generated | 5 | 134 | 243 | 35 | 412 |
+| convex\\internal | 8 | 521 | 32 | 72 | 625 |
 | convex\\types | 1 | 36 | 0 | 2 | 38 |
 | deployment | 9 | 2,528 | 300 | 647 | 3,475 |
 | deployment (Files) | 2 | 472 | 10 | 131 | 613 |
 | deployment\\docker-compose | 2 | 419 | 33 | 99 | 551 |
 | deployment\\scripts | 5 | 1,637 | 257 | 417 | 2,311 |
-| docs | 17 | 4,526 | 0 | 1,368 | 5,894 |
-| docs (Files) | 15 | 4,318 | 0 | 1,332 | 5,650 |
-| docs\\profile | 2 | 208 | 0 | 36 | 244 |
+| docs | 40 | 6,779 | 0 | 2,205 | 8,984 |
+| docs\\01_introduction | 1 | 273 | 0 | 90 | 363 |
+| docs\\02_architecture | 1 | 18 | 0 | 14 | 32 |
+| docs\\03_api_reference | 1 | 15 | 0 | 10 | 25 |
+| docs\\04_guides | 1 | 36 | 0 | 25 | 61 |
+| docs\\05_contributing | 2 | 166 | 0 | 65 | 231 |
+| docs\\06_security | 1 | 23 | 0 | 16 | 39 |
+| docs\\07_additional | 33 | 6,248 | 0 | 1,985 | 8,233 |
+| docs\\07_additional (Files) | 31 | 6,040 | 0 | 1,949 | 7,989 |
+| docs\\07_additional\\profile | 2 | 208 | 0 | 36 | 244 |
 | shared | 1 | 333 | 0 | 32 | 365 |
 | shared\\profile | 1 | 333 | 0 | 32 | 365 |
-| src | 257 | 39,786 | 5,582 | 5,346 | 50,714 |
-| src (Files) | 4 | 104 | 38 | 21 | 163 |
-| src\\app | 53 | 5,557 | 841 | 769 | 7,167 |
-| src\\app (Files) | 4 | 153 | 7 | 18 | 178 |
+| src | 315 | 44,899 | 5,611 | 5,875 | 56,385 |
+| src (Files) | 4 | 102 | 38 | 21 | 161 |
+| src\\app | 86 | 9,170 | 873 | 1,121 | 11,164 |
+| src\\app (Files) | 2 | 52 | 5 | 8 | 65 |
 | src\\app\\(auth) | 3 | 25 | 0 | 7 | 32 |
 | src\\app\\(auth) (Files) | 1 | 17 | 0 | 3 | 20 |
 | src\\app\\(auth)\\sign-in | 1 | 4 | 0 | 2 | 6 |
 | src\\app\\(auth)\\sign-in\\[[...sign-in]] | 1 | 4 | 0 | 2 | 6 |
 | src\\app\\(auth)\\sign-up | 1 | 4 | 0 | 2 | 6 |
 | src\\app\\(auth)\\sign-up\\[[...sign-up]] | 1 | 4 | 0 | 2 | 6 |
+| src\\app\\(marketing) | 12 | 888 | 34 | 59 | 981 |
+| src\\app\\(marketing) (Files) | 2 | 125 | 1 | 7 | 133 |
+| src\\app\\(marketing)\\_components | 10 | 763 | 33 | 52 | 848 |
 | src\\app\\__tests__ | 1 | 76 | 4 | 22 | 102 |
 | src\\app\\admin | 2 | 36 | 22 | 10 | 68 |
 | src\\app\\admin (Files) | 1 | 22 | 11 | 5 | 38 |
@@ -76,8 +88,15 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | src\\app\\api\\users\\webhook | 2 | 232 | 35 | 32 | 299 |
 | src\\app\\api\\webhooks | 1 | 0 | 0 | 1 | 1 |
 | src\\app\\api\\webhooks\\clerk | 1 | 0 | 0 | 1 | 1 |
-| src\\app\\app | 34 | 4,512 | 725 | 615 | 5,852 |
-| src\\app\\app (Files) | 2 | 296 | 50 | 29 | 375 |
+| src\\app\\app | 57 | 7,338 | 725 | 918 | 8,981 |
+| src\\app\\app (Files) | 2 | 298 | 50 | 29 | 377 |
+| src\\app\\app\\conversations | 11 | 1,334 | 0 | 160 | 1,494 |
+| src\\app\\app\\conversations (Files) | 3 | 104 | 0 | 17 | 121 |
+| src\\app\\app\\conversations\\[conversationId] | 5 | 778 | 0 | 99 | 877 |
+| src\\app\\app\\conversations\\[conversationId] (Files) | 1 | 97 | 0 | 17 | 114 |
+| src\\app\\app\\conversations\\[conversationId]\\components | 4 | 681 | 0 | 82 | 763 |
+| src\\app\\app\\conversations\\components | 2 | 391 | 0 | 33 | 424 |
+| src\\app\\app\\conversations\\utils | 1 | 61 | 0 | 11 | 72 |
 | src\\app\\app\\courses | 11 | 1,630 | 674 | 238 | 2,542 |
 | src\\app\\app\\courses (Files) | 2 | 360 | 59 | 41 | 460 |
 | src\\app\\app\\courses\\[courseId] | 9 | 1,270 | 615 | 197 | 2,082 |
@@ -89,15 +108,22 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | src\\app\\app\\courses\\[courseId]\\modules\\[moduleId] (Files) | 1 | 332 | 26 | 28 | 386 |
 | src\\app\\app\\courses\\[courseId]\\modules\\[moduleId]\\lessons | 2 | 452 | 70 | 51 | 573 |
 | src\\app\\app\\courses\\[courseId]\\modules\\[moduleId]\\lessons\\[lessonId] | 2 | 452 | 70 | 51 | 573 |
-| src\\app\\app\\employer | 10 | 1,069 | 0 | 139 | 1,208 |
-| src\\app\\app\\employer (Files) | 2 | 136 | 0 | 15 | 151 |
+| src\\app\\app\\employer | 22 | 2,559 | 0 | 282 | 2,841 |
+| src\\app\\app\\employer (Files) | 2 | 128 | 0 | 15 | 143 |
 | src\\app\\app\\employer\\_utils | 1 | 44 | 0 | 11 | 55 |
-| src\\app\\app\\employer\\gigs | 7 | 889 | 0 | 113 | 1,002 |
-| src\\app\\app\\employer\\gigs (Files) | 1 | 211 | 0 | 25 | 236 |
-| src\\app\\app\\employer\\gigs\\[gigId] | 2 | 402 | 0 | 49 | 451 |
-| src\\app\\app\\employer\\gigs\\[gigId] (Files) | 1 | 174 | 0 | 21 | 195 |
-| src\\app\\app\\employer\\gigs\\[gigId]\\applications | 1 | 228 | 0 | 28 | 256 |
-| src\\app\\app\\employer\\gigs\\_components | 3 | 243 | 0 | 32 | 275 |
+| src\\app\\app\\employer\\gigs | 19 | 2,387 | 0 | 256 | 2,643 |
+| src\\app\\app\\employer\\gigs (Files) | 1 | 213 | 0 | 25 | 238 |
+| src\\app\\app\\employer\\gigs\\[gigId] | 5 | 970 | 0 | 112 | 1,082 |
+| src\\app\\app\\employer\\gigs\\[gigId] (Files) | 1 | 197 | 0 | 22 | 219 |
+| src\\app\\app\\employer\\gigs\\[gigId]\\applications | 2 | 628 | 0 | 65 | 693 |
+| src\\app\\app\\employer\\gigs\\[gigId]\\applications (Files) | 1 | 243 | 0 | 28 | 271 |
+| src\\app\\app\\employer\\gigs\\[gigId]\\applications\\[applicationId] | 1 | 385 | 0 | 37 | 422 |
+| src\\app\\app\\employer\\gigs\\[gigId]\\edit | 2 | 145 | 0 | 25 | 170 |
+| src\\app\\app\\employer\\gigs\\_components | 12 | 1,171 | 0 | 112 | 1,283 |
+| src\\app\\app\\employer\\gigs\\_components (Files) | 4 | 349 | 0 | 44 | 393 |
+| src\\app\\app\\employer\\gigs\\_components\\hooks | 1 | 70 | 0 | 15 | 85 |
+| src\\app\\app\\employer\\gigs\\_components\\sections | 5 | 665 | 0 | 45 | 710 |
+| src\\app\\app\\employer\\gigs\\_components\\utils | 2 | 87 | 0 | 8 | 95 |
 | src\\app\\app\\employer\\gigs\\create | 1 | 33 | 0 | 7 | 40 |
 | src\\app\\app\\gigs | 4 | 267 | 1 | 55 | 323 |
 | src\\app\\app\\gigs (Files) | 1 | 45 | 1 | 7 | 53 |
@@ -113,7 +139,7 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | src\\app\\atom-test | 1 | 4 | 0 | 2 | 6 |
 | src\\app\\sentry-example-page | 1 | 220 | 0 | 12 | 232 |
 | src\\app\\state | 1 | 13 | 0 | 2 | 15 |
-| src\\components | 131 | 19,436 | 1,218 | 2,048 | 22,702 |
+| src\\components | 134 | 19,728 | 1,200 | 2,071 | 22,999 |
 | src\\components (Files) | 11 | 2,058 | 288 | 266 | 2,612 |
 | src\\components\\ProfileAbout | 4 | 42 | 0 | 10 | 52 |
 | src\\components\\ProfileEducation | 4 | 42 | 0 | 9 | 51 |
@@ -125,48 +151,54 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | src\\components\\ProfileSkills | 4 | 59 | 0 | 10 | 69 |
 | src\\components\\__tests__ | 1 | 122 | 6 | 27 | 155 |
 | src\\components\\admin | 1 | 1,659 | 90 | 110 | 1,859 |
-| src\\components\\applications | 6 | 548 | 0 | 65 | 613 |
-| src\\components\\course | 5 | 1,249 | 91 | 108 | 1,448 |
+| src\\components\\applications | 6 | 554 | 0 | 63 | 617 |
+| src\\components\\course | 5 | 1,231 | 73 | 108 | 1,412 |
 | src\\components\\courses | 5 | 1,327 | 67 | 103 | 1,497 |
 | src\\components\\debug | 1 | 356 | 33 | 37 | 426 |
 | src\\components\\examples | 1 | 219 | 36 | 34 | 289 |
 | src\\components\\feedback | 1 | 24 | 0 | 4 | 28 |
-| src\\components\\gigs | 15 | 2,633 | 0 | 244 | 2,877 |
-| src\\components\\gigs\\apply | 3 | 442 | 0 | 43 | 485 |
+| src\\components\\gigs | 15 | 2,651 | 0 | 243 | 2,894 |
+| src\\components\\gigs\\apply | 3 | 460 | 0 | 42 | 502 |
 | src\\components\\gigs\\detail | 2 | 295 | 0 | 26 | 321 |
 | src\\components\\gigs\\form | 5 | 956 | 0 | 91 | 1,047 |
 | src\\components\\gigs\\list | 5 | 940 | 0 | 84 | 1,024 |
 | src\\components\\kibo | 4 | 1,816 | 180 | 208 | 2,204 |
 | src\\components\\layouts | 2 | 202 | 0 | 18 | 220 |
-| src\\components\\lesson | 6 | 1,528 | 137 | 185 | 1,850 |
+| src\\components\\lesson | 6 | 1,542 | 137 | 187 | 1,866 |
 | src\\components\\profile-onboarding | 2 | 591 | 0 | 40 | 631 |
 | src\\components\\progress | 1 | 330 | 43 | 38 | 411 |
 | src\\components\\shared | 3 | 658 | 69 | 73 | 800 |
-| src\\components\\ui | 33 | 3,343 | 177 | 384 | 3,904 |
-| src\\components\\ui (Files) | 31 | 3,192 | 177 | 357 | 3,726 |
+| src\\components\\ui | 36 | 3,615 | 177 | 408 | 4,200 |
+| src\\components\\ui (Files) | 34 | 3,464 | 177 | 381 | 4,022 |
 | src\\components\\ui\\kibo-ui | 2 | 151 | 0 | 27 | 178 |
 | src\\components\\ui\\kibo-ui\\avatar-stack | 1 | 48 | 0 | 4 | 52 |
 | src\\components\\ui\\kibo-ui\\video-player | 1 | 103 | 0 | 23 | 126 |
 | src\\hooks | 11 | 2,729 | 432 | 390 | 3,551 |
-| src\\lib | 27 | 5,723 | 1,266 | 888 | 7,877 |
+| src\\lib | 34 | 6,348 | 1,266 | 972 | 8,586 |
 | src\\lib (Files) | 3 | 489 | 98 | 78 | 665 |
 | src\\lib\\__tests__ | 1 | 96 | 0 | 19 | 115 |
 | src\\lib\\auth | 3 | 257 | 144 | 58 | 459 |
+| src\\lib\\convex | 6 | 500 | 0 | 76 | 576 |
+| src\\lib\\convex (Files) | 5 | 418 | 0 | 60 | 478 |
+| src\\lib\\convex\\types | 1 | 82 | 0 | 16 | 98 |
 | src\\lib\\data | 1 | 262 | 42 | 20 | 324 |
 | src\\lib\\logging | 2 | 632 | 80 | 80 | 792 |
 | src\\lib\\mock | 1 | 206 | 1 | 16 | 223 |
 | src\\lib\\performance | 6 | 1,848 | 487 | 345 | 2,680 |
-| src\\lib\\server | 2 | 131 | 0 | 31 | 162 |
+| src\\lib\\server | 2 | 152 | 0 | 33 | 185 |
 | src\\lib\\utils | 3 | 422 | 170 | 76 | 668 |
 | src\\lib\\validation | 1 | 65 | 36 | 10 | 111 |
-| src\\lib\\validations | 4 | 1,315 | 208 | 155 | 1,678 |
+| src\\lib\\validations | 5 | 1,419 | 208 | 161 | 1,788 |
 | src\\providers | 3 | 178 | 94 | 44 | 316 |
 | src\\schemas | 1 | 328 | 26 | 21 | 375 |
 | src\\services | 6 | 1,095 | 133 | 147 | 1,375 |
 | src\\services\\observability | 1 | 504 | 118 | 78 | 700 |
 | src\\services\\profile | 5 | 591 | 15 | 69 | 675 |
+| src\\stories | 14 | 394 | 15 | 47 | 456 |
+| src\\stories (Files) | 9 | 389 | 15 | 47 | 451 |
+| src\\stories\\assets | 5 | 5 | 0 | 0 | 5 |
 | src\\styles | 1 | 119 | 0 | 7 | 126 |
-| src\\types | 12 | 2,268 | 979 | 681 | 3,928 |
-| src\\utils | 8 | 2,249 | 555 | 330 | 3,134 |
+| src\\types | 13 | 2,366 | 979 | 692 | 4,037 |
+| src\\utils | 8 | 2,342 | 555 | 342 | 3,239 |
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)

@@ -1,0 +1,28 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "PostCSS", "XML", "JSON", "JavaScript", "Markdown", "YAML", "comment", "blank", "total"
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\main.ts", "TypeScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\preview.ts", "TypeScript", 15, 0, 0, 0, 0, 0, 0, 0, 3, 4, 22
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\.storybook\vitest.setup.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 0, 2, 2, 8
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\docs\README.md", "Markdown", 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 3
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\eslint.config.js", "JavaScript", 0, 0, 0, 0, 0, 2, 0, 0, 1, 1, 4
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\package.json", "JSON", 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 14
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 0, 0, 0, 3138, 0, 703, 3841
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\CourseHero.stories.tsx", "TypeScript JSX", 0, 14, 0, 0, 0, 0, 0, 0, -9, 1, 6
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\course\ModuleList.stories.tsx", "TypeScript JSX", 0, -32, 0, 0, 0, 0, 0, 0, -9, -1, -42
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\components\lesson\LessonPlayer.stories.tsx", "TypeScript JSX", 0, 14, 0, 0, 0, 0, 0, 0, 0, 2, 16
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Button.stories.ts", "TypeScript", 39, 0, 0, 0, 0, 0, 0, 0, 6, 7, 52
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Button.tsx", "TypeScript JSX", 0, 35, 0, 0, 0, 0, 0, 0, 6, 3, 44
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Header.stories.ts", "TypeScript", 25, 0, 0, 0, 0, 0, 0, 0, 2, 5, 32
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Header.tsx", "TypeScript JSX", 0, 66, 0, 0, 0, 0, 0, 0, 0, 4, 70
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Page.stories.ts", "TypeScript", 21, 0, 0, 0, 0, 0, 0, 0, 1, 6, 28
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\Page.tsx", "TypeScript JSX", 0, 86, 0, 0, 0, 0, 0, 0, 0, 6, 92
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\accessibility.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\discord.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\github.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\tutorials.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\assets\youtube.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\button.css", "PostCSS", 0, 0, 30, 0, 0, 0, 0, 0, 0, 1, 31
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\header.css", "PostCSS", 0, 0, 28, 0, 0, 0, 0, 0, 0, 5, 33
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\src\stories\page.css", "PostCSS", 0, 0, 59, 0, 0, 0, 0, 0, 0, 10, 69
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\vitest.config.ts", "TypeScript", 30, 0, 0, 0, 0, 0, 0, 0, 3, 5, 38
+"c:\Users\dell\WebstormProjects\Gigsy_Digitopia2025\gigsy\vitest.shims.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2
+"Total", "-", 151, 183, 117, 5, 14, 2, 1, 3138, 7, 769, 4387
