@@ -1,30 +1,41 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { fetchMutation } from "convex/nextjs";
 import type { Id } from "convex/_generated/dataModel";
 
 import { api } from "convex/_generated/api";
 import { getAuthToken } from "@/utils/fetchers-server";
+import {
+  cacheTags,
+  resolveGigDataSource,
+  serializeCacheTag,
+} from "@/lib/server/cache-tags";
 import type { GigEditorPayload } from "../../_components/GigEditorForm";
 
 const BASE_PATH = "/app/employer" as const;
 const GIGS_PATH = `${BASE_PATH}/gigs` as const;
+const gigsDataSource = resolveGigDataSource();
 
 interface UpdateGigActionInput {
   gigId: Id<"gigs">;
   values: GigEditorPayload;
 }
 
-export async function updateGigAction({ gigId, values }: UpdateGigActionInput) {
+type UpdateGigActionResult = Promise<{ success: boolean; message: string }>;
+
+export async function updateGigAction({
+  gigId,
+  values,
+}: UpdateGigActionInput): UpdateGigActionResult {
   const token = await getAuthToken();
 
   if (!token) {
     return {
       success: false,
       message: "Not authenticated",
-    } as const;
+    };
   }
 
   try {
@@ -71,11 +82,14 @@ export async function updateGigAction({ gigId, values }: UpdateGigActionInput) {
 
     revalidatePath(`${GIGS_PATH}/${gigId}`);
     revalidatePath(GIGS_PATH);
+    revalidateTag(serializeCacheTag(cacheTags.gigs.list(gigsDataSource)));
+    revalidateTag(serializeCacheTag(cacheTags.gigs.detail(gigId)));
+    revalidateTag(serializeCacheTag(cacheTags.gigs.related(gigId)));
 
     return {
       success: true,
       message: "Gig updated successfully",
-    } as const;
+    };
   } catch (error) {
     console.error("[GigEditor] Failed to update gig", { gigId, error });
 
@@ -85,6 +99,6 @@ export async function updateGigAction({ gigId, values }: UpdateGigActionInput) {
         error instanceof Error
           ? error.message
           : "Failed to update gig. Please try again.",
-    } as const;
+    };
   }
 }

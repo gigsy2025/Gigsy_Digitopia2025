@@ -90,7 +90,7 @@ export function HeroSection({ stats }: HeroSectionProps) {
                 <dd className="mt-2 text-3xl font-semibold sm:text-4xl">
                   {stat.value}
                 </dd>
-                <p className="mt-2 text-sm text-indigo-100/80">
+                <p className="mt-2 text-sm text-indigo-200">
                   {stat.description}
                 </p>
               </div>
