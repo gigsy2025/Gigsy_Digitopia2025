@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@clerk/nextjs/server";
@@ -9,6 +9,7 @@ import {
   type ProfileCreationInput,
 } from "../../../../../shared/profile/profileCreationSchema";
 import { createProfileMutation } from "@/services/profile/profileFetchers";
+import { cacheTags } from "@/lib/server/cache-tags";
 
 export interface ProfileCreationResult {
   success: boolean;
@@ -46,5 +47,7 @@ export async function submitProfileOnboarding(
 
   const slug = profile.summary.slug;
   revalidatePath(`/app/profile/${slug}`);
+  revalidateTag(cacheTags.profiles.bySlug(slug));
+  revalidateTag(cacheTags.profiles.byUserId(profile.summary.userId));
   redirect(`/app/profile/${slug}`);
 }

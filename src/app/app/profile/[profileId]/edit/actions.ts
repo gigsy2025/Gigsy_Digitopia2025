@@ -1,17 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { ConvexError } from "convex/values";
 import { z } from "zod";
 
-import {
-  ProfileUpdateInputSchema,
-  type ProfileUpdateInput,
-} from "../../../../../../shared/profile/profileCreationSchema";
+import { ProfileUpdateInputSchema } from "../../../../../../shared/profile/profileCreationSchema";
 import { createProfileService } from "@/services/profile";
 import { resolveCurrentUser } from "@/lib/auth/userResolver.server";
 import type { Id } from "convex/_generated/dataModel";
+import { cacheTags } from "@/lib/server/cache-tags";
 
 const UpdateProfilePayloadSchema = z.object({
   profileSlug: z.string().trim().min(1),
@@ -93,9 +91,11 @@ export async function submitProfileUpdate(
       };
     }
 
-    await service.updateProfile(profileId, input);
+    const updatedProfile = await service.updateProfile(profileId, input);
 
     revalidatePath(`/app/profile/${profileSlug}`);
+    revalidateTag(cacheTags.profiles.bySlug(profileSlug));
+    revalidateTag(cacheTags.profiles.byUserId(updatedProfile.summary.userId));
 
     return {
       success: true,
