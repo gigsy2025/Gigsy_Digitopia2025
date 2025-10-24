@@ -22,7 +22,7 @@ export function SolutionShowcaseSection({
             Curated solution suites that launch fast and evolve with your
             operating model.
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-lg text-slate-700 dark:text-slate-200">
             Each suite is powered by cross-functional workflows, automation, and
             analytics so your teams move together with clarity and confidence.
           </p>
@@ -43,14 +43,17 @@ export function SolutionShowcaseSection({
                   <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                     {solution.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                     {solution.subtitle}
                   </p>
                 </div>
-                <ul className="mt-auto space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                <ul className="mt-auto space-y-3 text-sm text-slate-700 dark:text-slate-200">
                   {solution.benefits.map((benefit) => (
                     <li key={benefit} className="flex items-start gap-3">
-                      <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-indigo-400" />
+                      <span
+                        className="mt-1 inline-flex h-2 w-2 rounded-full bg-indigo-400"
+                        aria-hidden="true"
+                      />
                       <span>{benefit}</span>
                     </li>
                   ))}

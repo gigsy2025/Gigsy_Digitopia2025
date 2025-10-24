@@ -20,7 +20,7 @@ export function TestimonialsSection({
           <h2 className="text-3xl font-semibold text-balance text-slate-900 sm:text-4xl dark:text-white">
             The platform trusted by transformation leaders worldwide.
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-lg text-slate-700 dark:text-slate-200">
             Whether you are scaling a global consultancy or orchestrating
             internal mobility, Gigsy delivers the clarity and speed your teams
             expect.
@@ -33,14 +33,14 @@ export function TestimonialsSection({
               key={testimonial.name}
               className="flex h-full flex-col gap-6 rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-[0_30px_90px_-60px_rgba(15,23,42,0.4)] transition hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-900/80"
             >
-              <blockquote className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                “{testimonial.quote}”
+              <blockquote className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                "{testimonial.quote}"
               </blockquote>
               <figcaption className="mt-auto space-y-1 text-sm">
                 <p className="font-semibold text-slate-900 dark:text-white">
                   {testimonial.name}
                 </p>
-                <p className="text-slate-500 dark:text-slate-400">
+                <p className="text-slate-600 dark:text-slate-300">
                   {testimonial.role} · {testimonial.company}
                 </p>
               </figcaption>

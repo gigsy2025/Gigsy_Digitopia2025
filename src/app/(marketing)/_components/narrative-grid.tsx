@@ -37,15 +37,18 @@ export function NarrativeGrid({
                       <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                         {narrative.title}
                       </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">
+                      <p className="text-sm text-slate-700 dark:text-slate-200">
                         {narrative.subtitle}
                       </p>
                     </div>
                   </div>
-                  <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                  <ul className="mt-6 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                     {narrative.bullets.map((bullet) => (
                       <li key={bullet} className="flex items-start gap-3">
-                        <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-indigo-400" />
+                        <span
+                          className="mt-1 inline-flex h-2 w-2 rounded-full bg-indigo-400"
+                          aria-hidden="true"
+                        />
                         <span>{bullet}</span>
                       </li>
                     ))}
@@ -74,7 +77,7 @@ export function NarrativeGrid({
                   <dd className="mt-1 text-3xl font-semibold text-slate-900 dark:text-white">
                     {stat.value}
                   </dd>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">
                     {stat.description}
                   </p>
                 </div>

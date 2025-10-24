@@ -25,7 +25,7 @@ export function FeatureHighlightsSection({
           <h2 className="text-3xl font-semibold text-balance text-slate-900 sm:text-4xl dark:text-white">
             Every workflow stays connected, compliant, and insight-rich.
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-300">
+          <p className="text-lg text-slate-700 dark:text-slate-200">
             Modular capabilities let you launch quickly and extend
             confidently—from sourcing and onboarding to delivery, learning, and
             finance.
@@ -55,7 +55,7 @@ export function FeatureHighlightsSection({
                       {feature.title}
                     </h3>
                   </div>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                     {feature.description}
                   </p>
                 </div>

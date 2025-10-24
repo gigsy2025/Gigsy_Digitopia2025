@@ -26,7 +26,7 @@ export function WorkflowSection({ stages }: WorkflowSectionProps) {
           <h2 className="text-3xl font-semibold text-balance sm:text-4xl">
             From strategy to measurable value in four deliberate movements.
           </h2>
-          <p className="max-w-3xl text-lg text-indigo-100/90">
+          <p className="max-w-3xl text-lg text-indigo-200">
             Gigsy is built for cross-functional alignment. Each stage connects
             talent, delivery, learning, and finance with shared data and
             automation.
@@ -44,7 +44,7 @@ export function WorkflowSection({ stages }: WorkflowSectionProps) {
                 {stage.stage}
               </span>
               <h3 className="text-xl font-semibold">{stage.headline}</h3>
-              <p className="text-sm leading-relaxed text-indigo-100/90">
+              <p className="text-sm leading-relaxed text-indigo-200">
                 {stage.copy}
               </p>
               {index < stages.length - 1 ? (
