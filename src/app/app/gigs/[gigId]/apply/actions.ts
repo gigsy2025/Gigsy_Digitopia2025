@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { fetchMutation } from "convex/nextjs";
 import { api } from "convex/_generated/api";
@@ -10,6 +10,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import type { GigApplyFormValues } from "@/components/gigs/apply/GigApplyForm";
 import { requireUser } from "@/lib/auth/requireUser";
+import { cacheTags } from "@/lib/server/cache-tags";
 
 function sanitizeCoverLetter(input: string): string {
   return input.trim();
@@ -92,6 +93,9 @@ export async function applyToGigAction(
 
     revalidatePath(`/app/gigs/${gigId}`);
     revalidatePath("/app/profile/applications");
+    revalidateTag(cacheTags.gigs.list);
+    revalidateTag(cacheTags.gigs.detail(gigId));
+    revalidateTag(cacheTags.gigs.related(gigId));
 
     if (result.isDuplicate) {
       return {

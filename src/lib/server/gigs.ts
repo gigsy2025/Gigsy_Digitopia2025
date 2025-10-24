@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import type { Id } from "convex/_generated/dataModel";
 
@@ -14,12 +15,17 @@ import {
   mapGigRecordToListItem,
   mapGigRecordToDetail,
 } from "@/utils/gig-mappers";
+import { cacheTags } from "@/lib/server/cache-tags";
 
 const GIGS_DATASOURCE = (
   process.env.NEXT_PUBLIC_GIGS_DATASOURCE ?? "mock"
 ).toLowerCase();
 
 const shouldUseConvex = GIGS_DATASOURCE === "convex";
+
+const GIG_LIST_REVALIDATE_SECONDS = shouldUseConvex ? 120 : 3600;
+const GIG_DETAIL_REVALIDATE_SECONDS = shouldUseConvex ? 180 : 3600;
+const RELATED_GIGS_REVALIDATE_SECONDS = shouldUseConvex ? 180 : 3600;
 
 async function fetchGigListFromConvex(
   filters?: Parameters<typeof normalizePublicGigFilters>[0],
@@ -71,15 +77,24 @@ async function fetchRecommendedFromMock(
   return getMockRecommendedGigs(gigId, limit);
 }
 
-export const getGigList = cache(async (): Promise<GigListItem[]> => {
-  console.log("Should use Convex: ", shouldUseConvex);
-  if (shouldUseConvex) {
-    console.log("Fetching gig list from Convex");
-    return fetchGigListFromConvex();
-  }
+const getGigListCached = unstable_cache(
+  async (): Promise<GigListItem[]> => {
+    if (shouldUseConvex) {
+      return fetchGigListFromConvex();
+    }
 
-  return fetchGigListFromMock();
-});
+    return fetchGigListFromMock();
+  },
+  ["gigs", "list", GIGS_DATASOURCE],
+  {
+    revalidate: GIG_LIST_REVALIDATE_SECONDS,
+    tags: [cacheTags.gigs.list],
+  },
+);
+
+export async function getGigList(): Promise<GigListItem[]> {
+  return getGigListCached();
+}
 
 export const preloadGigList = cache(async () => {
   if (!shouldUseConvex) {
@@ -89,47 +104,70 @@ export const preloadGigList = cache(async () => {
   return preloadQuery(api.gigs.list, {});
 });
 
-export const getGigDetail = cache(
-  async (gigId: string): Promise<GigDetail | null> => {
-    if (!gigId) {
-      return null;
-    }
+function createGigDetailCache(gigId: string) {
+  return unstable_cache(
+    async () => {
+      if (shouldUseConvex) {
+        return fetchGigDetailFromConvex(gigId);
+      }
 
-    if (shouldUseConvex) {
-      return fetchGigDetailFromConvex(gigId);
-    }
+      return fetchGigDetailFromMock(gigId);
+    },
+    ["gigs", "detail", gigId, GIGS_DATASOURCE],
+    {
+      revalidate: GIG_DETAIL_REVALIDATE_SECONDS,
+      tags: [cacheTags.gigs.detail(gigId)],
+    },
+  );
+}
 
-    return fetchGigDetailFromMock(gigId);
-  },
-);
+export async function getGigDetail(gigId: string): Promise<GigDetail | null> {
+  if (!gigId) {
+    return null;
+  }
 
-export const getRelatedGigs = cache(
-  async (gigId: string, limit = 3): Promise<GigListItem[]> => {
-    if (!gigId) {
-      return [];
-    }
+  return createGigDetailCache(gigId)();
+}
 
-    if (shouldUseConvex) {
-      return fetchRelatedFromConvex(gigId, limit);
-    }
+function createRelatedGigsCache(gigId: string, limit: number) {
+  return unstable_cache(
+    async () => {
+      if (shouldUseConvex) {
+        return fetchRelatedFromConvex(gigId, limit);
+      }
 
-    return fetchRecommendedFromMock(gigId, limit);
-  },
-);
+      return fetchRecommendedFromMock(gigId, limit);
+    },
+    ["gigs", "related", gigId, `${limit}`, GIGS_DATASOURCE],
+    {
+      revalidate: RELATED_GIGS_REVALIDATE_SECONDS,
+      tags: [cacheTags.gigs.related(gigId)],
+    },
+  );
+}
 
-export const getGigDetailWithRelated = cache(
-  async (
-    gigId: string,
-    limit = 3,
-  ): Promise<{
-    gig: GigDetail | null;
-    relatedGigs: GigListItem[];
-  }> => {
-    const [gig, relatedGigs] = await Promise.all([
-      getGigDetail(gigId),
-      getRelatedGigs(gigId, limit),
-    ]);
+export async function getRelatedGigs(
+  gigId: string,
+  limit = 3,
+): Promise<GigListItem[]> {
+  if (!gigId) {
+    return [];
+  }
 
-    return { gig, relatedGigs };
-  },
-);
+  return createRelatedGigsCache(gigId, limit)();
+}
+
+export async function getGigDetailWithRelated(
+  gigId: string,
+  limit = 3,
+): Promise<{
+  gig: GigDetail | null;
+  relatedGigs: GigListItem[];
+}> {
+  const [gig, relatedGigs] = await Promise.all([
+    getGigDetail(gigId),
+    getRelatedGigs(gigId, limit),
+  ]);
+
+  return { gig, relatedGigs };
+}

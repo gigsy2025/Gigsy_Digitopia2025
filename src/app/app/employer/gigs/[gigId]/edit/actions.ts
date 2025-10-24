@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { fetchMutation } from "convex/nextjs";
 import type { Id } from "convex/_generated/dataModel";
 
 import { api } from "convex/_generated/api";
 import { getAuthToken } from "@/utils/fetchers-server";
+import { cacheTags } from "@/lib/server/cache-tags";
 import type { GigEditorPayload } from "../../_components/GigEditorForm";
 
 const BASE_PATH = "/app/employer" as const;
@@ -71,6 +72,9 @@ export async function updateGigAction({ gigId, values }: UpdateGigActionInput) {
 
     revalidatePath(`${GIGS_PATH}/${gigId}`);
     revalidatePath(GIGS_PATH);
+    revalidateTag(cacheTags.gigs.list);
+    revalidateTag(cacheTags.gigs.detail(gigId));
+    revalidateTag(cacheTags.gigs.related(gigId));
 
     return {
       success: true,
