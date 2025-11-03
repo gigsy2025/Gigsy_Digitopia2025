@@ -77,35 +77,35 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         <SidebarProvider defaultOpen={defaultOpen}>
           <AppSidebar />
           <SidebarInset>
-          {/* Main App Header */}
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-            <div className="flex w-full items-center justify-between px-4">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-2 h-4" />
+            {/* Main App Header */}
+            <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+              <div className="flex w-full items-center justify-between px-4">
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger className="-ml-1" />
+                  <Separator orientation="vertical" className="mr-2 h-4" />
 
-                {/* Simple breadcrumb for now */}
-                <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <span>Dashboard</span>
-                  <span>/</span>
-                  <span className="text-foreground">Overview</span>
+                  {/* Simple breadcrumb for now */}
+                  <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                    <span>Dashboard</span>
+                    <span>/</span>
+                    <span className="text-foreground">Overview</span>
+                  </div>
+                </div>
+
+                {/* Balance Badge - visible on desktop */}
+                <div className="flex items-center gap-4">
+                  <ClientBalanceBadge />
                 </div>
               </div>
+            </header>
 
-              {/* Balance Badge - visible on desktop */}
-              <div className="flex items-center gap-4">
-                <ClientBalanceBadge />
-              </div>
+            {/* Main Content Area */}
+            <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 pt-0">
+              {children}
             </div>
-          </header>
-
-          {/* Main Content Area */}
-          <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 pt-0">
-            {children}
-          </div>
 
             {/* Skills Onboarding Check */}
-            <SkillsCheck />
+            {/* <SkillsCheck /> */}
           </SidebarInset>
         </SidebarProvider>
       </Providers>
