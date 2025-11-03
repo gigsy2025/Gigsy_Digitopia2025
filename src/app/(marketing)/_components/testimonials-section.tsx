@@ -34,7 +34,7 @@ export function TestimonialsSection({
               className="flex h-full flex-col gap-6 rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-[0_30px_90px_-60px_rgba(15,23,42,0.4)] transition hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-900/80"
             >
               <blockquote className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                "{testimonial.quote}"
+                &quot;{testimonial.quote}&quot;
               </blockquote>
               <figcaption className="mt-auto space-y-1 text-sm">
                 <p className="font-semibold text-slate-900 dark:text-white">
