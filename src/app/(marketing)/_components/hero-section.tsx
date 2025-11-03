@@ -80,23 +80,23 @@ export function HeroSection({ stats }: HeroSectionProps) {
           </div>
         </div>
 
-        <dl className="grid gap-6 rounded-3xl border border-white/10 bg-white/5 p-8 text-white backdrop-blur">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-white backdrop-blur">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col">
+              <dl key={stat.label} className="flex flex-col">
                 <dt className="text-sm font-medium text-indigo-200">
                   {stat.label}
                 </dt>
                 <dd className="mt-2 text-3xl font-semibold sm:text-4xl">
                   {stat.value}
                 </dd>
-                <p className="mt-2 text-sm text-indigo-200">
+                <dd className="mt-2 text-sm text-indigo-200">
                   {stat.description}
-                </p>
-              </div>
+                </dd>
+              </dl>
             ))}
           </div>
-        </dl>
+        </div>
       </div>
     </section>
   );
