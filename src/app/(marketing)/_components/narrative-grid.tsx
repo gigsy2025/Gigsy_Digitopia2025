@@ -68,21 +68,21 @@ export function NarrativeGrid({
                 everywhere you operate.
               </h3>
             </div>
-            <dl className="mt-10 space-y-6">
+            <div className="mt-10 space-y-6">
               {supportingStats.map((stat) => (
-                <div key={stat.label}>
+                <dl key={stat.label} className="space-y-2">
                   <dt className="text-sm font-medium text-indigo-600 dark:text-indigo-200">
                     {stat.label}
                   </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-slate-900 dark:text-white">
+                  <dd className="text-3xl font-semibold text-slate-900 dark:text-white">
                     {stat.value}
                   </dd>
-                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">
+                  <dd className="text-sm text-slate-700 dark:text-slate-200">
                     {stat.description}
-                  </p>
-                </div>
+                  </dd>
+                </dl>
               ))}
-            </dl>
+            </div>
           </aside>
         </div>
       </div>

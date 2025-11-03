@@ -33,26 +33,34 @@ export function WorkflowSection({ stages }: WorkflowSectionProps) {
           </p>
         </header>
 
-        <ol className="relative grid gap-10 sm:grid-cols-2">
-          <div className="pointer-events-none absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 bg-white/10 sm:block" />
-          {stages.map((stage, index) => (
-            <li
-              key={stage.stage}
-              className="relative space-y-4 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm"
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-slate-900/70 text-sm font-semibold text-indigo-200">
-                {stage.stage}
-              </span>
-              <h3 className="text-xl font-semibold">{stage.headline}</h3>
-              <p className="text-sm leading-relaxed text-indigo-200">
-                {stage.copy}
-              </p>
-              {index < stages.length - 1 ? (
-                <span className="absolute -bottom-5 left-1/2 hidden h-10 w-px -translate-x-1/2 bg-white/10 sm:block" />
-              ) : null}
-            </li>
-          ))}
-        </ol>
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-1/2 hidden h-full w-px -translate-x-1/2 bg-white/10 sm:block"
+          />
+          <ol className="grid gap-10 sm:grid-cols-2">
+            {stages.map((stage, index) => (
+              <li
+                key={stage.stage}
+                className="relative space-y-4 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm"
+              >
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-slate-900/70 text-sm font-semibold text-indigo-200">
+                  {stage.stage}
+                </span>
+                <h3 className="text-xl font-semibold">{stage.headline}</h3>
+                <p className="text-sm leading-relaxed text-indigo-200">
+                  {stage.copy}
+                </p>
+                {index < stages.length - 1 ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-5 left-1/2 hidden h-10 w-px -translate-x-1/2 bg-white/10 sm:block"
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </section>
   );
