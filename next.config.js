@@ -5,9 +5,15 @@
 import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
 import { withBetterStack } from "@logtail/next";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const CrittersWebpackPluginModule = require("critters-webpack-plugin");
+const CrittersWebpackPlugin =
+  CrittersWebpackPluginModule.default ?? CrittersWebpackPluginModule;
 
 /** @type {import("next").NextConfig} */
-const config = {
+const baseConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
@@ -29,10 +35,26 @@ const config = {
       },
     ],
   },
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.plugins.push(
+        new CrittersWebpackPlugin({
+          preload: "swap",
+          pruneSource: true,
+          inlineFonts: true,
+          compress: true, // Minify inlined CSS
+          preloadFonts: true, // Preload key fonts to reduce blocking
+          mergeStylesheets: true, // Merge multiple CSS files before inlining
+        }),
+      );
+    }
+
+    return config;
+  },
 };
 
 // First wrap with BetterStack/Logtail, then with Sentry
-const configWithLogtail = withBetterStack(config);
+const configWithLogtail = withBetterStack(baseConfig);
 
 export default withSentryConfig(configWithLogtail, {
   // For all available options, see:
