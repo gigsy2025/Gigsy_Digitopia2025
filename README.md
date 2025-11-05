@@ -25,6 +25,7 @@
 - [🎯 Use Cases](#-use-cases)
 - [🔒 Security & Compliance](#-security--compliance)
 - [🌐 Deployment](#-deployment)
+- [🗼 Lighthouse Scores](#-lighthouse-scores)
 - [🤝 Contributing](#-contributing)
 - [📄 Documentation](#-documentation)
 - [👥 Team](#-team)
@@ -443,6 +444,29 @@ vercel deploy --prod
 - **Development**: Hot reload, debug logging
 - **Staging**: Production-like environment for testing
 - **Production**: Optimized builds, error monitoring, CDN
+
+---
+
+## 🗼 Lighthouse Scores
+
+Desktop (Nov 4, 2025) on homepage
+
+![Performance](https://img.shields.io/badge/Performance-96-brightgreen?logo=lighthouse&logoColor=white)
+![Accessibility](https://img.shields.io/badge/Accessibility-100-brightgreen?logo=lighthouse&logoColor=white)
+![Best%20Practices](https://img.shields.io/badge/Best%20Practices-100-brightgreen?logo=lighthouse&logoColor=white)
+![SEO](https://img.shields.io/badge/SEO-100-brightgreen?logo=lighthouse&logoColor=white)
+
+- Full report: [PageSpeed Insights result](https://pagespeed.web.dev/analysis/https-gigsy-digitopia2025-vercel-app/8i7wak0hhn?form_factor=desktop)
+- Tested page: https://gigsy-digitopia2025.vercel.app/
+- Device: Desktop preset • Throttling: Default Lighthouse
+- Lighthouse run date: 2025-11-04
+
+Reproduce locally:
+```bash
+npx lighthouse https://gigsy-digitopia2025.vercel.app/ --preset=desktop --output=html --output-path=./lighthouse-report.html
+```
+
+Note: Scores may vary slightly over time due to content, caching, and network conditions.
 
 ---
 
